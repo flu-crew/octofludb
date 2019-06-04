@@ -1,18 +1,4 @@
-# SELECT ?id ?strain ?gb ?year
-# WHERE {
-#     ?event a usda:event .
-#     ?event usda:related_to ?i .
-#     ?i foaf:name ?id .
-#     ?i usda:date ?date .
-#     OPTIONAL{
-#         ?strain usda:xref ?i .
-#         ?strain a usda:strain_id .
-#     }
-#     BIND (YEAR(?date) AS ?year) .
-#     FILTER (?year = 2017) .
-# }
-
-SELECT ?event ?i ?id ?strain_name ?year
+SELECT ?id ?strain_name ?year
 WHERE {
     ?event a usda:event .
     ?event usda:related_to ?i .
