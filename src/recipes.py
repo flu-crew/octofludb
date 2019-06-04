@@ -4,10 +4,16 @@ import src.fasta as fasta
 import src.geography as geog
 import src.genbank as gb
 import src.flu as flu
-from src.nomenclature import (P, O, nt)
+import src.date as date
+from src.nomenclature import (P, O, nt, ne)
 from src.util import (replace, fixLookup, make_maybe_add)
 import src.entrez as entrez
 import re
+import pandas as pd
+
+STRAIN_PAT = re.compile("[^A-Za-z][ABCD]/[^()]+")
+A0_PAT = re.compile("A0\d{7}") #e.g. A01104095
+GENBANK_PAT = re.compile("[A-Z][A-Z]?\d{5,7}")
 
 def add_seq_meta_triples(g, meta):
   strain_uid = URIRef(str(meta["strain"]))
@@ -63,8 +69,65 @@ def load_factor(
       g.add((uri, nt.is_a, o))
   g.commit()
 
+def infer_type(x):
+  x_is_a = None
+  if re.fullmatch(STRAIN_PAT, x):
+    x_is_a = O.strain
+  elif re.fullmatch(A0_PAT, x):
+    x_is_a = O.a0
+  elif re.fullmatch(GENBANK_PAT, x):
+    x_is_a = O.gb
+  return x_is_a
+
+def make_literal(x):
+  try:
+    # Can x be a date?
+    x_lit = Literal(str(date.p_date.parse(x)), datatype=XSD.date)
+  except:
+    # If not, then make it a normal literal
+    x_lit = Literal(x) 
+  return(x_lit)
+
+def load_excel(g:ConjunctiveGraph, filename:str, event=None)->None:
+  d = pd.read_excel(filename)
+
+  if event:
+    event_uri = ne.term(event) 
+    g.add((event_uri, P.is_a, O.event))
+    g.add((event_uri, P.name, Literal(event)))
+
+  for i in range(d.shape[0]):
+    s = d.iloc[i][0] # subject - the id from the table's key column
+    # the subject URI cannot have spaces
+    uri = URIRef(s.lower().replace(" ", "_"))
+
+    if event:
+      g.add((event_uri, P.related_to, uri))
+
+    # associate the ID with its name
+    g.add((uri, P.name, Literal(s)))
+
+    # try to determine the type of the ID (e.g., strain, genebank or A0)
+    # if successful, add a triple linking the id to its type
+    s_type = infer_type(s)
+    if s_type != None:
+      g.add((uri, P.is_a, s_type))
+
+    # associate the ID with each element in the row with column names as predicates
+    for j in range(1, d.shape[1]):
+      p = d.columns[j] # predicate - the column name
+      o = d.iloc[i][j] # object - the value in the cell
+
+      # the predict shouldn't have spaces and I convert to lower case to avoid
+      # case mismatches in lookups
+      p = p.lower().replace(" ", "_")
+
+      g.add((uri, nt.term(p), make_literal(o)))
+
+  g.commit()
+
+
 def load_influenza_na(g:ConjunctiveGraph, filename:str)->None:
-  strain_pat = re.compile("[^A-Za-z][ABCD]/[^()]+")
   with open(filename, "r") as f:
     field = dict()
     for row in f.readlines():
@@ -97,7 +160,7 @@ def load_influenza_na(g:ConjunctiveGraph, filename:str)->None:
       #     Influenza A virus H3N2
       #     unidentified influenza virus
       # * In the current database (06/04/2019) 541/712177 entries are pathological
-      strain_match = re.search(strain_pat, els[7])
+      strain_match = re.search(STRAIN_PAT, els[7])
       if strain_match:
         strain = strain_match.group(0)
 
@@ -106,6 +169,15 @@ def load_influenza_na(g:ConjunctiveGraph, filename:str)->None:
         g.add((strain_uid, P.has_segment, gb_uid))
         g.add((strain_uid, P.is_a, O.strain))
         g.add((strain_uid, P.name, Literal(strain)))
+
+        a0_match = re.search(A0_PAT, strain)
+        if a0_match:
+          a0_name = a0_match.group(0)
+          a0_uid = URIRef(a0_name)
+          g.add((strain_uid, P.xref, a0_uid))
+          g.add((a0_uid, P.xref, strain_uid))
+          g.add((a0_uid, P.is_a, O.a0))
+          g.add((a0_uid, P.name, Literal(a0_uid)))
 
         maybe_add = make_maybe_add(g, field, strain_uid)
         maybe_add(P.host,    "host")

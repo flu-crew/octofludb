@@ -19,7 +19,7 @@ class Date:
     self.day = day
 
   def __str__(self):
-    return("-".join([self.month, self.day, self.year]))
+    return("-".join([self.year, self.month, self.day]))
 
 # parse date
 p_year = p.regex('20\d\d') ^ p.regex('19\d\d') ^ p.regex('\d\d').parsecmap(expandYear)

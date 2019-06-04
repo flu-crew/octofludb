@@ -8,6 +8,7 @@ Usage:
   d79 tag_strains <db> <idlist_filename> <tag>
   d79 tag_gb <db> <gblist_filename> <tag>
   d79 load_factor <db> <table_filename> <relation> [--key-type=<key>] 
+  d79 load_excel <db> <table_filename> [--event=<event>]
   d79 serialize <db> <serial_filename>
   d79 add_gbids <db> <gb_list_filename>
 
@@ -47,6 +48,9 @@ if __name__ == '__main__':
       for gb_meta in entrez.get_gbs(gbids):
         gb.add_gb_meta_triples(g, gb_meta)
     g.commit()
+
+  if arguments["load_excel"]:
+    recipe.load_excel(g, arguments["<table_filename>"], event=arguments["--event"])
 
   if arguments["load_factor"]:
     recipe.load_factor(

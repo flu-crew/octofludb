@@ -21,7 +21,7 @@ from rdflib.plugins.sparql import prepareQuery
 from src.nomenclature import (nt)
 from docopt import docopt
 import sys
-from rdflib.namespace import RDF, FOAF
+from rdflib.namespace import RDF, FOAF, XSD
 
 def load_turtle(filename):
   with open(filename, "r") as f:
@@ -44,7 +44,7 @@ if __name__ == '__main__':
 
   turtle_str = load_turtle(arguments["<turtle_filename>"])
 
-  qres = g.query(turtle_str, initNs = {"foaf":FOAF, "usda":nt })
+  qres = g.query(turtle_str, initNs = {"foaf":FOAF, "usda":nt, "xsd":XSD })
 
   if arguments["--as-fasta"]:
     for row in qres:

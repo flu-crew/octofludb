@@ -3,8 +3,9 @@ from rdflib import Namespace
 from rdflib.namespace import RDF, FOAF
 from src.util import padDigit
 
-ni = Namespace("")
-nt = Namespace("")
+ni = Namespace("ars_id")
+nt = Namespace("ars_term")
+ne = Namespace("ars_event")
 
 def uidgen(base="_", pad=3, start=0):
   for i in itertools.count(0):
@@ -17,12 +18,15 @@ class O:
   a0 = nt.a0_id
   feature = nt.feature
   complete_genome = nt.complete_genome
+  event = nt.event
 
 class P:
   # standard semantic web predicates
   is_a = RDF.type
   name = FOAF.name
   knows = FOAF.knows
+  related_to = nt.related_to
+  xref = nt.xref 
   # flu relations
   has_segment = nt.has_segment
   feature     = nt.feature
