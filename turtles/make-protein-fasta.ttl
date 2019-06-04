@@ -1,0 +1,14 @@
+SELECT ?gb ?pid ?s ?segment ?seq
+WHERE {
+    ?strain a usda:strain_id .
+    ?strain usda:tag 'swine-reference' .
+    ?strain foaf:name ?s .
+    ?strain usda:has_segment ?gb .
+    ?gb usda:feature ?fid .
+    ?fid a usda:CDS .
+    ?fid a usda:feature .
+    ?fid usda:gene ?segment .
+    ?fid usda:protein_id ?pid .
+    ?fid usda:translation ?seq .
+}
+LIMIT 10

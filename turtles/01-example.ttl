@@ -1,0 +1,9 @@
+# list strains that have both the antiserum and cdc_cvvs tags
+SELECT ?strain_name
+WHERE {
+    ?strain a usda:strain_id .
+    ?strain usda:tag "antiserum" .
+    ?strain usda:tag "cdc_cvvs" .
+    ?strain foaf:name ?strain_name .
+}
+LIMIT 10

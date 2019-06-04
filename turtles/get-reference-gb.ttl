@@ -1,0 +1,10 @@
+# build.py does not download all the genbank files for all the strains (that
+# would be a lot of work) so it is necessary to retrive the genbank ids of
+# interest and then pipe them into `build.py add_gbids`. This query retrieves
+# the genbank ids for all strains tagged as swine references.
+SELECT DISTINCT ?gb
+WHERE {
+    ?strain a usda:strain_id .
+    ?strain usda:tag "swine-reference" .
+    ?strain usda:has_segment ?gb .
+}

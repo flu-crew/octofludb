@@ -1,0 +1,12 @@
+SELECT ?gb ?s ?segment ?seq
+WHERE {
+    ?strain a usda:strain_id .
+    ?strain foaf:name ?s .
+    ?strain usda:has_segment ?gb .
+    ?gb usda:feature ?fid .
+    ?gb usda:GBSeq_sequence ?seq .
+    ?fid a usda:CDS .
+    ?fid a usda:feature .
+    ?fid usda:gene ?segment .
+}
+LIMIT 100

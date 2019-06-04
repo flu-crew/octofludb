@@ -1,0 +1,7 @@
+# Lists and counts the types of edges associated with a strain 
+SELECT ?p (COUNT(?p) as ?count)
+WHERE {
+    ?strain a usda:strain_id .
+    ?strain ?p ?o .
+}
+GROUP BY ?p

@@ -1,0 +1,8 @@
+# list all strains with a tag
+SELECT ?strain_name ?tag
+WHERE {
+    ?strain a usda:strain_id .
+    ?strain usda:tag ?tag .
+    ?strain foaf:name ?strain_name .
+}
+LIMIT 10

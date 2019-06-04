@@ -1,0 +1,5 @@
+SELECT DISTINCT ?s
+WHERE {
+    ?strain a usda:strain_id .
+    ?strain foaf:name ?s .
+}
