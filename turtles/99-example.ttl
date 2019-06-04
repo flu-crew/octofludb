@@ -1,4 +1,3 @@
-# list strains that have both the antiserum and cdc_cvvs tags
 SELECT ?strain_name
 WHERE {
     ?strain a usda:strain_id .

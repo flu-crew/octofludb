@@ -11,7 +11,7 @@ import src.entrez as entrez
 import re
 import pandas as pd
 
-STRAIN_PAT = re.compile("[^A-Za-z][ABCD]/[^()]+")
+STRAIN_PAT = re.compile("[ABCD]/[^()]+")
 A0_PAT = re.compile("A0\d{7}") #e.g. A01104095
 GENBANK_PAT = re.compile("[A-Z][A-Z]?\d{5,7}")
 
