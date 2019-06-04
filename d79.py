@@ -4,13 +4,16 @@
 Build a local SPARQL database.
 
 Usage:
-  d79 load_strains <db_filename> <table_filename>
-  d79 tag_strains <db_filename> <idlist_filename> <tag>
-  d79 serialize <db_filename> <serial_filename>
-  d79 add_gbids <db_filename> <gb_list_filename>
+  d79 load_strains <db> <table_filename>
+  d79 tag_strains <db> <idlist_filename> <tag>
+  d79 tag_gb <db> <gblist_filename> <tag>
+  d79 load_factor <db> <table_filename> <relation> [--key-type=<key>] 
+  d79 serialize <db> <serial_filename>
+  d79 add_gbids <db> <gb_list_filename>
 
 Options:
-  -h --help     Show this screen.
+  -h --help         Show this screen.
+  --key-type <key>  The subject type to merge on [default="strain"].
 """
 
 import sys
@@ -28,7 +31,7 @@ if __name__ == '__main__':
 
   uid = uidgen()
   g = ConjunctiveGraph(store="Sleepycat")
-  g.open(arguments["<db_filename>"], create=True)
+  g.open(arguments["<db>"], create=True)
 
   if arguments["load_strains"]:
     # load big table from IVR, with roughly the following format:
@@ -44,6 +47,14 @@ if __name__ == '__main__':
       for gb_meta in entrez.get_gbs(gbids):
         gb.add_gb_meta_triples(g, gb_meta)
     g.commit()
+
+  if arguments["load_factor"]:
+    recipe.load_factor(
+      g,
+      arguments["<table_filename>"],
+      arguments["<relation>"],
+      arguments["--key-type"]
+    )
 
   if arguments["serialize"]:
     g.serialize(

@@ -3,8 +3,8 @@ from rdflib import Namespace
 from rdflib.namespace import RDF, FOAF
 from src.util import padDigit
 
-ni = Namespace("http://github.com/arendsee/usda/ids/")
-nt = Namespace("http://github.com/arendsee/usda/terms/")
+ni = Namespace("")
+nt = Namespace("")
 
 def uidgen(base="_", pad=3, start=0):
   for i in itertools.count(0):
@@ -12,8 +12,11 @@ def uidgen(base="_", pad=3, start=0):
 
 
 class O:
-  strain = nt.USDA_strain # unique key for the strain
+  strain = nt.strain_id # unique key for the strain
+  gb = nt.genbank_id
+  a0 = nt.a0_id
   feature = nt.feature
+  complete_genome = nt.complete_genome
 
 class P:
   # standard semantic web predicates
@@ -23,7 +26,7 @@ class P:
   # flu relations
   has_segment = nt.has_segment
   feature     = nt.feature
-  tag        = nt.tag
+  tag         = nt.tag
   # the local curated data
   strain_alt = nt.USDA_strain_id_alt # alternative strain IDs
   gb         = nt.USDA_genbank_id # an optional unique key for the segment
@@ -35,6 +38,7 @@ class P:
   ha_clade   = nt.USDA_ha_clade
   date       = nt.USDA_date
   host       = nt.USDA_host
+  encodes    = nt.encodes
   # raw values from GenBank
   gb_locus             = nt.GBSeq_locus # unique key
   gb_length            = nt.GBSeq_length
