@@ -99,7 +99,7 @@ def load_excel(g:ConjunctiveGraph, filename:str, event=None)->None:
   for i in range(d.shape[0]):
     s = d.iloc[i][0] # subject - the id from the table's key column
     # the subject URI cannot have spaces
-    uri = URIRef(s.lower().replace(" ", "_"))
+    uri = URIRef(s.replace(" ", "_"))
 
     if event:
       g.add((event_uri, P.related_to, uri))

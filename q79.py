@@ -53,7 +53,13 @@ if __name__ == '__main__':
       print(f'>{header}')
       print(seq)
 
+  def to_str(x):
+    if x == None:
+      return "-"
+    else:
+      return str(x)
+
   for row in qres:
-    print('\t'.join(row))
+    print('\t'.join((to_str(x) for x in row)))
 
   g.close()

@@ -3,5 +3,7 @@ SELECT ?strain_name
 WHERE {
     ?strain a usda:strain_id .
     ?strain foaf:name ?strain_name .
+    ?strain usda:tag "antiserum" .
+    ?strain usda:tag "cdc_cvvs" .
 }
 LIMIT 10

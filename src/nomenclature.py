@@ -3,9 +3,9 @@ from rdflib import Namespace
 from rdflib.namespace import RDF, FOAF
 from src.util import padDigit
 
-ni = Namespace("ars_id")
-nt = Namespace("ars_term")
-ne = Namespace("ars_event")
+ni = Namespace("flucrew/id/")
+nt = Namespace("flucrew/term/")
+ne = Namespace("flucrew/event/")
 
 def uidgen(base="_", pad=3, start=0):
   for i in itertools.count(0):
