@@ -1,0 +1,9 @@
+SELECT ?id ?motif ?glyc
+WHERE {
+    ?event a usda:event .
+    ?event foaf:name "glyco-project" .
+    ?event usda:related_to ?i .
+    ?i foaf:name ?id .
+    ?i usda:p162_motif ?motif .
+    ?i usda:glyc_possible ?glyc .
+}

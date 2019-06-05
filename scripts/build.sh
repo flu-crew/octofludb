@@ -25,3 +25,6 @@ d79 tag_strains $DB "STATIC/vaccine/strain_ids.txt" "vaccine"
 d79 load_excel $DB "STATIC/fair/2016.xlsx" --event="fair"
 d79 load_excel $DB "STATIC/fair/2017.xlsx" --event="fair"
 d79 load_excel $DB "STATIC/fair/2018.xlsx" --event="fair"
+
+# load glycosylation project
+d79 load_excel $DB "STATIC/glycosylation-project/glycosylation.xlsx" --event="glyco-project"
