@@ -13,7 +13,8 @@ WHERE {
     ?strain_id usda:has_segment ?i .
     ?strain_id foaf:name ?strain .
     ?strain_id usda:host ?host .
-    ?strain_id usda:date ?date .
+    ?strain_id usda:date ?date_str .
+    BIND (STRDT(?date_str, xsd:dateType) as ?date) .
     # get genbank data
     ?i usda:sequence ?nt_seq .
     ?i usda:feature/usda:translation ?aa_seq .

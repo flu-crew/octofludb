@@ -5,6 +5,6 @@ WHERE {
     ?strain_id foaf:name ?strain .
     ?strain_id usda:tag "antiserum" .
     # NOTE: "cdc_cvvs" is deprecated, used "cdc_cvv"
-    ?strain_id usda:tag "cdc_cvvs" . 
+    ?strain_id usda:tag "cdc_cvv" . 
 }
 LIMIT 10

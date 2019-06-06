@@ -45,9 +45,12 @@ if __name__ == '__main__':
   if arguments["add_gbids"]:
     with open(arguments["<gb_list_filename>"], "r") as f:
       gbids = [g.strip() for g in f.readlines()]
-      for gb_meta in entrez.get_gbs(gbids):
-        gb.add_gb_meta_triples(g, gb_meta)
-    g.commit()
+      for gb_metas in entrez.get_gbs(gbids):
+        for gb_meta in gb_metas:
+          gb.add_gb_meta_triples(g, gb_meta)
+        # commit the current batch (say of 1000 entries)
+        g.commit()
+        print(f' > uploaded and committed {len(gb_metas)} ids', file=sys.stderr)
 
   if arguments["load_excel"]:
     recipe.load_excel(g, arguments["<table_filename>"], event=arguments["--event"])

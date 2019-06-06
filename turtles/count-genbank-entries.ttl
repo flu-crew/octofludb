@@ -1,0 +1,7 @@
+# how many strains have genbank entries?
+SELECT ?gid ?nt
+WHERE {
+    ?gid a usda:genbank_id .
+    ?gid usda:sequence ?nt .
+}
+LIMIT 10000

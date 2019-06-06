@@ -11,7 +11,7 @@ import src.entrez as entrez
 import re
 import pandas as pd
 
-STRAIN_PAT = re.compile("[ABCD]/[^()[]]+")
+STRAIN_PAT = re.compile("[ABCD]/[^()\[\]]+")
 A0_PAT = re.compile("A0\d{7}") #e.g. A01104095
 GENBANK_PAT = re.compile("[A-Z][A-Z]?\d{5,7}")
 
@@ -184,6 +184,9 @@ def load_influenza_na(g:ConjunctiveGraph, filename:str)->None:
         maybe_add(P.host,    "host")
         maybe_add(P.country, "country")
         maybe_add(P.date,    "date")
+
+        if field["date"] != None:
+          g.add((strain_uid, P.date, make_literal(field["date"])))
       else:
-        print(f'could not parse strain: {"|".join(els)}', file=sys.stderr, end="")
+        print(f'  could not parse strain: {"|".join(els)}', file=sys.stderr, end="")
   g.commit()

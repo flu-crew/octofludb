@@ -18,33 +18,33 @@ time d79 load_strains $DB $file
 
 
 file="STATIC/cdc_cvv/strain_ids.txt"
-event="cdc_cvv"
-log "Loading CDC_CVV strains from '$file' as event '$event'"
-time d79 tag_strains $DB $file $event
+tag="cdc_cvv"
+log "Loading CDC_CVV strains from '$file' as tag '$tag'"
+time d79 tag_strains $DB $file $tag
 
 
 file="STATIC/antiserum/strain_ids.txt"
-event="antiserum"
-log "Loading antisera strains from '$file' as event '$event'"
-time d79 tag_strains $DB $file --event=$event
+tag="antiserum"
+log "Loading antisera strains from '$file' as tag '$tag'"
+time d79 tag_strains $DB $file $tag
 
 
 file="STATIC/global-reference/strain_ids.txt"
-event="global-references"
-log "Loading global reference strains from '$file' as event '$event'"
-time d79 tag_strains $DB $file --event=$event
+tag="global-references"
+log "Loading global reference strains from '$file' as tag '$tag'"
+time d79 tag_strains $DB $file $tag
 
 
 file="STATIC/swine-reference/strain_ids.txt"
-event="swine-reference"
-log "Loading segment references from '$file' as event '$event'"
-time d79 tag_strains $DB $file --event=$event
+tag="swine-reference"
+log "Loading segment references from '$file' as tag '$tag'"
+time d79 tag_strains $DB $file $tag
 
 
 file="STATIC/vaccine/strain_ids.txt"
-event="vaccine"
-log "Loading strain recommended by WHO for vaccines from '$file' as event '$event'"
-time d79 tag_strains $DB $file --event=$event
+tag="vaccine"
+log "Loading strain recommended by WHO for vaccines from '$file' as tag '$tag'"
+time d79 tag_strains $DB $file $tag
 
 
 event="fair"
@@ -59,10 +59,13 @@ event="glyco-project"
 log "Loading glycosylation (Todd Davis) project from '$file' as event '$event'"
 time d79 load_excel $DB $file --event=$event
 
-log "Retrieving all swine Genbank IDs and selected human IDs (saved in gb-id.txt)"
+# log "Retrieving all swine Genbank IDs and selected human IDs (saved in gb-id.txt)"
 time ./query.sh ~/src/git/d79/turtles/all-swine-and-refs.ttl > gb-ids.txt
 log "Compiling Genbank records for each of these IDs (this will take a few hours)"
 time d79 add_gbids $DB gb-ids.txt
+
+log "serializing ..."
+d79 serialize $DB dump2.ttl
 
 log $(date)
 log "done"

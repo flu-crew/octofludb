@@ -1,6 +1,7 @@
 import parsec as p
 import re
 from src.util import padDigit 
+from src.util import rmNone
 
 def expandYear(x:str)->str:
   """Expand years: [1-9]X -> 19XX and 0X -> 200X"""
@@ -19,7 +20,7 @@ class Date:
     self.day = day
 
   def __str__(self):
-    return("-".join([self.year, self.month, self.day]))
+    return("-".join(rmNone([self.year, self.month, self.day])))
 
 # parse date
 p_year = p.regex('20\d\d') ^ p.regex('19\d\d') ^ p.regex('\d\d').parsecmap(expandYear)
