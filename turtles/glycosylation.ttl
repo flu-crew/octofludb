@@ -1,9 +1,22 @@
-SELECT ?id ?motif ?glyc
+## Retrieve all the sequences and metadata needed for the glycosylation study
+SELECT ?id ?strain ?host ?date ?source ?glyc ?motif ?prot_id ?aa_seq ## to get the protein sequence
+# SELECT ?id ?strain ?host ?date ?source ?glyc ?motif ?nt_seq
 WHERE {
+    # get the glycosylation project data
     ?event a usda:event .
     ?event foaf:name "glyco-project" .
     ?event usda:related_to ?i .
     ?i foaf:name ?id .
     ?i usda:p162_motif ?motif .
     ?i usda:glyc_possible ?glyc .
+    # get strain info
+    ?strain_id usda:has_segment ?i .
+    ?strain_id foaf:name ?strain .
+    ?strain_id usda:host ?host .
+    ?strain_id usda:date ?date .
+    # get genbank data
+    ?i usda:sequence ?nt_seq .
+    ?i usda:feature/usda:translation ?aa_seq .
+    ?i usda:feature/usda:protein_id ?prot_id .
+    OPTIONAL{ ?i usda:feature/usda:isolation_source ?source . }
 }

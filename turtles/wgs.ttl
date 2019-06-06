@@ -1,0 +1,13 @@
+## WGS
+SELECT ?strain ?date
+WHERE {
+    ?strain_id a usda:strain_id .
+    ?strain_id usda:host "Swine" .
+    ?strain_id foaf:name ?strain .
+    ?strain_id usda:date ?date .
+    FILTER (STRDT(?date, xsd:dateTime) > "2018-03-01"^^xsd:dateTime) .
+    ?strain_id usda:has_segment ?gb_id .
+    ?gb_id a usda:genbank_id .
+    ?gb_id usda:encodes "HA" .
+}
+LIMIT 10

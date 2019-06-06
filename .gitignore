@@ -5,3 +5,4 @@ __pycache__/
 z.*
 *.fna
 *.db/
+src/.orientdb_history

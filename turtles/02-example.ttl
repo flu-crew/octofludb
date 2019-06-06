@@ -1,13 +1,18 @@
-SELECT ?id ?strain_name ?year
+SELECT ?id ?strain ?year
 WHERE {
     ?event a usda:event .
+    ?event foaf:name "fair" .
     ?event usda:related_to ?i .
     ?i foaf:name ?id .
     ?i usda:date ?date .
-    OPTIONAL{
-        ?i usda:xref ?strain_id .
-        ?strain_id foaf:name ?strain_name .
-    }
     BIND (YEAR(?date) AS ?year) .
     FILTER (?year = 2017) .
+    # OPTIONAL{
+    #     ?strain_id usda:xref ?i  .
+    #     ?strain_id a usda:strain_id .
+    #     ?strain_id foaf:name ?strain .
+    #     ?strain_id usda:xref ?j .
+    #     ?j a usda:a0_id .
+    #     ?j foaf:name ?a0 .
+    # }
 }

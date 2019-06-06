@@ -46,20 +46,21 @@ if __name__ == '__main__':
 
   qres = g.query(turtle_str, initNs = {"foaf":FOAF, "usda":nt, "xsd":XSD })
 
-  if arguments["--as-fasta"]:
-    for row in qres:
-      seq = row[-1]
-      header = '|'.join(row[0:(len(row)-1)])
-      print(f'>{header}')
-      print(seq)
-
+  # Set empty fields to "-". Empty fields occur when a SPARQL query uses OPTIONAL. 
   def to_str(x):
     if x == None:
       return "-"
     else:
       return str(x)
 
-  for row in qres:
-    print('\t'.join((to_str(x) for x in row)))
+  if arguments["--as-fasta"]:
+    for row in qres:
+      seq = row[-1]
+      header = '|'.join((to_str(x) for x in row[0:(len(row)-1)]))
+      print(f'>{header}')
+      print(seq)
+  else:
+    for row in qres:
+      print('\t'.join((to_str(x) for x in row)))
 
   g.close()

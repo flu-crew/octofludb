@@ -11,7 +11,7 @@ import src.entrez as entrez
 import re
 import pandas as pd
 
-STRAIN_PAT = re.compile("[ABCD]/[^()]+")
+STRAIN_PAT = re.compile("[ABCD]/[^()[]]+")
 A0_PAT = re.compile("A0\d{7}") #e.g. A01104095
 GENBANK_PAT = re.compile("[A-Z][A-Z]?\d{5,7}")
 
@@ -144,6 +144,7 @@ def load_influenza_na(g:ConjunctiveGraph, filename:str)->None:
 
       gb_uid = URIRef(field["gb"])
       g.add((gb_uid, P.is_a, O.gb))
+      g.add((gb_uid, P.name, Literal(field["gb"])))
       g.add((gb_uid, P.segment, Literal(field["segment"])))
       g.add((gb_uid, P.encodes, Literal(flu.SEGMENT[int(els[2])-1])))
       if is_complete:
@@ -162,7 +163,7 @@ def load_influenza_na(g:ConjunctiveGraph, filename:str)->None:
       # * In the current database (06/04/2019) 541/712177 entries are pathological
       strain_match = re.search(STRAIN_PAT, els[7])
       if strain_match:
-        strain = strain_match.group(0)
+        strain = strain_match.group(0).strip() # yes, some of them can end in space
 
         strain_uid = URIRef(strain.replace(" ", "_"))
         maybe_add = make_maybe_add(g, field, strain_uid)

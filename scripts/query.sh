@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-q79 .d79.db $@
+time q79 .d79.db "$@"
