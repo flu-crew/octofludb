@@ -26,7 +26,7 @@ def get_gbs(gb_ids:List[str])->List[dict]:
         if 500 <= err.code <= 599:
             attempt += 1
             print(f'Received error from server {err}', file=sys.stderr)
-            print(f'Attempt {attempt} of 10 attempt', file=sys.stderr)
+            print(f'Attempt {str(attempt)} of 10 attempt', file=sys.stderr)
             time.sleep(15)
         else:
             raise

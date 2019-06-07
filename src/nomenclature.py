@@ -15,10 +15,15 @@ def uidgen(base="_", pad=3, start=0):
 class O:
   strain = nt.strain_id # unique key for the strain
   gb = nt.genbank_id
-  a0 = nt.a0_id
+  barcode = nt.barcode
+  gisaid = nt.gisaid
   feature = nt.feature
   complete_genome = nt.complete_genome
   event = nt.event
+  dnamd5 = nt.dna_md5
+  dnaseq = nt.dna_sequence
+  protein_sequence = nt.protein_sequence
+  protein_md5 = nt.protein_md5
 
 class P:
   # standard semantic web predicates

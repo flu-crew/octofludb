@@ -1,4 +1,5 @@
 import sys
+import math
 from rdflib import (ConjunctiveGraph, URIRef, Literal)
 import src.fasta as fasta
 import src.geography as geog
@@ -12,11 +13,13 @@ import re
 import pandas as pd
 
 STRAIN_PAT = re.compile("[ABCD]/[^()\[\]]+")
-A0_PAT = re.compile("A0\d{7}") #e.g. A01104095
+BARCODE_PAT = re.compile("A0\d{6,8}|\d+TOSU\d+") #e.g. A01104095 or 16TOSU4783
 GENBANK_PAT = re.compile("[A-Z][A-Z]?\d{5,7}")
+GISAID_PAT = re.compile("EPI_ISL_\d+")
 
 def add_seq_meta_triples(g, meta):
-  strain_uid = URIRef(str(meta["strain"]))
+
+  strain_uid = URIRef(str(meta["strain"]).replace(" ", "_"))
 
   g.add((strain_uid, P.has_segment, URIRef(meta["gb"])))
   g.add((strain_uid, P.is_a, O.strain))
@@ -49,19 +52,21 @@ def tag_gb(g:ConjunctiveGraph, filename:str, tag:str)->None:
   g.commit()
 
 def load_factor(
-  g:ConjunctiveGraph,
-  table_filename:str,
-  relation:str,
-  key_type:str="strain"
-)->None:
+    g:ConjunctiveGraph,
+    table_filename:str,
+    relation:str,
+    key_type:str="strain"
+  )->None:
   if key_type == "strain":
     o = O.strain 
-  elif key_type == "A0":
-    o = O.a0
+  elif key_type == "barcode":
+    o = O.barcode
+  elif key_type == "gisaid":
+    o = O.gisaid
   elif key_type == "gb":
     o = O.gb
   else:
-    sys.exit("please choose key_type from strain, A0, and gb")
+    sys.exit("please choose key_type from strain, barcode, and gb")
   with open(table_filename, "r") as f:
     for (key,val) in ((k.strip(),v.strip()) for k,v in f.readlines().split("\t")):
       uri = URIRef(key.replace(" ", "_"))
@@ -73,10 +78,12 @@ def infer_type(x):
   x_is_a = None
   if re.fullmatch(STRAIN_PAT, x):
     x_is_a = O.strain
-  elif re.fullmatch(A0_PAT, x):
-    x_is_a = O.a0
+  elif re.fullmatch(BARCODE_PAT, x):
+    x_is_a = O.barcode
   elif re.fullmatch(GENBANK_PAT, x):
     x_is_a = O.gb
+  elif re.fullmatch(GISAID_PAT, x):
+    x_is_a = O.gisaid
   return x_is_a
 
 def make_literal(x):
@@ -107,7 +114,7 @@ def load_excel(g:ConjunctiveGraph, filename:str, event=None)->None:
     # associate the ID with its name
     g.add((uri, P.name, Literal(s)))
 
-    # try to determine the type of the ID (e.g., strain, genebank or A0)
+    # try to determine the type of the ID (e.g., strain, genebank or barcode)
     # if successful, add a triple linking the id to its type
     s_type = infer_type(s)
     if s_type != None:
@@ -122,7 +129,10 @@ def load_excel(g:ConjunctiveGraph, filename:str, event=None)->None:
       # case mismatches in lookups
       p = p.lower().replace(" ", "_")
 
-      g.add((uri, nt.term(p), make_literal(o)))
+      #  print(f'{type(o)} {str(o)} {type(o) == "float" and math.isnan(o)}')
+      #  if not (o == None or (type(o) == "float" and math.isnan(o))):
+      if not (o == None or o != o):
+        g.add((uri, nt.term(p), make_literal(o)))
 
   g.commit()
 
@@ -171,14 +181,14 @@ def load_influenza_na(g:ConjunctiveGraph, filename:str)->None:
         g.add((strain_uid, P.is_a, O.strain))
         g.add((strain_uid, P.name, Literal(strain)))
 
-        a0_match = re.search(A0_PAT, strain)
-        if a0_match:
-          a0_name = a0_match.group(0)
-          a0_uid = URIRef(a0_name)
-          g.add((strain_uid, P.xref, a0_uid))
-          g.add((a0_uid, P.xref, strain_uid))
-          g.add((a0_uid, P.is_a, O.a0))
-          g.add((a0_uid, P.name, Literal(a0_uid)))
+        barcode_match = re.search(BARCODE_PAT, strain)
+        if barcode_match:
+          barcode_name = barcode_match.group(0)
+          barcode_uid = URIRef(barcode_name)
+          g.add((strain_uid, P.xref, barcode_uid))
+          g.add((barcode_uid, P.xref, strain_uid))
+          g.add((barcode_uid, P.is_a, O.barcode))
+          g.add((barcode_uid, P.name, Literal(barcode_uid)))
 
         maybe_add = make_maybe_add(g, field, strain_uid)
         maybe_add(P.host,    "host")

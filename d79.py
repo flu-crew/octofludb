@@ -4,13 +4,13 @@
 Build a local SPARQL database.
 
 Usage:
-  d79 load_strains <db> <table_filename>
-  d79 tag_strains <db> <idlist_filename> <tag>
-  d79 tag_gb <db> <gblist_filename> <tag>
-  d79 load_factor <db> <table_filename> <relation> [--key-type=<key>] 
-  d79 load_excel <db> <table_filename> [--event=<event>]
-  d79 serialize <db> <serial_filename>
-  d79 add_gbids <db> <gb_list_filename>
+  d79 load_strains <table_filename> [<db>] [--rdf=<rdf>]
+  d79 tag_strains <idlist_filename> <tag> [<db>]  [--rdf=<rdf>]
+  d79 tag_gb <gblist_filename> <tag> [<db>]  [--rdf=<rdf>]
+  d79 load_factor <table_filename> <relation> <db> [--key-type=<key>]  [--rdf=<rdf>]
+  d79 load_excel <table_filename> [<db>] [--event=<event>] [--rdf=<rdf>]
+  d79 load_gbids <gb_list_filename> [<db>] [--rdf=<rdf>]
+  d79 serialize <serial_filename> <db> 
 
 Options:
   -h --help         Show this screen.
@@ -31,8 +31,12 @@ if __name__ == '__main__':
   arguments = docopt(__doc__, version='build.sh 0.0.1')
 
   uid = uidgen()
-  g = ConjunctiveGraph(store="Sleepycat")
-  g.open(arguments["<db>"], create=True)
+
+  if arguments["<db>"]:
+    g = ConjunctiveGraph(store="Sleepycat")
+    g.open(arguments["<db>"], create=True)
+  else:
+    g = ConjunctiveGraph()
 
   if arguments["load_strains"]:
     # load big table from IVR, with roughly the following format:
@@ -42,7 +46,7 @@ if __name__ == '__main__':
   if arguments["tag_strains"]:
     recipe.tag_strains(g, arguments["<idlist_filename>"], arguments["<tag>"])
 
-  if arguments["add_gbids"]:
+  if arguments["load_gbids"]:
     with open(arguments["<gb_list_filename>"], "r") as f:
       gbids = [g.strip() for g in f.readlines()]
       for gb_metas in entrez.get_gbs(gbids):
@@ -66,6 +70,13 @@ if __name__ == '__main__':
   if arguments["serialize"]:
     g.serialize(
       destination=arguments["<serial_filename>"],
+      format="turtle",
+      encoding="utf-8"
+    )
+
+  if arguments["--rdf"]:
+    g.serialize(
+      destination=arguments["--rdf"],
       format="turtle",
       encoding="utf-8"
     )
