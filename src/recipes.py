@@ -1,12 +1,12 @@
 import sys
 import math
-from rdflib import (ConjunctiveGraph, URIRef, Literal)
+from rdflib import (ConjunctiveGraph, Literal)
 import src.fasta as fasta
 import src.geography as geog
 import src.genbank as gb
 import src.flu as flu
 import src.date as date
-from src.nomenclature import (P, O, nt, ne)
+from src.nomenclature import (P, O, nt, ne, make_uri)
 from src.util import (replace, fixLookup, make_maybe_add)
 import src.entrez as entrez
 import re
@@ -17,11 +17,47 @@ BARCODE_PAT = re.compile("A0\d{6,8}|\d+TOSU\d+") #e.g. A01104095 or 16TOSU4783
 GENBANK_PAT = re.compile("[A-Z][A-Z]?\d{5,7}")
 GISAID_PAT = re.compile("EPI_ISL_\d+")
 
+def add_blast_results(g, filename, uid, event=None):
+  igen = uidgen(base="blast/" + filename, pad=0)
+  if event:
+    event_uri = ne.term(event) 
+    g.add((event_uri, P.is_a, O.event))
+    g.add((event_uri, P.name, Literal(event)))
+
+  with open(filename, "r") as f:
+    for row in f.readlines():
+      try:
+        (qseqid, sseqid, pident, length, mismatch, gapopen,
+         qstart, qend, sstart, send, evalue, bitscore) = row.split("\t")
+      except ValueError:
+        sys.exit("Expected blast file to have exactly 12 fields (as per default blast outfmt 6 options)")
+
+      huid = next(igen)
+
+      if event:
+        g.add((event_uri, P.related_to, huid))
+
+      g.add((huid, P.qseqid,   make_uri(qseqid)))
+      g.add((huid, P.sseqid,   make_uri(sseqid)))
+      g.add((huid, P.pident,   Literal(float(pident))))
+      g.add((huid, P.length,   Literal(int(length))))
+      g.add((huid, P.mismatch, Literal(int(mismatch))))
+      g.add((huid, P.gapopen,  Literal(int(gapopen))))
+      g.add((huid, P.qstart,   Literal(int(qstart))))
+      g.add((huid, P.qend,     Literal(int(qend))))
+      g.add((huid, P.sstart,   Literal(int(sstart))))
+      g.add((huid, P.send,     Literal(int(send))))
+      g.add((huid, P.evalue,   Literal(float(evalue))))
+      g.add((huid, P.bitscore, Literal(float(bitscore))))
+
+  g.commit()
+
+
 def add_seq_meta_triples(g, meta):
 
-  strain_uid = URIRef(str(meta["strain"]).replace(" ", "_"))
+  strain_uid = make_uri(meta["strain"])
 
-  g.add((strain_uid, P.has_segment, URIRef(meta["gb"])))
+  g.add((strain_uid, P.has_segment, make_uri(meta["gb"])))
   g.add((strain_uid, P.is_a, O.strain))
   g.add((strain_uid, P.name, Literal(str(meta["strain"]))))
 
@@ -36,7 +72,7 @@ def add_seq_meta_triples(g, meta):
 def tag_strains(g:ConjunctiveGraph, filename:str, tag:str)->None:
   with open(filename, "r") as f:
     for strain in (s.strip() for s in f.readlines()):
-      uri = URIRef(strain.replace(" ", "_"))
+      uri = make_uri(strain)
       g.add((uri, P.tag, Literal(tag)))
       g.add((uri, P.is_a, O.strain))
       g.add((uri, P.name, Literal(strain)))
@@ -45,7 +81,7 @@ def tag_strains(g:ConjunctiveGraph, filename:str, tag:str)->None:
 def tag_gb(g:ConjunctiveGraph, filename:str, tag:str)->None:
   with open(filename, "r") as f:
     for gb in (s.strip() for s in f.readlines()):
-      uri = URIRef(gb.replace(" ", "_"))
+      uri = make_uri(gb)
       g.add((uri, P.tag, Literal(tag)))
       g.add((uri, P.is_a, O.gb))
       g.add((uri, P.name, Literal(gb)))
@@ -69,7 +105,7 @@ def load_factor(
     sys.exit("please choose key_type from strain, barcode, and gb")
   with open(table_filename, "r") as f:
     for (key,val) in ((k.strip(),v.strip()) for k,v in f.readlines().split("\t")):
-      uri = URIRef(key.replace(" ", "_"))
+      uri = make_uri(key)
       g.add((uri, nt.term(relation), Literal(tag)))
       g.add((uri, nt.is_a, o))
   g.commit()
@@ -106,7 +142,7 @@ def load_excel(g:ConjunctiveGraph, filename:str, event=None)->None:
   for i in range(d.shape[0]):
     s = d.iloc[i][0] # subject - the id from the table's key column
     # the subject URI cannot have spaces
-    uri = URIRef(s.replace(" ", "_"))
+    uri = make_uri(s)
 
     if event:
       g.add((event_uri, P.related_to, uri))
@@ -152,7 +188,7 @@ def load_influenza_na(g:ConjunctiveGraph, filename:str)->None:
       except IndexError:
         print(f'Expected 11 columns, found only {len(els)}. This is unexpected and a little frightening.', file=sys.stderr)
 
-      gb_uid = URIRef(field["gb"])
+      gb_uid = make_uri(field["gb"])
       g.add((gb_uid, P.is_a, O.gb))
       g.add((gb_uid, P.name, Literal(field["gb"])))
       g.add((gb_uid, P.segment, Literal(field["segment"])))
@@ -175,7 +211,7 @@ def load_influenza_na(g:ConjunctiveGraph, filename:str)->None:
       if strain_match:
         strain = strain_match.group(0).strip() # yes, some of them can end in space
 
-        strain_uid = URIRef(strain.replace(" ", "_"))
+        strain_uid = make_uri(strain)
         maybe_add = make_maybe_add(g, field, strain_uid)
         g.add((strain_uid, P.has_segment, gb_uid))
         g.add((strain_uid, P.is_a, O.strain))
@@ -184,7 +220,7 @@ def load_influenza_na(g:ConjunctiveGraph, filename:str)->None:
         barcode_match = re.search(BARCODE_PAT, strain)
         if barcode_match:
           barcode_name = barcode_match.group(0)
-          barcode_uid = URIRef(barcode_name)
+          barcode_uid = make_uri(barcode_name)
           g.add((strain_uid, P.xref, barcode_uid))
           g.add((barcode_uid, P.xref, strain_uid))
           g.add((barcode_uid, P.is_a, O.barcode))

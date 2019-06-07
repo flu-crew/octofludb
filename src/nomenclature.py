@@ -1,5 +1,5 @@
 import itertools
-from rdflib import Namespace
+from rdflib import (Namespace, URIRef)
 from rdflib.namespace import RDF, FOAF
 from src.util import padDigit
 
@@ -8,8 +8,12 @@ nt = Namespace("https://github.com/arendsee/flucrew/term/")
 ne = Namespace("https://github.com/arendsee/flucrew/event/")
 
 def uidgen(base="_", pad=3, start=0):
+  base = base.replace(" ", "_")
   for i in itertools.count(0):
     yield ni.term(padDigit(base + str(i), pad))
+
+def make_uri(x):
+  return(URIRef(str(x).replace(" ", "_")))
 
 
 class O:

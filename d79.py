@@ -10,6 +10,7 @@ Usage:
   d79 load_factor <table_filename> <relation> <db> [--key-type=<key>]  [--rdf=<rdf>]
   d79 load_excel <table_filename> [<db>] [--event=<event>] [--rdf=<rdf>]
   d79 load_gbids <gb_list_filename> [<db>] [--rdf=<rdf>]
+  d79 load_blast <blast_filename> [<db>] [--event=<event>] [--rdf=<rdf>]
   d79 serialize <serial_filename> <db> 
 
 Options:
@@ -58,6 +59,9 @@ if __name__ == '__main__':
 
   if arguments["load_excel"]:
     recipe.load_excel(g, arguments["<table_filename>"], event=arguments["--event"])
+
+  if arguments["load_blast"]:
+    recipe.load_blast(g, arguments["<blast_filename>"], event=arguments["--event"])
 
   if arguments["load_factor"]:
     recipe.load_factor(

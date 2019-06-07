@@ -59,10 +59,17 @@ event="glyco-project"
 log "Loading glycosylation (Todd Davis) project from '$file' as event '$event'"
 time d79 load_excel $file $DB --event=$event
 
-# log "Retrieving all swine Genbank IDs and selected human IDs (saved in gb-id.txt)"
+
+log "Retrieving all swine Genbank IDs and selected human IDs (saved in gb-id.txt)"
 time ./query.sh ~/src/git/d79/turtles/all-swine-and-refs.ttl > gb-ids.txt
 log "Compiling Genbank records for each of these IDs (this will take a few hours)"
 time d79 load_gbids gb-ids.txt $DB
+
+
+file="STATIC/blast.txt"
+log "Loading blast results from $file"
+time d79 load_blast --event="blast_all-against-all" $DB 
+
 
 log "serializing ..."
 d79 serialize dump2.ttl $DB
