@@ -6,7 +6,7 @@ import src.geography as geog
 import src.genbank as gb
 import src.flu as flu
 import src.date as date
-from src.nomenclature import (P, O, nt, ne, make_uri)
+from src.nomenclature import (P, O, nt, ne, make_uri, uidgen)
 from src.util import (replace, fixLookup, make_maybe_add)
 import src.entrez as entrez
 import re
@@ -17,7 +17,7 @@ BARCODE_PAT = re.compile("A0\d{6,8}|\d+TOSU\d+") #e.g. A01104095 or 16TOSU4783
 GENBANK_PAT = re.compile("[A-Z][A-Z]?\d{5,7}")
 GISAID_PAT = re.compile("EPI_ISL_\d+")
 
-def add_blast_results(g, filename, uid, event=None):
+def load_blast(g, filename, event=None):
   igen = uidgen(base="blast/" + filename, pad=0)
   if event:
     event_uri = ne.term(event) 

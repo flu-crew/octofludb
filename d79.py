@@ -22,7 +22,6 @@ import sys
 import os
 from docopt import docopt
 from rdflib import (ConjunctiveGraph)
-from src.nomenclature import (uidgen)
 import src.recipes as recipe
 import src.entrez as entrez
 import src.genbank as gb
@@ -30,8 +29,6 @@ import src.genbank as gb
 if __name__ == '__main__':
 
   arguments = docopt(__doc__, version='build.sh 0.0.1')
-
-  uid = uidgen()
 
   if arguments["<db>"]:
     g = ConjunctiveGraph(store="Sleepycat")

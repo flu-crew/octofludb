@@ -40,6 +40,19 @@ class P:
   has_segment = nt.has_segment
   feature     = nt.feature
   tag         = nt.tag
+  # blast predicates
+  qseqid = nt.qseqid
+  sseqid = nt.sseqid
+  pident = nt.pident
+  length = nt.length
+  mismatch = nt.mismatch
+  gapopen = nt.gapopen
+  qstart = nt.qstart
+  qend = nt.qend
+  sstart = nt.sstart
+  send = nt.send
+  evalue = nt.evalue
+  bitscore = nt.bitscore
   # the local curated data
   strain_alt = nt.strain_id_alt # alternative strain IDs
   gb         = nt.genbank_id # an optional unique key for the segment
