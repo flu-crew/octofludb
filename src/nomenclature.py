@@ -40,6 +40,11 @@ class P:
   has_segment = nt.has_segment
   feature     = nt.feature
   tag         = nt.tag
+  dnaseq = nt.dna_sequence
+  proseq = nt.protein_sequence
+  dnamd5 = nt.dna_md5
+  aamd5 = nt.aa_md5
+  protein_md5 = nt.protein_md5
   # blast predicates
   qseqid = nt.qseqid
   sseqid = nt.sseqid

@@ -9,7 +9,7 @@ will all be on one line. If you want to wrap it, I suggest piping to `smof
 clean`.
 
 Usage:
-  sparql.py <db_filename> <turtle_filename> [--as-fasta]
+  sparql.py <turtle_db> <turtle_query> [--as-fasta]
 
 Options:
   -h --help     Show this screen.
@@ -32,17 +32,13 @@ if __name__ == '__main__':
 
   arguments = docopt(__doc__, version='sparql.sh 0.0.1')
 
-  g = ConjunctiveGraph(store="Sleepycat")
-  g.open(arguments["<db_filename>"], create=False)
+  g = ConjunctiveGraph()
+  g.parse(arguments["<turtle_db>"], format="turtle")
 
   if len(g) == 0:
     print("Loaded an empty database", file=sys.stderr)
 
-  ## If I ever want to read raw turtle instead ...
-  #  g = Graph()
-  #  g.parse("dump.ttl", format="turtle")
-
-  turtle_str = load_turtle(arguments["<turtle_filename>"])
+  turtle_str = load_turtle(arguments["<turtle_query>"])
 
   qres = g.query(turtle_str, initNs = {"foaf":FOAF, "usda":nt, "xsd":XSD })
 

@@ -2,6 +2,7 @@ from src.nomenclature import (uidgen, P, O, nt)
 from src.util import (rmNone, make_maybe_add)
 from rdflib import (URIRef, Literal)
 from hashlib import md5
+import sys
 
 def add_gb_meta_triples(g, gb_meta):
   gid = URIRef(str(gb_meta["GBSeq_locus"]))
@@ -23,16 +24,11 @@ def add_gb_meta_triples(g, gb_meta):
   maybe_add(P.gb_organism,          "GBSeq_organism")
   maybe_add(P.gb_taxonomy,          "GBSeq_taxonomy")
 
-  seq = meta["GBSeq_sequence"].upper()
-  seqmd5 = md5().update(bytes(seq.encode("ascii"))).hexdigest()
-  g.add((gid, P.dna_sequence, Literal(seq)))
-  g.add((gid, P.dnamd5, Literal(seqmd5)))
-
-  if key in meta and meta["GBSeq_sequence"] != None:
-    try:
-      g.add((sid, p, Literal(meta[key])))
-    except:
-      pass
+  seq = gb_meta["GBSeq_sequence"].upper()
+  seqmd5 = md5()
+  seqmd5.update(bytes(seq.encode("ascii")))
+  g.add((gid, P.dnaseq, Literal(seq)))
+  g.add((gid, P.dnamd5, Literal(seqmd5.hexdigest())))
 
   igen = uidgen(base=gb_meta["GBSeq_locus"] + "_feat_")
   for feat in gb_meta["GBSeq_feature-table"]:
@@ -45,18 +41,19 @@ def add_gb_meta_triples(g, gb_meta):
     maybe_add(P.gb_location, "GBFeature_location")
     #  maybe_add(P.gb_key, "GBFeature_intervals") # for laters
 
-    try:
-      for qual in feat["GBFeature_quals"]:
-        if qual["GBQualifier_name"] == "translation":
-          aaseq = qual["GBQualifier_value"]
-          aaseqmd5 = md5().update(bytes(seq.encode("ascii"))).hexdigest()
-          g.add((fid, P.protein_sequence, Literal(aaseq)))
-          g.add((fid, P.aamd5, Literal(aaseqmd5)))
-        else:
+    for qual in feat["GBFeature_quals"]:
+      if qual["GBQualifier_name"] == "translation":
+        aaseq = qual["GBQualifier_value"]
+        aaseqmd5 = md5()
+        aaseqmd5.update(bytes(seq.encode("ascii")))
+        g.add((fid, P.proseq, Literal(aaseq)))
+        g.add((fid, P.aamd5, Literal(aaseqmd5.hexdigest())))
+      else:
+        try:
           g.add((
             fid,
             nt.term(qual["GBQualifier_name"]),
             Literal(qual["GBQualifier_value"])
           ))
-    except:
-      pass
+        except KeyError:
+          print(f'In {gb_meta["GBSeq_locus"]}: Could not load: {str(qual)}', file=sys.stderr)

@@ -1,0 +1,7 @@
+SELECT DISTINCT ?gb
+WHERE {
+    ?strain_id usda:host "Swine" .
+    ?strain_id a usda:strain_id .
+    ?strain_id usda:has_segment ?gb_id .
+    ?gb_id foaf:name ?gb .
+}

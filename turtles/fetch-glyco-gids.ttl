@@ -1,0 +1,7 @@
+SELECT DISTINCT ?gb
+WHERE {
+    ?event a usda:event .
+    ?event foaf:name "glyco-project" .
+    ?event usda:related_to ?gb_id .
+    ?gb_id foaf:name ?gb .
+}
