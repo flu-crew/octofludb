@@ -4,18 +4,19 @@
 Build a local SPARQL database.
 
 Usage:
-  d79 load_strains <table_filename> [<db>] [--rdf=<rdf>]
-  d79 tag_strains <idlist_filename> <tag> [<db>]  [--rdf=<rdf>]
-  d79 tag_gb <gblist_filename> <tag> [<db>]  [--rdf=<rdf>]
-  d79 load_factor <table_filename> <relation> <db> [--key-type=<key>]  [--rdf=<rdf>]
-  d79 load_excel <table_filename> [<db>] [--event=<event>] [--rdf=<rdf>]
-  d79 load_gbids <gb_list_filename> [<db>] [--rdf=<rdf>]
-  d79 load_blast <blast_filename> [<db>] [--event=<event>] [--rdf=<rdf>]
-  d79 serialize <serial_filename> <db> 
+  d79 load_strains <table_filename> [<db>] [--rdf=<rdf>] [--format=<format>]
+  d79 tag_strains <idlist_filename> <tag> [<db>]  [--rdf=<rdf>] [--format=<format>]
+  d79 tag_gb <gblist_filename> <tag> [<db>]  [--rdf=<rdf>] [--format=<format>]
+  d79 load_factor <table_filename> <relation> <db> [--key-type=<key>]  [--rdf=<rdf>] [--format=<format>]
+  d79 load_excel <table_filename> [<db>] [--event=<event>] [--rdf=<rdf>] [--format=<format>]
+  d79 load_gbids <gb_list_filename> [<db>] [--rdf=<rdf>] [--format=<format>]
+  d79 load_blast <blast_filename> [<db>] [--event=<event>] [--rdf=<rdf>] [--format=<format>]
+  d79 serialize <serial_filename> <db> [--format=<format>]
 
 Options:
-  -h --help         Show this screen.
-  --key-type <key>  The subject type to merge on [default="strain"].
+  -h --help             Show this screen.
+  -k --key-type <key>   The subject type to merge on [default="strain"].
+  -f --format <format>  The RDF format ("turtle" or "ntriples")
 """
 
 import sys
@@ -71,14 +72,14 @@ if __name__ == '__main__':
   if arguments["serialize"]:
     g.serialize(
       destination=arguments["<serial_filename>"],
-      format="turtle",
+      format=arguments["--format"],
       encoding="utf-8"
     )
 
   if arguments["--rdf"]:
     g.serialize(
       destination=arguments["--rdf"],
-      format="turtle",
+      format=arguments["--format"],
       encoding="utf-8"
     )
 

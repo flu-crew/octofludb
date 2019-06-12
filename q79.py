@@ -9,7 +9,7 @@ will all be on one line. If you want to wrap it, I suggest piping to `smof
 clean`.
 
 Usage:
-  sparql.py <turtle_db> <turtle_query> [--as-fasta]
+  sparql.py <rdf_db> <sparql_query> [--as-fasta]
 
 Options:
   -h --help     Show this screen.
@@ -23,7 +23,7 @@ from docopt import docopt
 import sys
 from rdflib.namespace import RDF, FOAF, XSD
 
-def load_turtle(filename):
+def load_rdf(filename):
   with open(filename, "r") as f:
     sparql_str = f.read().strip()
   return(sparql_str)
@@ -33,14 +33,14 @@ if __name__ == '__main__':
   arguments = docopt(__doc__, version='sparql.sh 0.0.1')
 
   g = ConjunctiveGraph()
-  g.parse(arguments["<turtle_db>"], format="turtle")
+  g.parse(arguments["<rdf_db>"])
 
   if len(g) == 0:
     print("Loaded an empty database", file=sys.stderr)
 
-  turtle_str = load_turtle(arguments["<turtle_query>"])
+  rdf_str = load_rdf(arguments["<sparql_query>"])
 
-  qres = g.query(turtle_str, initNs = {"foaf":FOAF, "usda":nt, "xsd":XSD })
+  qres = g.query(rdf_str, initNs = {"foaf":FOAF, "usda":nt, "xsd":XSD })
 
   # Set empty fields to "-". Empty fields occur when a SPARQL query uses OPTIONAL. 
   def to_str(x):
