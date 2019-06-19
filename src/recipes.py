@@ -1,21 +1,23 @@
 import sys
 import math
 from rdflib import (ConjunctiveGraph, Literal)
-import src.fasta as fasta
-import src.geography as geog
-import src.genbank as gb
-import src.flu as flu
-import src.date as date
+import src.domain.flu as flu
 from src.nomenclature import (P, O, nt, ne, make_uri, uidgen)
 from src.util import (replace, fixLookup, make_maybe_add)
+import src.parser as p
 import src.entrez as entrez
 import re
 import pandas as pd
 
+# TODO: replace these with parsers
+
 STRAIN_PAT = re.compile("[ABCD]/[^()\[\]]+")
-BARCODE_PAT = re.compile("A0\d{6,8}|\d+TOSU\d+") #e.g. A01104095 or 16TOSU4783
-GENBANK_PAT = re.compile("[A-Z][A-Z]?\d{5,7}")
-GISAID_PAT = re.compile("EPI_ISL_\d+")
+BARCODE_PAT = re.compile('A0\d{7}|\d+TOSU\d+|EPI_ISL_\d+')
+
+from src.parser import (p_date)
+
+#  def load_fasta(g, filename, event=None, columns=None, delimiter=None):
+#    pass
 
 def load_blast(g, filename, event=None):
   igen = uidgen(base="blast/" + filename, pad=0)
@@ -51,7 +53,6 @@ def load_blast(g, filename, event=None):
       g.add((huid, P.bitscore, Literal(float(bitscore))))
 
   g.commit()
-
 
 def add_seq_meta_triples(g, meta):
 
@@ -112,20 +113,20 @@ def load_factor(
 
 def infer_type(x):
   x_is_a = None
-  if re.fullmatch(STRAIN_PAT, x):
+  if p.parse_match(p_strain, x):
     x_is_a = O.strain
-  elif re.fullmatch(BARCODE_PAT, x):
+  elif p.parse_match(p_barcode, x):
     x_is_a = O.barcode
-  elif re.fullmatch(GENBANK_PAT, x):
+  elif p.parse_match(p_gb, x):
     x_is_a = O.gb
-  elif re.fullmatch(GISAID_PAT, x):
+  elif p.parse_match(p_gisaid_seqid, x):
     x_is_a = O.gisaid
   return x_is_a
 
 def make_literal(x):
   try:
     # Can x be a date?
-    x_lit = Literal(str(date.p_date.parse(x)), datatype=XSD.date)
+    x_lit = Literal(str(p_date.parse(x)), datatype=XSD.date)
   except:
     # If not, then make it a normal literal
     x_lit = Literal(x) 

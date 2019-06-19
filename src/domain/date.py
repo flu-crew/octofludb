@@ -1,7 +1,5 @@
 import parsec as p
-import re
-from src.util import padDigit 
-from src.util import rmNone
+from src.util import (padDigit, rmNone) 
 
 def expandYear(x:str)->str:
   """Expand years: [1-9]X -> 19XX and 0X -> 200X"""
@@ -12,7 +10,6 @@ def expandYear(x:str)->str:
       x = "19" + x
   return(x)
 
-
 class Date:
   def __init__(self, year:str, month:str=None, day:str=None):
     self.year = year
@@ -21,12 +18,6 @@ class Date:
 
   def __str__(self):
     return("-".join(rmNone([self.year, self.month, self.day])))
-
-# parse date
-p_year = p.regex('20\d\d') ^ p.regex('19\d\d') ^ p.regex('\d\d').parsecmap(expandYear)
-p_longyear = p.regex('20\d\d') | p.regex('19\d\d')
-p_month = p.regex('10|11|12|0?[1-9]').parsecmap(padDigit)
-p_day = p.regex('3[01]|[012]?\d').parsecmap(padDigit)
 
 @p.generate
 def p_date_ymd():
@@ -45,5 +36,10 @@ def p_date_mdy():
   yield p.optional(p.regex('[-/]'))
   y = yield p_longyear
   return(Date(month=m,day=d,year=y))
+
+p_year = p.regex('20\d\d') ^ p.regex('19\d\d') ^ p.regex('\d\d').parsecmap(expandYear)
+p_longyear = p.regex('20\d\d') | p.regex('19\d\d')
+p_month = p.regex('10|11|12|0?[1-9]').parsecmap(padDigit)
+p_day = p.regex('3[01]|[012]?\d').parsecmap(padDigit)
 
 p_date = p_date_ymd | p_date_mdy

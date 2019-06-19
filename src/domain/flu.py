@@ -1,6 +1,18 @@
-from src.tokens import *
-from src.date import (p_year)
-from src.util import (rmNone)
+import parsec as p
+from src.domain.date import (p_year)
+from src.domain.identifier import (p_A0)
+from src.util import (rmNone, concat)
+
+# the 8 segments of the flu genome (order matters)
+SEGMENT = ["PB2", "PB1", "PA", "HA", "NP", "NA", "M", "NS1"]
+
+p_HA = p.regex('H\d+') ^ p.regex('pdmH\d+')
+p_NA = p.regex('N\d+')
+p_internal_gene = p.regex("PB2|PB1|PA|NP|M|NS1")
+p_segment = p_internal_gene | p_HA | p_NA
+p_HANA = p.regex("H\d+N\d+")
+p_constellation = p.regex("[TPV]{6}")
+p_segment_number = p.regex("[1-8]")
 
 class Strain:
   def __init__(self, flutype=None, subtype=None, host=None, place=None, ident=None, year=None, raw=None):
@@ -68,4 +80,4 @@ def p_s5():
   subtype = yield p.optional(p.string("(") >> p_HANA << p.string(")"))
   return(Strain(flutype=flutype, host=host, place=place, year=year, ident=ident, subtype=subtype))
 
-p_strain = p_s5 ^ p_s4 ^ p_s3
+p_strain_obj = p_s5 ^ p_s4 ^ p_s3

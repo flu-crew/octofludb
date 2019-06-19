@@ -63,8 +63,8 @@ if __name__ == '__main__':
   if args["load_blast"]:
     recipe.load_blast(g, args["<blast_filename>"], event=args["--event"])
 
-  if args["load_fasta"]:
-    recipe.load_fasta(g, args["<fasta_filename>"], event=args["--event"], columns=args["--columns"], delimiter=args["--delimiter"])
+  #  if args["load_fasta"]:
+  #    recipe.load_fasta(g, args["<fasta_filename>"], event=args["--event"], columns=args["--columns"], delimiter=args["--delimiter"])
 
   if args["load_factor"]:
     recipe.load_factor(
