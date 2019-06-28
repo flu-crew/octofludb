@@ -1,0 +1,29 @@
+# example from the EMBL website
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX dbpedia2: <http://dbpedia.org/property/>
+PREFIX dbpedia: <http://dbpedia.org/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX faldo: <http://biohackathon.org/resource/faldo#>
+PREFIX ensembl: <http://rdf.ebi.ac.uk/resource/ensembl/>
+
+SELECT DISTINCT ?transcript ?id ?typeLabel ?reference ?begin ?end ?location {
+    ?transcript obo:SO_transcribed_from ensembl:ENSG00000139618 ;
+    a ?type;
+    dc:identifier ?id .
+    OPTIONAL {
+        ?transcript faldo:location ?location .
+        ?location faldo:begin [faldo:position ?begin] .
+        ?location faldo:end [faldo:position ?end ] .
+        ?location faldo:reference ?reference .
+    }
+    OPTIONAL {?type rdfs:label ?typeLabel}
+
+}

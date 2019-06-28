@@ -1,0 +1,15 @@
+PREFIX core: <http://purl.uniprot.org/core/>
+PREFIX taxon:  <http://purl.uniprot.org/taxonomy/>
+PREFIX uniprot: <http://purl.uniprot.org/uniprot/>
+PREFIX embl: <http://purl.uniprot.org/embl/>
+
+PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX dc: <http://purl.org/dc/elements/1.1/> 
+
+SELECT DISTINCT ?s ?p ?o
+WHERE
+{
+    ?s core:locatedOn embl:S73497 .
+    ?s ?p ?o .
+}
