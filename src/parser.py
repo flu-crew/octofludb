@@ -98,8 +98,7 @@ p_country = wordset(geo.COUNTRIES.keys(), label="country")
 p_usa_state = wordset(
     words=list(geo.STATE_ABBR.values())
     + list(geo.STATE_ABBR.keys())
-    + list(geo.STATE_MISPELLINGS.keys())
-    + ["USA", "United States"],  # may be used when state is not available
+    + list(geo.STATE_MISPELLINGS.keys()),
     label="usa_state",
 )
 
