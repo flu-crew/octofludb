@@ -16,9 +16,9 @@ Usage:
 
 Options:
   -h --help               Show this screen.
-  -k --key-type <key>     The subject type to merge on [default="strain"]
+  -k --key-type <key>     The subject type to merge on [default:"strain"]
   -f --format <format>    The RDF format ("turtle" or "ntriples")
-  --delimiter <del>       Field delimiter for FASTA headers [default="|"]
+  --delimiter <del>       Field delimiter for FASTA headers [default:"|"]
   --write-fasta           Write output as a FASTA to STDOUT
   -c --columns <columns>  Columns of a table for fields in a header (e.g., "sid[host,date,gid],gid[clade],host,date,clade|(sid,type,strain_id);(gid,type,barcode);(gid,type,genbank_id)"
 """
@@ -30,8 +30,12 @@ from rdflib import ConjunctiveGraph
 import src.recipes as recipe
 import src.entrez as entrez
 import src.genbank as gb
+import signal
 
 if __name__ == "__main__":
+
+    if os.name is "posix":
+        signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 
     args = docopt(__doc__, version="build.sh 0.0.1")
 
