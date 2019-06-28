@@ -5,7 +5,7 @@ import src.domain.flu as flu
 from src.nomenclature import P, O, nt, ne, make_uri, uidgen, make_literal
 from src.util import replace, fixLookup, make_maybe_add
 import src.parser as p
-from src.fasta import parse_fasta, graph_fasta
+from src.fasta import parse_fasta, print_fasta, graph_fasta
 import src.entrez as entrez
 import re
 import pandas as pd
@@ -18,8 +18,10 @@ BARCODE_PAT = re.compile("A0\d{7}|\d+TOSU\d+|EPI_ISL_\d+")
 from src.parser import p_date
 
 
-def load_fasta(g, filename, event=None, columns=None, sep="|"):
+def load_fasta(g, filename, event=None, columns=None, sep="|", fastaout=False):
     entries = parse_fasta(filename, sep=sep)
+    if fastaout:
+        print_fasta(entries)
     return graph_fasta(g, entries)
 
 

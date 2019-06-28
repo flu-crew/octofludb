@@ -65,6 +65,7 @@ class O:
     constellation = nt.constellation
     unknown_sequence = nt.unknown_sequence
     unknown_strain = nt.unknown_strain
+    unknown_unknown = nt.unknown
 
 
 class P:
@@ -76,6 +77,7 @@ class P:
     xref = nt.xref
     unknown_sequence = nt.unknown_sequence
     unknown_strain = nt.unknown_strain
+    unknown_unknown = nt.unknown
     # flu relations
     has_segment = nt.has_segment
     feature = nt.feature

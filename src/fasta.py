@@ -19,18 +19,17 @@ def parse_fasta(filename, sep="|"):
         row = (h.split(sep) + [q] for (h, q) in entries)
         return resolve(guess_fields(row))
 
-def write_fasta(fields, filename):
-    with open(filename + "~", "w") as f:
-        for entry in fields:
-            header = "|".join(
-                (
-                    f"{str(entry[i][0])}={str(entry[i][1])}"
-                    for i in range(len(entry) - 1)
-                )
+def print_fasta(fields):
+    for entry in fields:
+        header = "|".join(
+            (
+                f"{str(entry[i][0])}={str(entry[i][1])}"
+                for i in range(len(entry) - 1)
             )
-            seq = entry[-1][1]
-            print(">" + header, file=f)
-            print(seq, file=f)
+        )
+        seq = entry[-1][1]
+        print(">" + header)
+        print(seq)
 
 def graph_fasta(g, fieldss):
   # - Create foaf:name links as needed, munging as needed
@@ -81,12 +80,14 @@ def graph_fasta(g, fieldss):
               "segment_number" : nt.segment_number,
               "proseq" : O.proseq,
               "dnaseq" : O.dnaseq,
+              "unknown" : O.unknown_unknown
           },
           {
               "segment_name" : Literal,
               "segment_number" : Literal,
               "proseq" : Literal,
               "dnaseq" : Literal,
+              "unknown" : Literal
           },
           "unknown_sequence"
       ),
@@ -114,7 +115,8 @@ def graph_fasta(g, fieldss):
       relation_sets=fastaRelationSets,
       isa_map=fastaIsaMap,
       munge_map=fastaMungeMap,
-      sub_builders=fastaGenerateAdditional
+      sub_builders=fastaGenerateAdditional,
+      unknown_tag="unknown"
   )
 
   fluRdfBuilder.build(g, fieldss)

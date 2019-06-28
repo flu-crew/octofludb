@@ -11,13 +11,15 @@ Usage:
   d79 load_excel <table_filename> [<db>] [--event=<event>] [--rdf=<rdf>] [--format=<format>]
   d79 load_gbids <gb_list_filename> [<db>] [--rdf=<rdf>] [--format=<format>]
   d79 load_blast <blast_filename> [<db>] [--event=<event>] [--rdf=<rdf>] [--format=<format>]
-  d79 load_fasta <fasta_filename> [<db>] [--event=<event>] [--rdf=<rdf>] [--format=<format>] [--columns=<columns>] [--delimiter=<del>]
+  d79 load_fasta <fasta_filename> [<db>] [--event=<event>] [--write-fasta] [--rdf=<rdf>] [--format=<format>] [--columns=<columns>] [--delimiter=<del>]
   d79 serialize <serial_filename> <db> [--format=<format>]
 
 Options:
   -h --help               Show this screen.
-  -k --key-type <key>     The subject type to merge on [default="strain"].
+  -k --key-type <key>     The subject type to merge on [default="strain"]
   -f --format <format>    The RDF format ("turtle" or "ntriples")
+  --delimiter <del>       Field delimiter for FASTA headers [default="|"]
+  --write-fasta           Write output as a FASTA to STDOUT
   -c --columns <columns>  Columns of a table for fields in a header (e.g., "sid[host,date,gid],gid[clade],host,date,clade|(sid,type,strain_id);(gid,type,barcode);(gid,type,genbank_id)"
 """
 
@@ -70,6 +72,7 @@ if __name__ == "__main__":
             event=args["--event"],
             columns=args["--columns"],
             sep=args["--delimiter"],
+            fastaout=args["--write-fasta"]
         )
 
     if args["load_factor"]:

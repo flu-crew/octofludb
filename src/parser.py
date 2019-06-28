@@ -113,7 +113,8 @@ class RdfBuilder:
         # with values in set1 being related to values in set2 by literal set2
         isa_map={},
         munge_map={},  # (<field>, <function>), munge <field> with <function> (e.g. to correct spelling)
-        sub_builders=[]  # (<field>, <function>), create new triples from <field> using <function>,
+        sub_builders=[],  # (<field>, <function>), create new triples from <field> using <function>,
+        unknown_tag="unknown"
         # e.g., to parse host name from a strain name.
     ):
         self.make_name = make_name
@@ -121,6 +122,8 @@ class RdfBuilder:
         self.munge_map = munge_map
         self.sub_builders = sub_builders
         self.isa_map = isa_map
+        self.unknown_tag=unknown_tag
+        # e.g., to parse host name from a strain name.
 
     def build(self, g, fieldss):
         """
@@ -133,6 +136,12 @@ class RdfBuilder:
 
     def _buildOne(self, g, fields, idx, event=None):
         # fields :: [(Tag, String)]
+
+        # replace unknown tags
+        for i in range(len(fields)):
+            t,v = fields[i]
+            if t is None:
+                fields[i] = (self.unknown_tag, v)
 
         for i in range(len(fields)):
             t,v = fields[i]
