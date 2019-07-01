@@ -8,17 +8,18 @@ Entrez.email = "zebulun.arendsee@usda.gov"
 
 # code adapted from http://biopython.org/DIST/docs/tutorial/Tutorial.html#htoc122
 def get_gbs(gb_ids: List[str]) -> List[dict]:
-    batch_size = 1000
+    batch_size = 100
     count = len(gb_ids)
     for start in range(0, count, batch_size):
-        end = min(count - 1, start + batch_size)
+        end = min(count, start + batch_size)
         attempt = 0
         while attempt < 10:
             try:
-                h = Entrez.efetch(db="nucleotide", id=gb_ids[start:end+1], retmode="xml")
-                print(f"Downloaded Genbank entries {start+1}-{end+1}", file=sys.stderr)
+                h = Entrez.efetch(db="nucleotide", id=gb_ids[start:end], retmode="xml")
                 x = Entrez.read(h)
                 h.close()
+                print(f"Downloaded Genbank entries {start+1}-{end+1}", file=sys.stderr)
+                print(f"  {gb_ids[start]}-{gb_ids[end-1]}", file=sys.stderr)
                 time.sleep(1)
                 yield x
                 break
