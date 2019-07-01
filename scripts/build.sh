@@ -51,10 +51,7 @@ time d79 load_excel "STATIC/fair/2017.xlsx" --rdf="ttl/fair2017.ttl" --event="fa
 time d79 load_excel "STATIC/fair/2018.xlsx" --rdf="ttl/fair2018.ttl" --event="fair" --format="ntriples"
 
 
-file="STATIC/glycosylation-project/glycosylation.xlsx"
-event="glyco-project"
-log "Loading glycosylation (Todd Davis) project from '$file' as event '$event'"
-time d79 load_excel $file --rdf="ttl/glyco-project.ttl" --event=$event --format="ntriples"
+file="STATIC/pdm-project-2019/pdm-project-2019./"
 
 ### TODO: push all files to the GraphDB database before running the fetch step
 ### Currently I have to manually stop here, go to the GraphDB browser, and
@@ -71,6 +68,11 @@ time d79 load_gbids swine-ids.txt --rdf="ttl/genbank.ttl" --format="ntriples"
 file="STATIC/blast.txt"
 log "Loading blast results from $file"
 time d79 load_blast "$file" --event="blast_all-against-all" --rdf="ttl/blast_all-against-all.ttl"  --format="ntriples"
+
+
+file="STATIC/pdm-2019.fasta"
+log "Loading pdm-2019.fasta"
+time d79 load_fasta "$file" --event="pdm-2019" --format="ntriples" --delimiter="|" --rdf="ttl/pdm-2019.ttl"
 
 log $(date)
 log "done"
