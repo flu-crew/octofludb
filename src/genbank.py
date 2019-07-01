@@ -50,17 +50,11 @@ def add_gb_meta_triples(g, gb_meta):
                     aaseqmd5.update(bytes(seq.encode("ascii")))
                     g.add((fid, P.proseq, Literal(aaseq)))
                     g.add((fid, P.aamd5, Literal(aaseqmd5.hexdigest())))
-                else:
-                    try:
-                        g.add(
-                            (
-                                fid,
-                                nt.term(qual["GBQualifier_name"]),
-                                Literal(qual["GBQualifier_value"]),
-                            )
+                elif "GBQualifier_name" in qual and "GBQualifier_value" in qual:
+                    g.add(
+                        (
+                            fid,
+                            nt.term(qual["GBQualifier_name"]),
+                            Literal(qual["GBQualifier_value"]),
                         )
-                    except KeyError:
-                        print(
-                            f'In {gb_meta["GBSeq_locus"]}: Could not load: {str(qual)}',
-                            file=sys.stderr,
-                        )
+                    )
