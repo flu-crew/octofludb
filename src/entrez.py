@@ -15,8 +15,8 @@ def get_gbs(gb_ids: List[str]) -> List[dict]:
         attempt = 0
         while attempt < 10:
             try:
-                h = Entrez.efetch(db="nucleotide", id=gb_ids[start:end], retmode="xml")
-                print(f"Downloaded Genbank entries {start+1}-{end}", file=sys.stderr)
+                h = Entrez.efetch(db="nucleotide", id=gb_ids[start:end+1], retmode="xml")
+                print(f"Downloaded Genbank entries {start+1}-{end+1}", file=sys.stderr)
                 x = Entrez.read(h)
                 h.close()
                 time.sleep(1)
