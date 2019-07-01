@@ -5,8 +5,8 @@ Query the graph database with SPARQL files
 
 Usage:
   q79 <sparql_query> [--repo=<repo>] [--header] [--fasta]
-  q79 uniprot <sparql_query>
-  q79 embl <sparql_query>
+  q79 uniprot <sparql_query> [--header] [--fasta]
+  q79 embl <sparql_query> [--header] [--fasta]
 
 Options:
   -h --help     Show this screen.
