@@ -87,13 +87,12 @@ if __name__ == "__main__":
     if args["serialize"]:
         g.serialize(
             destination=args["<serial_filename>"],
-            format=args["--format"],
-            encoding="utf-8",
+            format=args["--format"]
         )
 
     if args["--rdf"]:
         g.serialize(
-            destination=args["--rdf"], format=args["--format"], encoding="utf-8"
+            destination=args["--rdf"], format=args["--format"]
         )
 
     g.close()

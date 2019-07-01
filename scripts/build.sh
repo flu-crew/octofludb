@@ -56,18 +56,21 @@ event="glyco-project"
 log "Loading glycosylation (Todd Davis) project from '$file' as event '$event'"
 time d79 load_excel $file --rdf="ttl/glyco-project.ttl" --event=$event --format="ntriples"
 
+### TODO: push all files to the GraphDB database before running the fetch step
+### Currently I have to manually stop here, go to the GraphDB browser, and
+### upload the influenza_na dataset (at least).
 
-# log "Retrieving all swine Genbank IDs and selected human IDs (saved in gb-id.txt)"
-# time q79 ttl/influenza_na.ttl ~/src/git/d79/turtles/fetch-swine-gids.ttl > swine-ids.txt
-#
-#
-# log "Compiling Genbank records for each of these IDs (this will take a few hours)"
-# time d79 load_gbids swine-ids.txt --rdf="ttl/genbank.ttl" --format="ntriples"
-#
-#
-# file="STATIC/blast.txt"
-# log "Loading blast results from $file"
-# time d79 load_blast "$file" --event="blast_all-against-all" --rdf="ttl/blast_all-against-all.ttl"  --format="ntriples"
+log "Retrieving all swine Genbank IDs and selected human IDs (saved in gb-id.txt)"
+time q79 ~/src/git/d79/turtles/fetch-swine-gids.ttl > swine-ids.txt
+
+
+log "Compiling Genbank records for each of these IDs (this will take a few hours)"
+time d79 load_gbids swine-ids.txt --rdf="ttl/genbank.ttl" --format="ntriples"
+
+
+file="STATIC/blast.txt"
+log "Loading blast results from $file"
+time d79 load_blast "$file" --event="blast_all-against-all" --rdf="ttl/blast_all-against-all.ttl"  --format="ntriples"
 
 log $(date)
 log "done"

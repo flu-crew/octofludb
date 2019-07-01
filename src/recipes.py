@@ -15,8 +15,6 @@ import pandas as pd
 STRAIN_PAT = re.compile("[ABCD]/[^()\[\]]+")
 BARCODE_PAT = re.compile("A0\d{7}|\d+TOSU\d+|EPI_ISL_\d+")
 
-from src.parser import p_date
-
 
 def load_fasta(g, filename, event=None, columns=None, sep="|", fastaout=False):
     entries = parse_fasta(filename, sep=sep)
@@ -137,14 +135,18 @@ def load_factor(
 
 def infer_type(x):
     x_is_a = None
-    if p.parse_match(p_strain, x):
+    if p.parse_match(p.p_strain, x):
         x_is_a = O.strain
-    elif p.parse_match(p_barcode, x):
-        x_is_a = O.barcode
-    elif p.parse_match(p_gb, x):
+    elif p.parse_match(p.p_gisaid_isolate, x):
+        x_is_a = O.gisaid_isolate
+    elif p.parse_match(p.p_A0, x):
+        x_is_a = O.a0
+    elif p.parse_match(p.p_tosu, x):
+        x_is_a = O.tosu
+    elif p.parse_match(p.p_gb, x):
         x_is_a = O.gb
-    elif p.parse_match(p_gisaid_seqid, x):
-        x_is_a = O.gisaid
+    elif p.parse_match(p.p_gisaid_seqid, x):
+        x_is_a = O.gisaid_seqid
     return x_is_a
 
 
