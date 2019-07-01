@@ -1,3 +1,6 @@
+PREFIX usda: <https://github.com/arendsee/flucrew/term/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
 SELECT DISTINCT ?gb
 WHERE {
     ?strain_id usda:host "Swine" .

@@ -1,3 +1,6 @@
+PREFIX usda: <https://github.com/arendsee/flucrew/term/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
 # how many strains have genbank entries?
 SELECT ?gid ?nt
 WHERE {

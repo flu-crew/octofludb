@@ -1,3 +1,6 @@
+PREFIX usda: <https://github.com/arendsee/flucrew/term/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
 # build.py does not download all the genbank files for all the strains (that
 # would be a lot of work) so it is necessary to retrive the genbank ids of
 # interest and then pipe them into `build.py add_gbids`. This query retrieves

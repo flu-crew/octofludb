@@ -1,3 +1,6 @@
+PREFIX usda: <https://github.com/arendsee/flucrew/term/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
 ## Retrieve all the sequences and metadata needed for the glycosylation study
 SELECT ?id ?strain ?host ?date ?source ?glyc ?motif ?prot_id ?aa_seq ## to get the protein sequence
 # SELECT ?id ?strain ?host ?date ?source ?glyc ?motif ?nt_seq

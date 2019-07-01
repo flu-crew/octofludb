@@ -1,5 +1,6 @@
 PREFIX usda: <https://github.com/arendsee/flucrew/term/>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
 SELECT ?strain ?date
 WHERE {
     ?strain_id a usda:strain_id .

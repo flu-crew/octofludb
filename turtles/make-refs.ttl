@@ -1,3 +1,6 @@
+PREFIX usda: <https://github.com/arendsee/flucrew/term/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
 SELECT ?ref_reason ?gb ?strain_name ?subtype ?segment ?ha_clade ?date ?seq
 WHERE {
     ?strain a usda:strain_id .
