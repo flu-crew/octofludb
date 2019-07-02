@@ -1,4 +1,4 @@
-PREFIX usda: <https://github.com/arendsee/flucrew/term/>
+PREFIX f: <https://github.com/arendsee/flucrew/term/>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 
 ## Retrieve all the sequences and metadata needed for the glycosylation study
@@ -6,21 +6,19 @@ SELECT ?id ?strain ?host ?date ?source ?glyc ?motif ?prot_id ?aa_seq ## to get t
 # SELECT ?id ?strain ?host ?date ?source ?glyc ?motif ?nt_seq
 WHERE {
     # get the glycosylation project data
-    ?event a usda:event .
-    ?event foaf:name "glyco-project" .
-    ?event usda:related_to ?i .
+    ?i f:tag "glyco-project" .
     ?i foaf:name ?id .
-    ?i usda:p162_motif ?motif .
-    ?i usda:glyc_possible ?glyc .
+    ?i f:p162_motif ?motif .
+    ?i f:glyc_possible ?glyc .
     # get strain info
-    ?strain_id usda:has_segment ?i .
+    ?strain_id f:has_segment ?i .
     ?strain_id foaf:name ?strain .
-    ?strain_id usda:host ?host .
-    ?strain_id usda:date ?date_str .
+    ?strain_id f:host ?host .
+    ?strain_id f:date ?date_str .
     BIND (STRDT(?date_str, xsd:dateType) as ?date) .
     # get genbank data
-    ?i usda:sequence ?nt_seq .
-    ?i usda:feature/usda:translation ?aa_seq .
-    ?i usda:feature/usda:protein_id ?prot_id .
-    OPTIONAL{ ?i usda:feature/usda:isolation_source ?source . }
+    ?i f:sequence ?nt_seq .
+    ?i f:feature/f:translation ?aa_seq .
+    ?i f:feature/f:protein_id ?prot_id .
+    OPTIONAL{ ?i f:feature/f:isolation_source ?source . }
 }

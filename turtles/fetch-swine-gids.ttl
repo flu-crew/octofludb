@@ -1,10 +1,10 @@
-PREFIX usda: <https://github.com/arendsee/flucrew/term/>
+PREFIX f: <https://github.com/arendsee/flucrew/term/>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 
 SELECT DISTINCT ?gb
 WHERE {
-    ?strain_id usda:host "Swine" .
-    ?strain_id a usda:strain_id .
-    ?strain_id usda:has_segment ?gb_id .
+    ?strain_id f:host "Swine" .
+    ?strain_id a f:strain_id .
+    ?strain_id f:has_segment ?gb_id .
     ?gb_id foaf:name ?gb .
 }

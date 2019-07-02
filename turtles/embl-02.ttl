@@ -9,16 +9,15 @@ PREFIX dbpedia2: <http://dbpedia.org/property/>
 PREFIX dbpedia: <http://dbpedia.org/>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX id: <http://identifiers.org/>
 
 PREFIX obo: <http://purl.obolibrary.org/obo/>
 PREFIX faldo: <http://biohackathon.org/resource/faldo#>
 PREFIX ensembl: <http://rdf.ebi.ac.uk/resource/ensembl/>
-PREFIX biopax: <http://www.biopax.org/release/biopax-level3.owl#>
 
-SELECT ?s ?p ?o {
-    # ?s dc:identifier "ENSAMEP00000000149" .
-    # ?s ?p ?o .
-    ?s rdfs:seeAlso <http://purl.uniprot.org/prosite/PS50297> .
+SELECT DISTINCT ?s ?p ?o {
+    ?s dc:has_identifier ?id .
+    ?s rdf:type id:ncbigene . 
     ?s ?p ?o .
 }
-LIMIT 50
+LIMIT 1000

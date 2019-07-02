@@ -1,14 +1,9 @@
 PREFIX f: <https://github.com/arendsee/flucrew/term/>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-
-SELECT ?strain_name ?gb ?seq
-WHERE {
+select ?gb ?dnaseq where { 
 	?sid a f:strain_id .
-    ?sid foaf:name ?strain_name .
     ?sid f:host "Swine" .
     ?sid f:has_segment ?gid .
     ?gid foaf:name ?gb .
-    ?gid f:encodes "PB1" .
-    ?gid f:dna_sequence ?seq .
+    ?gid f:dna_sequence ?dnaseq .
 }
-LIMIT 10

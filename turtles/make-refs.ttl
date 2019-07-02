@@ -1,18 +1,18 @@
-PREFIX usda: <https://github.com/arendsee/flucrew/term/>
+PREFIX f: <https://github.com/arendsee/flucrew/term/>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 
 SELECT ?ref_reason ?gb ?strain_name ?subtype ?segment ?ha_clade ?date ?seq
 WHERE {
-    ?strain a usda:strain_id .
+    ?strain a f:strain_id .
     ?strain foaf:name ?strain_name .
-    ?strain usda:ref_reason ?ref_reason .
-    ?strain usda:subtype ?subtype .
-    ?strain usda:ha_clade ?ha_clade .
-    ?strain usda:date ?date .
-    ?strain usda:has_segment ?gb .
-    ?gb usda:feature ?fid .
-    ?gb usda:GBSeq_sequence ?seq .
-    ?fid a usda:CDS .
-    ?fid a usda:feature .
-    ?fid usda:gene ?segment .
+    ?strain f:ref_reason ?ref_reason .
+    ?strain f:subtype ?subtype .
+    ?strain f:ha_clade ?ha_clade .
+    ?strain f:date ?date .
+    ?strain f:has_segment ?gb .
+    ?gb f:feature ?fid .
+    ?gb f:GBSeq_sequence ?seq .
+    ?fid a f:CDS .
+    ?fid a f:feature .
+    ?fid f:gene ?segment .
 }

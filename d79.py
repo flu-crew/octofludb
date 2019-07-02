@@ -8,10 +8,10 @@ Usage:
   d79 tag_strains <idlist_filename> <tag> [<db>]  [--rdf=<rdf>] [--format=<format>]
   d79 tag_gb <gblist_filename> <tag> [<db>]  [--rdf=<rdf>] [--format=<format>]
   d79 load_factor <table_filename> <relation> <db> [--key-type=<key>]  [--rdf=<rdf>] [--format=<format>]
-  d79 load_excel <table_filename> [<db>] [--event=<event>] [--rdf=<rdf>] [--format=<format>]
+  d79 load_excel <table_filename> [<db>] [--tag=<tag>] [--rdf=<rdf>] [--format=<format>]
   d79 load_gbids <gb_list_filename> [<db>] [--rdf=<rdf>] [--format=<format>]
-  d79 load_blast <blast_filename> [<db>] [--event=<event>] [--rdf=<rdf>] [--format=<format>]
-  d79 load_fasta <fasta_filename> [<db>] [--event=<event>] [--write-fasta] [--rdf=<rdf>] [--format=<format>] [--columns=<columns>] [--delimiter=<del>]
+  d79 load_blast <blast_filename> [<db>] [--tag=<tag>] [--rdf=<rdf>] [--format=<format>]
+  d79 load_fasta <fasta_filename> [<db>] [--tag=<tag>] [--write-fasta] [--rdf=<rdf>] [--format=<format>] [--columns=<columns>] [--delimiter=<del>]
   d79 serialize <serial_filename> <db> [--format=<format>]
 
 Options:
@@ -64,16 +64,16 @@ if __name__ == "__main__":
                 print(f" > uploaded and committed {len(gb_metas)} ids", file=sys.stderr)
 
     if args["load_excel"]:
-        recipe.load_excel(g, args["<table_filename>"], event=args["--event"])
+        recipe.load_excel(g, args["<table_filename>"], tag=args["--tag"])
 
     if args["load_blast"]:
-        recipe.load_blast(g, args["<blast_filename>"], event=args["--event"])
+        recipe.load_blast(g, args["<blast_filename>"], tag=args["--tag"])
 
     if args["load_fasta"]:
         recipe.load_fasta(
             g,
             args["<fasta_filename>"],
-            event=args["--event"],
+            tag=args["--tag"],
             columns=args["--columns"],
             sep=args["--delimiter"],
             fastaout=args["--write-fasta"]

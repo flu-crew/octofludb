@@ -16,19 +16,15 @@ STRAIN_PAT = re.compile("[ABCD]/[^()\[\]]+")
 BARCODE_PAT = re.compile("A0\d{7}|\d+TOSU\d+|EPI_ISL_\d+")
 
 
-def load_fasta(g, filename, event=None, columns=None, sep="|", fastaout=False):
+def load_fasta(g, filename, tag=None, columns=None, sep="|", fastaout=False):
     entries = parse_fasta(filename, sep=sep)
     if fastaout:
-        print_fasta(entries)
-    return graph_fasta(g, entries)
+        print_fasta(entries, tag=tag)
+    return graph_fasta(g, entries, tag=tag)
 
 
-def load_blast(g, filename, event=None):
+def load_blast(g, filename, tag=None):
     igen = uidgen(base="blast/" + filename, pad=0)
-    if event:
-        event_uri = ne.term(event)
-        g.add((event_uri, P.is_a, O.event))
-        g.add((event_uri, P.name, Literal(event)))
 
     with open(filename, "r") as f:
         for row in f.readlines():
@@ -54,8 +50,8 @@ def load_blast(g, filename, event=None):
 
             huid = next(igen)
 
-            if event:
-                g.add((event_uri, P.related_to, huid))
+            if tag:
+                g.add((hud, P.tag, Literal(tag)))
 
             g.add((huid, P.qseqid, make_uri(qseqid)))
             g.add((huid, P.sseqid, make_uri(sseqid)))
@@ -150,21 +146,16 @@ def infer_type(x):
     return x_is_a
 
 
-def load_excel(g: ConjunctiveGraph, filename: str, event=None) -> None:
+def load_excel(g: ConjunctiveGraph, filename: str, tag=None) -> None:
     d = pd.read_excel(filename)
-
-    if event:
-        event_uri = ne.term(event)
-        g.add((event_uri, P.is_a, O.event))
-        g.add((event_uri, P.name, Literal(event)))
 
     for i in range(d.shape[0]):
         s = d.iloc[i][0]  # subject - the id from the table's key column
         # the subject URI cannot have spaces
         uri = make_uri(s)
 
-        if event:
-            g.add((event_uri, P.related_to, uri))
+        if tag:
+            g.add((uri, P.tag, Literal(tag)))
 
         # associate the ID with its name
         g.add((uri, P.name, Literal(s)))

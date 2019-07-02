@@ -17,8 +17,13 @@ Options:
 
 from SPARQLWrapper import SPARQLWrapper, JSON
 from docopt import docopt
+import os
+import signal
 
 if __name__ == "__main__":
+
+    if os.name is "posix":
+        signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 
     args = docopt(__doc__, version="sparql.sh 0.0.1")
 

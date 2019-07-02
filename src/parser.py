@@ -133,7 +133,7 @@ class RdfBuilder:
             self._buildOne(g, fields, idx=i)
         g.commit()
 
-    def _buildOne(self, g, fields, idx, event=None):
+    def _buildOne(self, g, fields, idx, tag=None):
         # fields :: [(Tag, String)]
 
         # replace unknown tags
@@ -171,9 +171,9 @@ class RdfBuilder:
             # define rdf:type of this field
             if k in self.isa_map:
                 g.add((make_uri(v), P.is_a, self.isa_map[k]))
-            # link top-level fields to the event, if given
-            if event and k in self.relation_sets[0][0]:
-                g.add((make_uri(event), P.related_to, make_uri(v)))
+            # tag top-level fields
+            if tag and k in self.relation_sets[0][0]:
+                g.add((make_uri(v), P.tag, Literal(tag)))
 
         # build other stuff from the whole fields
         for builder in self.sub_builders:

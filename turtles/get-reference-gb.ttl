@@ -1,4 +1,4 @@
-PREFIX usda: <https://github.com/arendsee/flucrew/term/>
+PREFIX f: <https://github.com/arendsee/flucrew/term/>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 
 # build.py does not download all the genbank files for all the strains (that
@@ -7,7 +7,7 @@ PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 # the genbank ids for all strains tagged as swine references.
 SELECT DISTINCT ?gb
 WHERE {
-    ?strain a usda:strain_id .
-    ?strain usda:tag "swine-reference" .
-    ?strain usda:has_segment ?gb .
+    ?strain a f:strain_id .
+    ?strain f:tag "swine-reference" .
+    ?strain f:has_segment ?gb .
 }

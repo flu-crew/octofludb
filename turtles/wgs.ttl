@@ -1,15 +1,19 @@
-PREFIX usda: <https://github.com/arendsee/flucrew/term/>
+PREFIX f: <https://github.com/arendsee/flucrew/term/>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 
-SELECT ?strain ?date
+SELECT (GROUP_CONCAT(DISTINCT ?event; SEPARATOR="|") AS ?events)
+       ?strain ?constellation ?gb ?seq
 WHERE {
-    ?strain_id a usda:strain_id .
-    ?strain_id usda:host "Swine" .
-    ?strain_id foaf:name ?strain .
-    ?strain_id usda:date ?date .
-    # FILTER (STRDT(?date, xsd:dateTime) > "2018-03-01"^^xsd:dateTime) .
-    # ?strain_id usda:has_segment ?gb_id .
-    # ?gb_id a usda:genbank_id .
-    # ?gb_id usda:encodes "HA" .
+    ?sid a f:strain_id .
+    OPTIONAL {
+        ?eid ?p ?sid .
+        ?eid foaf:name ?event .
+    }
+    ?sid f:constellation ?constellation .
+    ?sid f:date ?date .
+    ?sid foaf:name ?strain .
+    ?sid f:h_genbank ?gb .
+    ?gid foaf:name ?gb .
+    ?gid f:dna_sequence ?seq .
 }
-LIMIT 10
+GROUP BY ?strain ?constellation ?gb ?seq

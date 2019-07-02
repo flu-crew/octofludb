@@ -1,11 +1,11 @@
-PREFIX usda: <https://github.com/arendsee/flucrew/term/>
+PREFIX f: <https://github.com/arendsee/flucrew/term/>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 
 # list all strains with a tag
 SELECT ?strain_name ?tag
 WHERE {
-    ?strain a usda:strain_id .
-    ?strain usda:tag ?tag .
+    ?strain a f:strain_id .
+    ?strain f:tag ?tag .
     ?strain foaf:name ?strain_name .
 }
 LIMIT 10

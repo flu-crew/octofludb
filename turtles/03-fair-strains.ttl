@@ -1,0 +1,20 @@
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX f: <https://github.com/arendsee/flucrew/term/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+select DISTINCT ?tag ?strain_name ?gb ?gene ?constellation ?seq {
+    ?sid f:tag ?tag .
+    FILTER (?tag = "fair") .
+    ?sid foaf:name ?strain_name_raw .
+    ?sid f:constellation ?constellation .
+    # ?sid f:date ?date .
+    ?sid ?p2 ?gid .
+    ?gid a f:genbank_id .
+    ?gid foaf:name ?gb .
+    ?gid f:dna_sequence ?seq .
+    ?gid f:encodes ?gene .
+    FILTER (?gene = "HA") .
+    # FILTER (DATATYPE(?date) = xsd:dateTime || DATATYPE(?date) = xsd:date) .
+    # BIND (CONCAT(STR(YEAR(?date)), "/", STR(MONTH(?date)), "/", STR(DAY(?date))) as ?dateStr) .
+    BIND (REPLACE(?strain_name_raw, " ", "_") AS ?strain_name) . 
+}

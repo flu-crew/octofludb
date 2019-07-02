@@ -1,10 +1,10 @@
-PREFIX usda: <https://github.com/arendsee/flucrew/term/>
+PREFIX f: <https://github.com/arendsee/flucrew/term/>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 
 # how many strains have genbank entries?
 SELECT ?gid ?nt
 WHERE {
-    ?gid a usda:genbank_id .
-    ?gid usda:sequence ?nt .
+    ?gid a f:genbank_id .
+    ?gid f:sequence ?nt .
 }
 LIMIT 10000

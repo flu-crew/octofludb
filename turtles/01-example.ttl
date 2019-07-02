@@ -1,13 +1,13 @@
-PREFIX usda: <https://github.com/arendsee/flucrew/term/>
+PREFIX f: <https://github.com/arendsee/flucrew/term/>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 
 # list strains that have both the antiserum and cdc_cvvs tags
 SELECT ?strain
 WHERE {
-    ?strain_id a usda:strain_id .
+    ?strain_id a f:strain_id .
     ?strain_id foaf:name ?strain .
-    ?strain_id usda:tag "antiserum" .
+    ?strain_id f:tag "antiserum" .
     # NOTE: "cdc_cvvs" is deprecated, used "cdc_cvv"
-    ?strain_id usda:tag "cdc_cvv" . 
+    ?strain_id f:tag "cdc_cvv" . 
 }
 LIMIT 10

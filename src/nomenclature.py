@@ -5,7 +5,6 @@ from src.util import padDigit
 
 ni = Namespace("https://github.com/arendsee/flucrew/id/")
 nt = Namespace("https://github.com/arendsee/flucrew/term/")
-ne = Namespace("https://github.com/arendsee/flucrew/event/")
 
 
 def uidgen(base="_", pad=3, start=0):
@@ -56,7 +55,6 @@ class O:
     gisaid_isolate = nt.gisaid_isolate
     feature = nt.feature
     complete_genome = nt.complete_genome
-    event = nt.event
     dnaseq = nt.dna_sequence
     proseq = nt.protein_sequence
     dnamd5 = nt.dna_md5
@@ -71,15 +69,14 @@ class O:
 class P:
     # standard semantic web predicates
     is_a = RDF.type
-    name = FOAF.name
-    knows = FOAF.knows
-    related_to = nt.related_to
-    xref = nt.xref
+    name = RDF.label
+    related_to = nt.hasPart
+    xref = RDFS.seeAlso
     unknown_sequence = nt.unknown_sequence
     unknown_strain = nt.unknown_strain
     unknown_unknown = nt.unknown
     # flu relations
-    has_segment = nt.has_segment
+    has_segment = nt.hasPart
     feature = nt.feature
     tag = nt.tag
     dnaseq = nt.dna_sequence
