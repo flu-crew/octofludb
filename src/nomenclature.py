@@ -1,6 +1,6 @@
 import itertools
 from rdflib import Namespace, URIRef, Literal
-from rdflib.namespace import RDF, FOAF
+from rdflib.namespace import RDF, RDFS
 from src.util import padDigit
 
 ni = Namespace("https://github.com/arendsee/flucrew/id/")
@@ -69,7 +69,7 @@ class O:
 class P:
     # standard semantic web predicates
     is_a = RDF.type
-    name = RDF.label
+    name = RDFS.label
     related_to = nt.hasPart
     xref = RDFS.seeAlso
     unknown_sequence = nt.unknown_sequence

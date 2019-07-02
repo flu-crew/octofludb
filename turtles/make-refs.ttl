@@ -1,10 +1,10 @@
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX f: <https://github.com/arendsee/flucrew/term/>
-PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 
 SELECT ?ref_reason ?gb ?strain_name ?subtype ?segment ?ha_clade ?date ?seq
 WHERE {
     ?strain a f:strain_id .
-    ?strain foaf:name ?strain_name .
+    ?strain rdfs:label ?strain_name .
     ?strain f:ref_reason ?ref_reason .
     ?strain f:subtype ?subtype .
     ?strain f:ha_clade ?ha_clade .

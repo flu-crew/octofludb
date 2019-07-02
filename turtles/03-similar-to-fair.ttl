@@ -1,6 +1,5 @@
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX f: <https://github.com/arendsee/flucrew/term/>
-PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 
 select DISTINCT ?strain_2 ?sseqid_name ?gene ?dateStr ?constellation ?seq {
     # identify related sequences
@@ -13,15 +12,15 @@ select DISTINCT ?strain_2 ?sseqid_name ?gene ?dateStr ?constellation ?seq {
     ?sid2 a f:strain_id .
     ?sid1 f:has_segment ?qseqid .
     ?sid2 f:has_segment ?sseqid .
-    ?sid1 foaf:name ?s1 .
-    ?sid2 foaf:name ?s2 .
+    ?sid1 rdfs:label ?s1 .
+    ?sid2 rdfs:label ?s2 .
     # require one strain be one of the fair sequences
     ?sid1 f:tag "fair" .
     # and require the other strain not be one of the fair sequences
     FILTER NOT EXISTS { ?eid ?p ?sid2 }
     # link to the sequences for the non-fair strains
     ?sseqid f:dna_sequence ?seq .
-    ?sseqid foaf:name ?sseqid_name .
+    ?sseqid rdfs:label ?sseqid_name .
     ?sseqid f:encodes ?gene .
     ?sid2 f:date ?date .
     ?sid2 f:constellation ?constellation .

@@ -1,8 +1,8 @@
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX f: <https://github.com/arendsee/flucrew/term/>
-PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 
 SELECT DISTINCT ?gb
 WHERE {
-    ?gb_id foaf:name ?gb .
+    ?gb_id rdfs:label ?gb .
     ?gb_id f:tag "glyco-project" .
 }

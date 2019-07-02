@@ -1,19 +1,19 @@
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX f: <https://github.com/arendsee/flucrew/term/>
-PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 
 SELECT ?id ?strain ?year
 WHERE {
     ?i f:tag "fair" .
-    ?i foaf:name ?id .
+    ?i rdfs:label ?id .
     ?i f:date ?date .
     BIND (YEAR(?date) AS ?year) .
     FILTER (?year = 2017) .
     # OPTIONAL{
     #     ?strain_id f:xref ?i  .
     #     ?strain_id a f:strain_id .
-    #     ?strain_id foaf:name ?strain .
+    #     ?strain_id rdfs:label ?strain .
     #     ?strain_id f:xref ?j .
     #     ?j a f:a0_id .
-    #     ?j foaf:name ?a0 .
+    #     ?j rdfs:label ?a0 .
     # }
 }

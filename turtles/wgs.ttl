@@ -1,5 +1,5 @@
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX f: <https://github.com/arendsee/flucrew/term/>
-PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 
 SELECT (GROUP_CONCAT(DISTINCT ?event; SEPARATOR="|") AS ?events)
        ?strain ?constellation ?gb ?seq
@@ -7,13 +7,13 @@ WHERE {
     ?sid a f:strain_id .
     OPTIONAL {
         ?eid ?p ?sid .
-        ?eid foaf:name ?event .
+        ?eid rdfs:label ?event .
     }
     ?sid f:constellation ?constellation .
     ?sid f:date ?date .
-    ?sid foaf:name ?strain .
+    ?sid rdfs:label ?strain .
     ?sid f:h_genbank ?gb .
-    ?gid foaf:name ?gb .
+    ?gid rdfs:label ?gb .
     ?gid f:dna_sequence ?seq .
 }
 GROUP BY ?strain ?constellation ?gb ?seq

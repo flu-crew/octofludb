@@ -1,5 +1,5 @@
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX f: <https://github.com/arendsee/flucrew/term/>
-PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 
 ## Retrieve all the sequences and metadata needed for the glycosylation study
 SELECT ?id ?strain ?host ?date ?source ?glyc ?motif ?prot_id ?aa_seq ## to get the protein sequence
@@ -7,12 +7,12 @@ SELECT ?id ?strain ?host ?date ?source ?glyc ?motif ?prot_id ?aa_seq ## to get t
 WHERE {
     # get the glycosylation project data
     ?i f:tag "glyco-project" .
-    ?i foaf:name ?id .
+    ?i rdfs:label ?id .
     ?i f:p162_motif ?motif .
     ?i f:glyc_possible ?glyc .
     # get strain info
     ?strain_id f:has_segment ?i .
-    ?strain_id foaf:name ?strain .
+    ?strain_id rdfs:label ?strain .
     ?strain_id f:host ?host .
     ?strain_id f:date ?date_str .
     BIND (STRDT(?date_str, xsd:dateType) as ?date) .

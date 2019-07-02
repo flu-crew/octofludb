@@ -1,13 +1,13 @@
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX f: <https://github.com/arendsee/flucrew/term/>
-PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 
 SELECT ?strain_name ?gb ?seq
 WHERE {
 	?sid a f:strain_id .
-    ?sid foaf:name ?strain_name .
+    ?sid rdfs:label ?strain_name .
     ?sid f:host "Swine" .
     ?sid f:has_segment ?gid .
-    ?gid foaf:name ?gb .
+    ?gid rdfs:label ?gb .
     ?gid f:encodes "PB1" .
     ?gid f:dna_sequence ?seq .
 }

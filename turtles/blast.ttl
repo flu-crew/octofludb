@@ -1,20 +1,20 @@
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX f: <https://github.com/arendsee/flucrew/term/>
-PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 
 SELECT (GROUP_CONCAT(DISTINCT ?tag; SEPARATOR="|") AS ?tags)
        ?strain ?constellation ?gb ?seq
 WHERE {
-    ?eid foaf:name "fair" .
+    ?eid rdfs:label "fair" .
     ?eid ?p ?fair_sid .
     ?fair_sid a f:strain_id .
     ?fair_sid f:h_genbank ?fair_ha .
-    ?fair_gid foaf:name ?fair_ha .
+    ?fair_gid rdfs:label ?fair_ha .
 
     ?nonfair_sid a f:strain_id .
     FILTER NOT EXISTS {
         ?eid ?p ?nonfair_sid . 
     }
     ?nonfair_sid f:h_genbank ?nonfair_ha .
-    ?nonfair_gid foaf:name ?nonfair_ha .
+    ?nonfair_gid rdfs:label ?nonfair_ha .
 }
 GROUP BY ?strain ?constellation ?gb ?seq
