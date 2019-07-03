@@ -24,7 +24,7 @@ def strip(x):
 
 def compose(*args):
     def composition(x):
-        for f in args:
+        for f in reversed(args):
             x = f(x)
         return x
 

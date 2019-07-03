@@ -1,18 +1,11 @@
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX f: <https://github.com/arendsee/flucrew/term/>
 
-:Strain a rdfs:Class .
+f:strain a rdfs:Class .
 
-:GisaidIsolate rdfs:subClassOf :StrainId .
-:A0 rdfs:subClassOf :StrainId .
-:Tosu rdfs:subClassOf :StrainId .
-:StrainName rdfs:subClassOf :StrainId .
+f:sequence a rdfs:Class .
+f:dna_sequence a rdfs:Class .
+f:protein_sequence a rdfs:Class .
 
-:GisaidId rdfs:subClassOf :SegmentId .
-:GenBankNucId rdfs:subClassOf :SegmentId .
-
-:GenBankProId rdfs:subClassOf :ProteinId .
-
-
-:identifies a rdf:Property .
-
-:xref a rdf:Property .
+f:dna_sequence rdfs:subClassOf f:sequence
+f:protein_sequence rdfs:subClassOf f:sequence

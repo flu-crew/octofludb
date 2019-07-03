@@ -5,7 +5,7 @@ from typing import List
 
 import src.util as U
 
-from src.nomenclature import P, O, make_uri, nt, make_literal, Literal
+from src.nomenclature import P, O, make_uri, make_literal
 
 import src.domain.geography as geo
 from src.domain.date import p_year, p_longyear, p_month, p_day, p_date
@@ -102,7 +102,7 @@ p_usa_state = wordset(
     label="usa_state",
 )
 
-RelationSet = namedtuple("RelationSet", ["subjects", "relations", "objectify", "default"])
+RelationSet = namedtuple("RelationSet", ["subjects", "relations", "generators", "objectify", "default"])
 
 class RdfBuilder:
     def __init__(
@@ -113,7 +113,8 @@ class RdfBuilder:
         isa_map={},
         munge_map={},  # (<field>, <function>), munge <field> with <function> (e.g. to correct spelling)
         sub_builders=[],  # (<field>, <function>), create new triples from <field> using <function>,
-        unknown_tag="unknown"
+        unknown_tag="unknown",
+        tag=None
         # e.g., to parse host name from a strain name.
     ):
         self.make_name = make_name
@@ -122,6 +123,7 @@ class RdfBuilder:
         self.sub_builders = sub_builders
         self.isa_map = isa_map
         self.unknown_tag=unknown_tag
+        self.tag=tag
         # e.g., to parse host name from a strain name.
 
     def build(self, g, fieldss):
@@ -133,7 +135,7 @@ class RdfBuilder:
             self._buildOne(g, fields, idx=i)
         g.commit()
 
-    def _buildOne(self, g, fields, idx, tag=None):
+    def _buildOne(self, g, fields, idx):
         # fields :: [(Tag, String)]
 
         # replace unknown tags
@@ -152,10 +154,21 @@ class RdfBuilder:
         # make URIs for each relation level
         for r in self.relation_sets:
             if not r.subjects & fieldSet:
-                uri = "e" + str(idx) + "_" + str(hash(str(fields)))
-                fields.append((r.default, uri))
-                r.subjects.add(r.default)
-                fieldSet.add(r.default)
+                genfield = set(r.generators.keys()) & fieldSet
+                if genfield:
+                    for (k,v) in fields:
+                        if k in genfield:
+                            default = r.generators[k][0]
+                            uri = r.generators[k][1](v)
+                            fields.append((default, uri))
+                            r.subjects.add(default)
+                            fieldSet.add(default)
+                else:
+                    uri = "e" + str(idx) + "_" + str(hash(str(fields)))
+                    default = r.default
+                    fields.append((r.default, uri))
+                    r.subjects.add(r.default)
+                    fieldSet.add(r.default)
 
         for k,v in fields:
             # make hierarchical relations
@@ -165,15 +178,15 @@ class RdfBuilder:
                         if k_ in r.relations:
                             g.add((make_uri(v), r.relations[k_], r.objectify[k_](v_)))
 
-            # set foaf:name for this field
+            # set rdfs:label for this field
             if k in self.make_name:
-                g.add((make_uri(v), P.name, Literal(self.make_name[k](v))))
-            # define rdf:type of this field
+                g.add((make_uri(v), P.name, make_literal(self.make_name[k](v), False)))
+            #  define rdf:type of this field
             if k in self.isa_map:
                 g.add((make_uri(v), P.is_a, self.isa_map[k]))
             # tag top-level fields
-            if tag and k in self.relation_sets[0][0]:
-                g.add((make_uri(v), P.tag, Literal(tag)))
+            if self.tag and k in self.relation_sets[0][0]:
+                g.add((make_uri(v), P.tag, make_literal(self.tag, False)))
 
         # build other stuff from the whole fields
         for builder in self.sub_builders:
@@ -200,32 +213,7 @@ def groupSortToOrderedDict(xs):
     
     return OrderedDict(ys)
 
-
-fastaHeaderFieldParsers = (
-    # strain ids
-    ("A0", p_A0),
-    ("tosu", p_tosu),
-    ("gisaid_isolate", p_gisaid_isolate),
-    ("strain", p_strain),
-    # sequence ids
-    ("gb", p_gb),
-    ("gisaid_seqid", p_gisaid_seqid),
-    # other flu info
-    ("global_clade", p_global_clade),
-    ("constellation", p_constellation),
-    #
-    ("host", p_host),
-    ("date", p_date.parsecmap(str)),
-    ("subtype", p_HANA),
-    ("segment_name", p_segment),
-    ("state", p_usa_state),  # Pennslyvania (PA) conflicts with the segment PA
-    ("country", p_country),  # country Turkey conflicts with the host
-    ("segment_number", p_segment_number),
-    ("proseq", p_proseq),
-    ("dnaseq", p_dnaseq),
-)
-
-def guess_fields(fieldss: List[List[str]], parserSet=fastaHeaderFieldParsers):
+def guess_fields(fieldss: List[List[str]], parserSet=None):
     for fields in fieldss:
         xs = list()
         for field in fields:

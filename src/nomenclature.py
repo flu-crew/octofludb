@@ -1,10 +1,10 @@
 import itertools
-from rdflib import Namespace, URIRef, Literal
-from rdflib.namespace import RDF, RDFS
+import rdflib
+from rdflib.namespace import RDF, RDFS, OWL
 from src.util import padDigit
 
-ni = Namespace("https://github.com/arendsee/flucrew/id/")
-nt = Namespace("https://github.com/arendsee/flucrew/term/")
+ni = rdflib.Namespace("https://flucrew.org/id/")
+nt = rdflib.Namespace("https://flucrew.org/term/")
 
 
 def uidgen(base="_", pad=3, start=0):
@@ -14,16 +14,22 @@ def uidgen(base="_", pad=3, start=0):
 
 
 def make_uri(x):
-    return URIRef(str(x).replace(" ", "_"))
+    if isinstance(x, rdflib.term.URIRef):
+        return x
+    else:
+        return ni.term(x.lower().strip().replace(" ", "_"))
 
-def make_literal(x):
+def make_property(x):
+    return nt.term(x)
+
+def make_literal(x, infer=True):
+    if not infer:
+        return rdflib.Literal(x)
     try:
         # Can x be a date?
-        x_lit = Literal(str(p_date.parse(x)), datatype=XSD.date)
+        return rdflib.Literal(str(p_date.parse(x)), datatype=XSD.date)
     except:
-        # If not, then make it a normal literal
-        x_lit = Literal(x)
-    return x_lit
+        return rdflib.Literal(x)
 
 # # Triples to add:
 # (C.strainID rdf:type rdfs:Class)
@@ -46,22 +52,11 @@ class C:
 
 
 class O:
-    strain = nt.strain_id  # unique key for the strain
-    gb = nt.genbank_id
-    barcode = nt.barcode
-    a0 = nt.A0
-    tosu = nt.tosu
-    gisaid_seqid = nt.gisaid_seqid
-    gisaid_isolate = nt.gisaid_isolate
-    feature = nt.feature
-    complete_genome = nt.complete_genome
+    strain = nt.strain  # unique key for the strain
+    sequence = nt.sequence
     dnaseq = nt.dna_sequence
     proseq = nt.protein_sequence
-    dnamd5 = nt.dna_md5
-    promd5 = nt.protein_md5
-    global_clade = nt.global_clade
-    constellation = nt.constellation
-    unknown_sequence = nt.unknown_sequence
+    feature = nt.feature
     unknown_strain = nt.unknown_strain
     unknown_unknown = nt.unknown
 
@@ -70,20 +65,21 @@ class P:
     # standard semantic web predicates
     is_a = RDF.type
     name = RDFS.label
-    related_to = nt.hasPart
     xref = RDFS.seeAlso
-    unknown_sequence = nt.unknown_sequence
-    unknown_strain = nt.unknown_strain
+    sameAs = OWL.sameAs
+    hasPart = nt.hasPart
     unknown_unknown = nt.unknown
+    chksum = nt.chksum
     # flu relations
-    has_segment = nt.hasPart
     feature = nt.feature
     tag = nt.tag
     dnaseq = nt.dna_sequence
     proseq = nt.protein_sequence
-    dnamd5 = nt.dna_md5
-    aamd5 = nt.aa_md5
-    protein_md5 = nt.protein_md5
+    global_clade = nt.global_clade
+    constellation = nt.constellation
+    segment_name = nt.segment_name
+    segment_number = nt.segment_number
+    unknown_strain = nt.unknown_strain
     # blast predicates
     qseqid = nt.qseqid
     sseqid = nt.sseqid
@@ -97,9 +93,12 @@ class P:
     send = nt.send
     evalue = nt.evalue
     bitscore = nt.bitscore
+    # labels for sequences
+    gb = nt.genbank_id
+    # labels for strains
+    strain_name = nt.strain_name
+    barcode = nt.barcode 
     # the local curated data
-    strain_alt = nt.strain_id_alt  # alternative strain IDs
-    gb = nt.genbank_id  # an optional unique key for the segment
     ref_reason = nt.ref_reason
     subtype = nt.subtype
     segment = nt.segment
@@ -108,10 +107,11 @@ class P:
     ha_clade = nt.ha_clade
     date = nt.date
     host = nt.host
-    encodes = nt.encodes
-    # ----------------------------------------
-    # gb/*
-    # ----------------------------------------
+    encodes = nt.gene
+    # -----------------------------------------------------------------------
+    # gb/*  -- I need to start generalizing away from this, since this data
+    # does not come only from genebank.
+    # -----------------------------------------------------------------------
     gb_locus = nt.locus  # unique key
     gb_length = nt.length
     gb_strandedness = nt.strandedness
@@ -129,9 +129,9 @@ class P:
     gb_taxonomy = nt.taxonomy
     gb_references = nt.references
     gb_sequence = nt.sequence
-    # ----------------------------------------
+    # -----------------------------------------------------------------------
     # gb/feature/*
-    # ----------------------------------------
+    # -----------------------------------------------------------------------
     # a set of features associated with this particular strain
     gb_key = nt.key  # feature type (source | gene | CDS | misc_feature)
     gb_location = nt.location

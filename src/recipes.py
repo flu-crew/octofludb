@@ -2,7 +2,7 @@ import sys
 import math
 from rdflib import ConjunctiveGraph, Literal
 import src.domain.flu as flu
-from src.nomenclature import P, O, nt, ne, make_uri, uidgen, make_literal
+from src.nomenclature import P, O, uidgen, make_uri, make_literal, make_property
 from src.util import replace, fixLookup, make_maybe_add
 import src.parser as p
 from src.fasta import parse_fasta, print_fasta, graph_fasta
@@ -24,7 +24,7 @@ def load_fasta(g, filename, tag=None, columns=None, sep="|", fastaout=False):
 
 
 def load_blast(g, filename, tag=None):
-    igen = uidgen(base="blast/" + filename, pad=0)
+    igen = uidgen(base=f"blast/{filename}", pad=0)
 
     with open(filename, "r") as f:
         for row in f.readlines():
@@ -51,7 +51,7 @@ def load_blast(g, filename, tag=None):
             huid = next(igen)
 
             if tag:
-                g.add((hud, P.tag, Literal(tag)))
+                g.add((huid, P.tag, Literal(tag)))
 
             g.add((huid, P.qseqid, make_uri(qseqid)))
             g.add((huid, P.sseqid, make_uri(sseqid)))
@@ -69,63 +69,11 @@ def load_blast(g, filename, tag=None):
     g.commit()
 
 
-def add_seq_meta_triples(g, meta):
-
-    strain_uid = make_uri(meta["strain"])
-
-    g.add((strain_uid, P.has_segment, make_uri(meta["gb"])))
-    g.add((strain_uid, P.is_a, O.strain))
-    g.add((strain_uid, P.name, Literal(str(meta["strain"]))))
-
-    maybe_add = make_maybe_add(g, meta, strain_uid)
-    maybe_add(P.ref_reason, "ref_reason")
-    maybe_add(P.subtype, "subtype")
-    maybe_add(P.country, "country")
-    maybe_add(P.state, "state")
-    maybe_add(P.ha_clade, "ha_clade")
-    maybe_add(P.date, "date")
-
-
-def tag_strains(g: ConjunctiveGraph, filename: str, tag: str) -> None:
+def tag(g: ConjunctiveGraph, filename: str, tag: str) -> None:
+    print(filename)
     with open(filename, "r") as f:
-        for strain in (s.strip() for s in f.readlines()):
-            uri = make_uri(strain)
-            g.add((uri, P.tag, Literal(tag)))
-            g.add((uri, P.is_a, O.strain))
-            g.add((uri, P.name, Literal(strain)))
-    g.commit()
-
-
-def tag_gb(g: ConjunctiveGraph, filename: str, tag: str) -> None:
-    with open(filename, "r") as f:
-        for gb in (s.strip() for s in f.readlines()):
-            uri = make_uri(gb)
-            g.add((uri, P.tag, Literal(tag)))
-            g.add((uri, P.is_a, O.gb))
-            g.add((uri, P.name, Literal(gb)))
-    g.commit()
-
-
-def load_factor(
-    g: ConjunctiveGraph, table_filename: str, relation: str, key_type: str = "strain"
-) -> None:
-    if key_type == "strain":
-        o = O.strain
-    elif key_type == "barcode":
-        o = O.barcode
-    elif key_type == "gisaid":
-        o = O.gisaid
-    elif key_type == "gb":
-        o = O.gb
-    else:
-        sys.exit("please choose key_type from strain, barcode, and gb")
-    with open(table_filename, "r") as f:
-        for (key, val) in (
-            (k.strip(), v.strip()) for k, v in f.readlines().split("\t")
-        ):
-            uri = make_uri(key)
-            g.add((uri, nt.term(relation), Literal(tag)))
-            g.add((uri, nt.is_a, o))
+        for identifier in (s.strip() for s in f.readlines()):
+            g.add((make_uri(identifier), P.tag, Literal(tag)))
     g.commit()
 
 
@@ -134,15 +82,15 @@ def infer_type(x):
     if p.parse_match(p.p_strain, x):
         x_is_a = O.strain
     elif p.parse_match(p.p_gisaid_isolate, x):
-        x_is_a = O.gisaid_isolate
+        x_is_a = O.strain
     elif p.parse_match(p.p_A0, x):
-        x_is_a = O.a0
+        x_is_a = O.strain
     elif p.parse_match(p.p_tosu, x):
-        x_is_a = O.tosu
+        x_is_a = O.sequence
     elif p.parse_match(p.p_gb, x):
-        x_is_a = O.gb
+        x_is_a = O.sequence
     elif p.parse_match(p.p_gisaid_seqid, x):
-        x_is_a = O.gisaid_seqid
+        x_is_a = O.sequence
     return x_is_a
 
 
@@ -178,7 +126,7 @@ def load_excel(g: ConjunctiveGraph, filename: str, tag=None) -> None:
             #  print(f'{type(o)} {str(o)} {type(o) == "float" and math.isnan(o)}')
             #  if not (o == None or (type(o) == "float" and math.isnan(o))):
             if not (o == None or o != o):
-                g.add((uri, nt.term(p), make_literal(o)))
+                g.add((uri, make_property(p), make_literal(o)))
 
     g.commit()
 
@@ -202,8 +150,7 @@ def load_influenza_na(g: ConjunctiveGraph, filename: str) -> None:
                 )
 
             gb_uid = make_uri(field["gb"])
-            g.add((gb_uid, P.is_a, O.gb))
-            g.add((gb_uid, P.name, Literal(field["gb"])))
+            g.add((gb_uid, P.gb, Literal(field["gb"])))
             g.add((gb_uid, P.segment, Literal(field["segment"])))
             g.add((gb_uid, P.encodes, Literal(flu.SEGMENT[int(els[2]) - 1])))
             if is_complete:
@@ -228,7 +175,7 @@ def load_influenza_na(g: ConjunctiveGraph, filename: str) -> None:
 
                 strain_uid = make_uri(strain)
                 maybe_add = make_maybe_add(g, field, strain_uid)
-                g.add((strain_uid, P.has_segment, gb_uid))
+                g.add((strain_uid, P.hasPart, gb_uid))
                 g.add((strain_uid, P.is_a, O.strain))
                 g.add((strain_uid, P.name, Literal(strain)))
 
@@ -236,10 +183,8 @@ def load_influenza_na(g: ConjunctiveGraph, filename: str) -> None:
                 if barcode_match:
                     barcode_name = barcode_match.group(0)
                     barcode_uid = make_uri(barcode_name)
-                    g.add((strain_uid, P.xref, barcode_uid))
-                    g.add((barcode_uid, P.xref, strain_uid))
-                    g.add((barcode_uid, P.is_a, O.barcode))
-                    g.add((barcode_uid, P.name, Literal(barcode_uid)))
+                    g.add((strain_uid, P.barcode, Literal(barcode_name)))
+                    g.add((barcode_uid, P.sameAs, strain_uid))
 
                 maybe_add = make_maybe_add(g, field, strain_uid)
                 maybe_add(P.host, "host")

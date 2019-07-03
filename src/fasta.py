@@ -1,37 +1,66 @@
-import parsec as p
+import parsec
 
-from src.parser import guess_fields, resolve, RdfBuilder, RelationSet
+import src.parser as parser
 import src.util as U
-from src.nomenclature import P, O, make_uri, nt, make_literal, URIRef, Literal
+from rdflib import Literal
+from src.hash import chksum
+from src.nomenclature import P, O, make_uri, make_literal
 
+fastaHeaderFieldParsers = (
+    # strain ids
+    ("A0", parser.p_A0),
+    ("tosu", parser.p_tosu),
+    ("gisaid_isolate", parser.p_gisaid_isolate),
+    ("strain", parser.p_strain),
+    # sequence ids
+    ("gb", parser.p_gb),
+    ("gisaid_seqid", parser.p_gisaid_seqid),
+    # other flu info
+    ("global_clade", parser.p_global_clade),
+    ("constellation", parser.p_constellation),
+    #
+    ("host", parser.p_host),
+    ("date", parser.p_date.parsecmap(str)),
+    ("subtype", parser.p_HANA),
+    ("segment_name", parser.p_segment),
+    ("state", parser.p_usa_state),  # Pennslyvania (PA) conflicts with the segment PA
+    ("country", parser.p_country),  # country Turkey conflicts with the host
+    ("segment_number", parser.p_segment_number),
+    ("dnaseq", parser.p_dnaseq),
+    ("proseq", parser.p_proseq),
+)
 
 def parse_fasta(filename, sep="|"):
-    p_header = p.string(">") >> p.regex(".*") << p.spaces()
+    p_header = parsec.string(">") >> parsec.regex(".*") << parsec.spaces()
     p_seq = (
-        p.sepBy1(p.regex("[^>\n]*"), sep=p.regex("[\r\n\t ]+")).parsecmap(U.concat)
-        << p.spaces()
+        parsec.sepBy1(parsec.regex("[^>\n]*"), sep=parsec.regex("[\r\n\t ]+")).parsecmap(U.concat)
+        << parsec.spaces()
     )
     p_entry = p_header + p_seq
-    p_fasta = p.many1(p_entry)
+    p_fasta = parsec.many1(p_entry)
 
     with open(filename, "r") as f:
         entries = p_fasta.parse(f.read())
         row = (h.split(sep) + [q] for (h, q) in entries)
-        return resolve(guess_fields(row))
+        return parser.resolve(parser.guess_fields(row, parserSet=fastaHeaderFieldParsers))
 
-def print_fasta(fields):
+def print_fasta(fields, tag=None, sep="|"):
+    if tag:
+        tag += sep
+    else:
+        tag = ""
     for entry in fields:
-        header = "|".join(
+        header = sep.join(
             (
                 f"{str(entry[i][0])}={str(entry[i][1])}"
                 for i in range(len(entry) - 1)
             )
         )
         seq = entry[-1][1]
-        print(">" + header)
+        print(">" + tag + header)
         print(seq)
 
-def graph_fasta(g, fieldss):
+def graph_fasta(g, fieldss, tag=None):
   # - Create foaf:name links as needed, munging as needed
   fastaName = {
       "A0": U.upper,
@@ -45,20 +74,21 @@ def graph_fasta(g, fieldss):
   # - Link strain ID to each strain property
   # - Link segment ID to each segment property
   fastaRelationSets = [
-      RelationSet (
+      parser.RelationSet (
           {"strain", "A0", "tosu", "gisaid_isolate"},
           {
-              "global_clade" : nt.global_clade,
-              "constellation" : nt.constellation,
-              "host" : nt.host,
-              "date" : nt.date,
-              "state" : nt.state,
-              "country" : nt.country,
-              "subtype" : nt.subtype,
-              "gb" : P.segment,
-              "gisaid_seqid" : P.segment,
-              "unknown_sequence" : P.unknown_sequence,
+              "global_clade" : P.global_clade,
+              "constellation" : P.constellation,
+              "host" : P.host,
+              "date" : P.date,
+              "state" : P.state,
+              "country" : P.country,
+              "subtype" : P.subtype,
+              "gb" : P.hasPart,
+              "gisaid_seqid" : P.hasPart,
+              "dnaseq" : P.hasPart,
           },
+          {},
           {
               "global_clade" : Literal,
               "constellation" : Literal,
@@ -67,21 +97,22 @@ def graph_fasta(g, fieldss):
               "state" : Literal,
               "country" : Literal,
               "subtype" : Literal,
-              "gb" : URIRef,
-              "gisaid_seqid" : URIRef,
-              "unknown_sequence" : URIRef,
+              "gb" : make_uri,
+              "gisaid_seqid" : make_uri,
+              "dnaseq" : U.compose(make_uri, chksum),
           },
           "unknown_strain",
       ),
-      RelationSet (
+      parser.RelationSet (
           {"gb", "gisaid_seqid"},
           {
-              "segment_name" : nt.segment_name,
-              "segment_number" : nt.segment_number,
-              "proseq" : O.proseq,
-              "dnaseq" : O.dnaseq,
-              "unknown" : O.unknown_unknown
+              "segment_name" : P.segment_name,
+              "segment_number" : P.segment_number,
+              "proseq" : P.proseq,
+              "dnaseq" : P.dnaseq,
+              "unknown" : P.unknown_unknown
           },
+          {"dnaseq" : ("md5", U.compose(make_uri, chksum))},
           {
               "segment_name" : Literal,
               "segment_number" : Literal,
@@ -95,28 +126,45 @@ def graph_fasta(g, fieldss):
 
   # - Specify is_a relationships
   fastaIsaMap = {
-      "A0": O.a0,
-      "tosu": O.tosu,
-      "gisaid_isolate": O.gisaid_isolate,
+      "A0": O.strain,
+      "tosu": O.strain,
+      "gisaid_isolate": O.strain,
       "strain": O.strain,
-      "gb": O.gb,
-      "gisaid_seqid": O.gisaid_seqid,
-      "unknown_strain": O.unknown_strain,
-      "unknown_sequence": O.unknown_sequence,
+      "gb": O.sequence,
+      "gisaid_seqid": O.sequence,
+      "unknown_strain": O.sequence,
+      "unknown_sequence": O.sequence,
   }
 
   fastaMungeMap = {"date": make_literal, "host": U.lower}
 
-  # - Generate additional triples
-  fastaGenerateAdditional = []
+  def generateChksums(g, fields):
+      for (t,v) in fields:
+          if t == "proseq":
+              uri = make_uri(chksum(v))
+              g.add((uri, P.is_a, O.proseq))
+              for (t2,v2) in fields:
+                  if t2 in {"gb", "gisaid_seqid"}:
+                      g.add((make_uri(v2), P.hasPart, uri))
+          if t == "dnaseq":
+              uri = make_uri(chksum(v))
+              g.add((uri, P.is_a, O.dnaseq))
+              for (t2,v2) in fields:
+                  if t2 in {"gb", "gisaid_seqid"}:
+                      g.add((make_uri(v2), P.sameAs, uri))
 
-  fluRdfBuilder = RdfBuilder(
+
+  # - Generate additional triples
+  fastaGenerateAdditional = [generateChksums]
+
+  fluRdfBuilder = parser.RdfBuilder(
       make_name=fastaName,
       relation_sets=fastaRelationSets,
       isa_map=fastaIsaMap,
       munge_map=fastaMungeMap,
       sub_builders=fastaGenerateAdditional,
-      unknown_tag="unknown"
+      unknown_tag="unknown",
+      tag=tag
   )
 
   fluRdfBuilder.build(g, fieldss)

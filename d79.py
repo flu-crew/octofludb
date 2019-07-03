@@ -5,9 +5,7 @@ Build a local SPARQL database.
 
 Usage:
   d79 load_strains <table_filename> [<db>] [--rdf=<rdf>] [--format=<format>]
-  d79 tag_strains <idlist_filename> <tag> [<db>]  [--rdf=<rdf>] [--format=<format>]
-  d79 tag_gb <gblist_filename> <tag> [<db>]  [--rdf=<rdf>] [--format=<format>]
-  d79 load_factor <table_filename> <relation> <db> [--key-type=<key>]  [--rdf=<rdf>] [--format=<format>]
+  d79 tag <idlist_filename> <tag> [<db>]  [--rdf=<rdf>] [--format=<format>]
   d79 load_excel <table_filename> [<db>] [--tag=<tag>] [--rdf=<rdf>] [--format=<format>]
   d79 load_gbids <gb_list_filename> [<db>] [--rdf=<rdf>] [--format=<format>]
   d79 load_blast <blast_filename> [<db>] [--tag=<tag>] [--rdf=<rdf>] [--format=<format>]
@@ -50,8 +48,8 @@ if __name__ == "__main__":
         # (gb | host | ? | subtype | date | ? | "Influenza A virus (<strain>(<subtype>))" | ...)
         recipe.load_influenza_na(g, args["<table_filename>"])
 
-    if args["tag_strains"]:
-        recipe.tag_strains(g, args["<idlist_filename>"], args["<tag>"])
+    if args["tag"]:
+        recipe.tag(g, args["<idlist_filename>"], args["<tag>"])
 
     if args["load_gbids"]:
         with open(args["<gb_list_filename>"], "r") as f:
@@ -77,11 +75,6 @@ if __name__ == "__main__":
             columns=args["--columns"],
             sep=args["--delimiter"],
             fastaout=args["--write-fasta"]
-        )
-
-    if args["load_factor"]:
-        recipe.load_factor(
-            g, args["<table_filename>"], args["<relation>"], args["--key-type"]
         )
 
     if args["serialize"]:
