@@ -1,5 +1,5 @@
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX f: <https://github.com/arendsee/flucrew/term/>
+PREFIX f: <https://flucrew.org/term/>
 
 # build.py does not download all the genbank files for all the strains (that
 # would be a lot of work) so it is necessary to retrive the genbank ids of

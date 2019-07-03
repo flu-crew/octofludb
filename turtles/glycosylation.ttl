@@ -1,5 +1,5 @@
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX f: <https://github.com/arendsee/flucrew/term/>
+PREFIX f: <https://flucrew.org/term/>
 
 ## Retrieve all the sequences and metadata needed for the glycosylation study
 SELECT ?id ?strain ?host ?date ?source ?glyc ?motif ?prot_id ?aa_seq ## to get the protein sequence

@@ -1,5 +1,5 @@
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX f: <https://github.com/arendsee/flucrew/term/>
+PREFIX f: <https://flucrew.org/term/>
 
 select ?gb ?dnaseq where { 
 	?sid a f:strain_id .

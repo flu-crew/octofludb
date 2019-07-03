@@ -1,10 +1,10 @@
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX f: <https://github.com/arendsee/flucrew/term/>
+PREFIX f: <https://flucrew.org/term/>
 
 SELECT DISTINCT ?gb
 WHERE {
     ?strain_id f:host "Swine" .
-    ?strain_id a f:strain_id .
-    ?strain_id f:has_segment ?gb_id .
-    ?gb_id rdfs:label ?gb .
+    ?strain_id a f:strain .
+    ?strain_id f:hasPart ?gb_id .
+    ?gb_id f:genbank_id ?gb .
 }

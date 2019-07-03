@@ -1,5 +1,5 @@
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX f: <https://github.com/arendsee/flucrew/term/>
+PREFIX f: <https://flucrew.org/term/>
 
 select DISTINCT ?strain_2 ?sseqid_name ?gene ?dateStr ?constellation ?seq {
     # identify related sequences
