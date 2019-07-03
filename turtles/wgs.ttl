@@ -21,16 +21,13 @@ PREFIX f: <https://flucrew.org/term/>
 
 SELECT DISTINCT ?o ?p ?o2
 WHERE {
-    ?s a f:feature .
-    ?s ?p ?o .
-    # ?sid a f:strain .
+    ?sid a f:strain .
     # ?sid f:strain_name ?strain_name .
     # ?sid f:host "Swine" .
     # ?sid f:h1 "pandemic" .
     # ?sid f:hasPart/f:hasPart ?o .
-    # ?o ?p ?o2 .
-    # OPTIONAL {
-    #     ?sid f:tag ?tag .
-    # }
+    OPTIONAL {
+        ?sid f:tag ?tag .
+    }
 }
 LIMIT 20

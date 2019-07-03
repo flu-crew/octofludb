@@ -9,6 +9,7 @@ from src.fasta import parse_fasta, print_fasta, graph_fasta
 import src.entrez as entrez
 import re
 import pandas as pd
+from tqdm import tqdm
 
 # TODO: replace these with parsers
 
@@ -27,7 +28,7 @@ def load_blast(g, filename, tag=None):
     igen = uidgen(base=f"blast/{filename}", pad=0)
 
     with open(filename, "r") as f:
-        for row in f.readlines():
+        for row in tqdm(f.readlines()):
             try:
                 (
                     qseqid,
@@ -77,27 +78,26 @@ def tag(g: ConjunctiveGraph, filename: str, tag: str) -> None:
     g.commit()
 
 
-def infer_type(x):
-    x_is_a = None
+def infer_property(x):
     if p.parse_match(p.p_strain, x):
-        x_is_a = O.strain
+        return P.strain_name
     elif p.parse_match(p.p_gisaid_isolate, x):
-        x_is_a = O.strain
+        return P.gisaid_isolate
     elif p.parse_match(p.p_A0, x):
-        x_is_a = O.strain
+        return P.barcode
     elif p.parse_match(p.p_tosu, x):
-        x_is_a = O.sequence
+        return P.barcode
     elif p.parse_match(p.p_gb, x):
-        x_is_a = O.sequence
+        return P.gb
     elif p.parse_match(p.p_gisaid_seqid, x):
-        x_is_a = O.sequence
-    return x_is_a
+        return P.gisaid_seqid
+    return None
 
 
 def load_excel(g: ConjunctiveGraph, filename: str, tag=None) -> None:
     d = pd.read_excel(filename)
 
-    for i in range(d.shape[0]):
+    for i in tqdm(range(d.shape[0])):
         s = d.iloc[i][0]  # subject - the id from the table's key column
         # the subject URI cannot have spaces
         uri = make_uri(s)
@@ -105,14 +105,16 @@ def load_excel(g: ConjunctiveGraph, filename: str, tag=None) -> None:
         if tag:
             g.add((uri, P.tag, Literal(tag)))
 
-        # associate the ID with its name
+        # associate the ID with a name, there may be multiple names for this
+        # entity, due to the sameAs rules.
         g.add((uri, P.name, Literal(s)))
 
         # try to determine the type of the ID (e.g., strain, genebank or barcode)
         # if successful, add a triple linking the id to its type
-        s_type = infer_type(s)
-        if s_type != None:
-            g.add((uri, P.is_a, s_type))
+        prop = infer_property(s)
+        if prop is not None:
+            # associate the ID with its specific name
+            g.add((uri, prop, Literal(s)))
 
         # associate the ID with each element in the row with column names as predicates
         for j in range(1, d.shape[1]):
@@ -134,7 +136,7 @@ def load_excel(g: ConjunctiveGraph, filename: str, tag=None) -> None:
 def load_influenza_na(g: ConjunctiveGraph, filename: str) -> None:
     with open(filename, "r") as f:
         field = dict()
-        for row in f.readlines():
+        for row in tqdm(f.readlines()):
             els = row.split("\t")
             try:
                 field["gb"] = els[0]
@@ -151,8 +153,8 @@ def load_influenza_na(g: ConjunctiveGraph, filename: str) -> None:
 
             gb_uid = make_uri(field["gb"])
             g.add((gb_uid, P.gb, Literal(field["gb"])))
-            g.add((gb_uid, P.segment, Literal(field["segment"])))
-            g.add((gb_uid, P.encodes, Literal(flu.SEGMENT[int(els[2]) - 1])))
+            g.add((gb_uid, P.segment_number, Literal(field["segment"])))
+            g.add((gb_uid, P.segment_name, Literal(flu.SEGMENT[int(els[2]) - 1])))
             if is_complete:
                 g.add((gb_uid, P.tag, Literal("complete_genome")))
 
@@ -175,9 +177,8 @@ def load_influenza_na(g: ConjunctiveGraph, filename: str) -> None:
 
                 strain_uid = make_uri(strain)
                 maybe_add = make_maybe_add(g, field, strain_uid)
-                g.add((strain_uid, P.hasPart, gb_uid))
-                g.add((strain_uid, P.is_a, O.strain))
-                g.add((strain_uid, P.name, Literal(strain)))
+                g.add((strain_uid, P.has_segment, gb_uid))
+                g.add((strain_uid, P.strain_name, Literal(strain)))
 
                 barcode_match = re.search(BARCODE_PAT, strain)
                 if barcode_match:

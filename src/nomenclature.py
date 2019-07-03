@@ -19,8 +19,10 @@ def make_uri(x):
     else:
         return ni.term(x.lower().strip().replace(" ", "_"))
 
+
 def make_property(x):
     return nt.term(x)
+
 
 def make_literal(x, infer=True):
     if not infer:
@@ -31,50 +33,25 @@ def make_literal(x, infer=True):
     except:
         return rdflib.Literal(x)
 
-# # Triples to add:
-# (C.strainID rdf:type rdfs:Class)
-# (O.strain_id rdfs:subClassOf C.strainID)
-# (O.barcode rdfs:subClassOf C.strainID)
-# (O.gisaid rdfs:subClassOf C.strainID)
-#
-# (C.sequenceID rdf:type rdfs:Class)
-# (O.gb rdfs:subClassOf C.sequenceID)
-# (O.gisaid_iso rdfs:subClassOf C.sequenceID)
-#
-# (C.sequence rdf:type rdfs:Class)
-# (O.proseq rdfs:subClassOf C.sequence)
-# (O.dnaseq rdfs:subClassOf C.sequence)
-
-
-class C:
-    strainID = nt.strainID
-    sequenceID = nt.sequenceID
-
 
 class O:
-    strain = nt.strain  # unique key for the strain
-    sequence = nt.sequence
-    dnaseq = nt.dna_sequence
-    proseq = nt.protein_sequence
-    feature = nt.feature
+    feature = nt.Feature
     unknown_strain = nt.unknown_strain
     unknown_unknown = nt.unknown
 
 
 class P:
     # standard semantic web predicates
-    is_a = RDF.type
     name = RDFS.label
-    xref = RDFS.seeAlso
     sameAs = OWL.sameAs
-    hasPart = nt.hasPart
+    has_segment = nt.has_segment
     unknown_unknown = nt.unknown
     chksum = nt.chksum
     # flu relations
-    feature = nt.feature
+    has_feature = nt.has_feature
     tag = nt.tag
-    dnaseq = nt.dna_sequence
-    proseq = nt.protein_sequence
+    dnaseq = nt.dnaseq
+    proseq = nt.proseq
     global_clade = nt.global_clade
     constellation = nt.constellation
     segment_name = nt.segment_name
@@ -95,13 +72,15 @@ class P:
     bitscore = nt.bitscore
     # labels for sequences
     gb = nt.genbank_id
+    gisaid_seqid = nt.gisaid_seqid
     # labels for strains
     strain_name = nt.strain_name
-    barcode = nt.barcode 
+    barcode = nt.barcode
+    gisaid_isolate = nt.gisaid_isolate
+    has_segment = nt.has_segment
     # the local curated data
     ref_reason = nt.ref_reason
     subtype = nt.subtype
-    segment = nt.segment
     country = nt.country
     state = nt.state
     ha_clade = nt.ha_clade
@@ -112,6 +91,7 @@ class P:
     # gb/*  -- I need to start generalizing away from this, since this data
     # does not come only from genebank.
     # -----------------------------------------------------------------------
+    feature_key = nt.feature_key
     gb_locus = nt.locus  # unique key
     gb_length = nt.length
     gb_strandedness = nt.strandedness

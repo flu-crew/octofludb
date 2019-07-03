@@ -60,26 +60,26 @@ time d79 load_excel "${DATADIR}/fair/2018.xlsx" --rdf="ttl/fair2018.nt" --tag="f
 
 file="${DATADIR}/pdm-project-2019/pdm-project-2019./"
 
-### TODO: push all files to the GraphDB database before running the fetch step
-### Currently I have to manually stop here, go to the GraphDB browser, and
-### upload the influenza_na dataset (at least).
+## TODO: push all files to the GraphDB database before running the fetch step
+## Currently I have to manually stop here, go to the GraphDB browser, and
+## upload the influenza_na dataset (at least).
 
 log "Retrieving all swine Genbank IDs and selected human IDs (saved in gb-id.txt)"
 time q79 ~/src/git/d79/turtles/fetch-swine-gids.ttl > swine-ids.txt
 
 
-log "Compiling Genbank records for each of these IDs (this will take a few hours)"
+log "Compiling Genbank records for each of these IDs"
 time d79 load_gbids swine-ids.txt --rdf="ttl/genbank.nt" --format="ntriples"
 
 
-file="${DATADIR}/blast.txt"
-log "Loading blast results from $file"
-time d79 load_blast "$file" --tag="blast_all-against-all" --rdf="ttl/blast_all-against-all.nt"  --format="ntriples"
-
-
-file="${DATADIR}/pdm-2019.fasta"
-log "Loading pdm-2019.fasta"
-time d79 load_fasta "$file" --tag="pdm-2019" --format="ntriples" --delimiter="|" --rdf="ttl/pdm-2019.nt"
+# file="${DATADIR}/blast.txt"
+# log "Loading blast results from $file"
+# time d79 load_blast "$file" --tag="blast" --rdf="ttl/blast.nt"  --format="ntriples"
+#
+#
+# file="${DATADIR}/pdm-2019.fasta"
+# log "Loading $file"
+# time d79 load_fasta "$file" --tag="pdm-2019" --format="ntriples" --delimiter="|" --rdf="ttl/pdm-2019.nt"
 
 log $(date)
 log "done"

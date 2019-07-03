@@ -59,7 +59,6 @@ if __name__ == "__main__":
                     gb.add_gb_meta_triples(g, gb_meta)
                 # commit the current batch (say of 1000 entries)
                 g.commit()
-                print(f" > uploaded and committed {len(gb_metas)} ids", file=sys.stderr)
 
     if args["load_excel"]:
         recipe.load_excel(g, args["<table_filename>"], tag=args["--tag"])
@@ -74,18 +73,13 @@ if __name__ == "__main__":
             tag=args["--tag"],
             columns=args["--columns"],
             sep=args["--delimiter"],
-            fastaout=args["--write-fasta"]
+            fastaout=args["--write-fasta"],
         )
 
     if args["serialize"]:
-        g.serialize(
-            destination=args["<serial_filename>"],
-            format=args["--format"]
-        )
+        g.serialize(destination=args["<serial_filename>"], format=args["--format"])
 
     if args["--rdf"]:
-        g.serialize(
-            destination=args["--rdf"], format=args["--format"]
-        )
+        g.serialize(destination=args["--rdf"], format=args["--format"])
 
     g.close()

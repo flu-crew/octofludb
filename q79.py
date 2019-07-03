@@ -28,15 +28,15 @@ if __name__ == "__main__":
     args = docopt(__doc__, version="sparql.sh 0.0.1")
 
     if args["uniprot"]:
-        sparql = SPARQLWrapper('http://sparql.uniprot.org/sparql')
+        sparql = SPARQLWrapper("http://sparql.uniprot.org/sparql")
     elif args["embl"]:
-        sparql = SPARQLWrapper('https://www.ebi.ac.uk/rdf/services/sparql')
+        sparql = SPARQLWrapper("https://www.ebi.ac.uk/rdf/services/sparql")
     else:
         if args["--repo"]:
             repo = args["--repo"]
         else:
             repo = "flu"
-        sparql = SPARQLWrapper(f'http://localhost:7200/repositories/{repo}')
+        sparql = SPARQLWrapper(f"http://localhost:7200/repositories/{repo}")
 
     with open(args["<sparql_query>"], "r") as fh:
         sparql_file = fh.read()
@@ -45,12 +45,11 @@ if __name__ == "__main__":
     sparql.setReturnFormat(JSON)
     results = sparql.query().convert()
 
-    def val(xs, field): 
+    def val(xs, field):
         if field in xs:
-            return(xs[field]["value"])
+            return xs[field]["value"]
         else:
             return ""
-
 
     if args["--fasta"]:
         header_fields = results["head"]["vars"][:-1]

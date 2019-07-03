@@ -46,6 +46,7 @@ def rmNone(xs):
     """ Remove all 'None' elements from a list"""
     return list(filter(lambda x: x != None, xs))
 
+
 def firstOne(xs):
     """Return the first defined value in a list"""
     return rmNone(xs)[0]

@@ -1,4 +1,4 @@
-from src.nomenclature import uidgen, P, O, make_property
+from src.nomenclature import uidgen, P, O, make_property, make_uri
 from src.util import rmNone, make_maybe_add
 from src.hash import chksum
 from rdflib import Literal
@@ -8,8 +8,7 @@ import sys
 def add_gb_meta_triples(g, gb_meta):
     gid = make_uri(str(gb_meta["GBSeq_locus"]))
 
-    g.add((gid, P.genbank_id, Literal(gb_meta["GBSeq_locus"])))
-    g.add((gid, P.is_a, O.dnaseq))
+    g.add((gid, P.gb, Literal(gb_meta["GBSeq_locus"])))
 
     maybe_add = make_maybe_add(g, gb_meta, gid)
     maybe_add(P.gb_length, "GBSeq_length")
@@ -33,9 +32,8 @@ def add_gb_meta_triples(g, gb_meta):
     igen = uidgen(base=gb_meta["GBSeq_locus"] + "_feat_")
     for feat in gb_meta["GBSeq_feature-table"]:
         fid = next(igen)
-        g.add((gid, P.feature, fid))
-        g.add((fid, P.is_a, O.feature))
-        g.add((fid, P.is_a, make_uri(feat["GBFeature_key"])))
+        g.add((gid, P.has_feature, fid))
+        g.add((fid, P.name, Literal(feat["GBFeature_key"])))
 
         maybe_add = make_maybe_add(g, feat, fid)
         maybe_add(P.gb_location, "GBFeature_location")
@@ -45,8 +43,6 @@ def add_gb_meta_triples(g, gb_meta):
             for qual in feat["GBFeature_quals"]:
                 if qual["GBQualifier_name"] == "translation":
                     aaseq = qual["GBQualifier_value"]
-                    g.add((gid, P.hasPart, fid))
-                    g.add((fid, P.is_a, O.proseq))
                     g.add((fid, P.proseq, Literal(aaseq)))
                     g.add((fid, P.sameAs, make_uri(chksum(aaseq))))
                 elif "GBQualifier_name" in qual and "GBQualifier_value" in qual:

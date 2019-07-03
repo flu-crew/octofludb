@@ -102,15 +102,16 @@ p_usa_state = wordset(
     label="usa_state",
 )
 
-RelationSet = namedtuple("RelationSet", ["subjects", "relations", "generators", "objectify", "default"])
+RelationSet = namedtuple(
+    "RelationSet", ["subjects", "relations", "generators", "objectify", "default"]
+)
+
 
 class RdfBuilder:
     def __init__(
         self,
         make_name={},
         relation_sets=[],  # (<set1>, <set2>)), both sets include names from the field parser,
-        # with values in set1 being related to values in set2 by literal set2
-        isa_map={},
         munge_map={},  # (<field>, <function>), munge <field> with <function> (e.g. to correct spelling)
         sub_builders=[],  # (<field>, <function>), create new triples from <field> using <function>,
         unknown_tag="unknown",
@@ -121,16 +122,15 @@ class RdfBuilder:
         self.relation_sets = relation_sets
         self.munge_map = munge_map
         self.sub_builders = sub_builders
-        self.isa_map = isa_map
-        self.unknown_tag=unknown_tag
-        self.tag=tag
+        self.unknown_tag = unknown_tag
+        self.tag = tag
         # e.g., to parse host name from a strain name.
 
     def build(self, g, fieldss):
         """
         g is a 
         """
-        
+
         for i, fields in enumerate(fieldss):
             self._buildOne(g, fields, idx=i)
         g.commit()
@@ -140,12 +140,12 @@ class RdfBuilder:
 
         # replace unknown tags
         for i in range(len(fields)):
-            t,v = fields[i]
+            t, v = fields[i]
             if t is None:
                 fields[i] = (self.unknown_tag, v)
 
         for i in range(len(fields)):
-            t,v = fields[i]
+            t, v = fields[i]
             if t in self.munge_map:
                 fields[i] = (t, self.munge_map[t](v))
 
@@ -156,7 +156,7 @@ class RdfBuilder:
             if not r.subjects & fieldSet:
                 genfield = set(r.generators.keys()) & fieldSet
                 if genfield:
-                    for (k,v) in fields:
+                    for (k, v) in fields:
                         if k in genfield:
                             default = r.generators[k][0]
                             uri = r.generators[k][1](v)
@@ -170,20 +170,17 @@ class RdfBuilder:
                     r.subjects.add(r.default)
                     fieldSet.add(r.default)
 
-        for k,v in fields:
+        for k, v in fields:
             # make hierarchical relations
             for r in self.relation_sets:
                 if k in r.subjects:
-                    for k_,v_ in fields:
+                    for k_, v_ in fields:
                         if k_ in r.relations:
                             g.add((make_uri(v), r.relations[k_], r.objectify[k_](v_)))
 
             # set rdfs:label for this field
             if k in self.make_name:
                 g.add((make_uri(v), P.name, make_literal(self.make_name[k](v), False)))
-            #  define rdf:type of this field
-            if k in self.isa_map:
-                g.add((make_uri(v), P.is_a, self.isa_map[k]))
             # tag top-level fields
             if self.tag and k in self.relation_sets[0][0]:
                 g.add((make_uri(v), P.tag, make_literal(self.tag, False)))
@@ -192,6 +189,7 @@ class RdfBuilder:
         for builder in self.sub_builders:
             builder(g, fields)
 
+
 def resolve(xss):
     """
     For now I resolve ambiguities by just taking the first matching parser.
@@ -199,19 +197,21 @@ def resolve(xss):
     """
     return ([(x[0][0], x[0][1]) for x in xs] for xs in xss)
 
+
 def groupSortToOrderedDict(xs):
     """
     condense :: [(Key, Val)] -> {Key : [Val]} 
     """
     xs.sorted()
     ys = [(xs[0][0], [xs[0][1]])]
-    for k,v in xs[1:]:
-      if k == ys[-1][0]:
-        ys[-1][1].append(k)
-      else:
-        ys.append((k, [v]))
-    
+    for k, v in xs[1:]:
+        if k == ys[-1][0]:
+            ys[-1][1].append(k)
+        else:
+            ys.append((k, [v]))
+
     return OrderedDict(ys)
+
 
 def guess_fields(fieldss: List[List[str]], parserSet=None):
     for fields in fieldss:
