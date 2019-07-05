@@ -4,7 +4,7 @@ import src.parser as parser
 import src.util as U
 from rdflib import Literal
 from src.hash import chksum
-from src.nomenclature import P, O, make_uri, make_literal
+from src.nomenclature import P, O, make_uri, make_literal, make_usa_state_uri, make_date
 from tqdm import tqdm
 
 fastaHeaderFieldParsers = (
@@ -66,15 +66,6 @@ def print_fasta(fields, tag=None, sep="|"):
 
 
 def graph_fasta(g, fieldss, tag=None):
-    # - Create foaf:name links as needed, munging as needed
-    fastaName = {
-        "A0": U.upper,
-        "tosu": U.upper,
-        "gb": U.upper,
-        "strain": U.compose(U.strip, U.underscore),
-        "gisaid_seqid": U.upper,
-    }
-
     # - If no strain ID exists, create a new one
     # - Link strain ID to each strain property
     # - Link segment ID to each segment property
@@ -98,8 +89,8 @@ def graph_fasta(g, fieldss, tag=None):
                 "global_clade": Literal,
                 "constellation": Literal,
                 "host": Literal,
-                "date": make_literal,
-                "state": Literal,
+                "date": make_date,
+                "state": make_usa_state_uri,
                 "country": Literal,
                 "subtype": Literal,
                 "gb": make_uri,
@@ -109,7 +100,7 @@ def graph_fasta(g, fieldss, tag=None):
             "unknown_strain",
         ),
         parser.RelationSet(
-            {"gb", "gisaid_seqid"},
+            {"gb", "gisaid_seqid", "dnaseq"},
             {
                 "segment_name": P.segment_name,
                 "segment_number": P.segment_number,
@@ -141,7 +132,7 @@ def graph_fasta(g, fieldss, tag=None):
                         # link the segment ids to the protein feature
                         g.add((make_uri(v2), P.has_feature, uri))
                         # link the protein feature to the protein sequence
-                        g.add((uri, P.proseq, v))
+                        g.add((uri, P.proseq, Literal(v)))
             if t == "dnaseq":
                 uri = make_uri(chksum(v))
                 for (t2, v2) in fields:
@@ -152,7 +143,6 @@ def graph_fasta(g, fieldss, tag=None):
     fastaGenerateAdditional = [generateChksums]
 
     fluRdfBuilder = parser.RdfBuilder(
-        make_name=fastaName,
         relation_sets=fastaRelationSets,
         munge_map=fastaMungeMap,
         sub_builders=fastaGenerateAdditional,

@@ -1,10 +1,14 @@
 import itertools
 import rdflib
+import sys
+import src.domain.geography as geo
 from rdflib.namespace import RDF, RDFS, OWL
 from src.util import padDigit
 
 ni = rdflib.Namespace("https://flucrew.org/id/")
 nt = rdflib.Namespace("https://flucrew.org/term/")
+nusa = rdflib.Namespace("https://flucrew.org/geo/usa/")
+ncountry = rdflib.Namespace("https://flucrew.org/geo/country/")
 
 
 def uidgen(base="_", pad=3, start=0):
@@ -18,6 +22,30 @@ def make_uri(x):
         return x
     else:
         return ni.term(x.lower().strip().replace(" ", "_"))
+
+
+def make_usa_state_uri(code):
+    abbr = geo.state_to_code(code)
+    if not abbr:
+        print("Expected a USA state name or postal abbreviation", file=sys.stderr)
+        sys.exit(1)
+    return nusa.term(abbr)
+
+
+def make_country_uri(name):
+    """ Returns a tuple with the URI and an alternative name no code was found """
+    code = geo.country_to_code(name)
+    if code:
+        uri = ncountry.term(code)
+        alt = None
+    else:
+        uri = make_uri(name)
+        alt = name
+    return (uri, alt)
+
+
+def make_date(date):
+    return rdflib.Literal(str(p_date.parse(x)), datatype=XSD.date)
 
 
 def make_property(x):
@@ -82,7 +110,8 @@ class P:
     ref_reason = nt.ref_reason
     subtype = nt.subtype
     country = nt.country
-    state = nt.state
+    country_name = nt.country_name
+    state = nusa.state
     ha_clade = nt.ha_clade
     date = nt.date
     host = nt.host

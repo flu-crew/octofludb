@@ -1,33 +1,11 @@
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX f: <https:///flucrew.org/term/>
+PREFIX f: <https://flucrew.org/term/>
 
-# ===== list all properties ======
-f:barcode        a rdfs:Property .
-f:chksum         a rdfs:Property .
-f:constellation  a rdfs:Property .
-f:country        a rdfs:Property .
-f:date           a rdfs:Property .
-f:dna_sequence   a rdfs:Property .
-f:gene           a rdfs:Property .
-f:gisaid_isolate a rdfs:Property .
-f:global_clade   a rdfs:Property .
-f:ha_clade       a rdfs:Property .
-f:has_protein    a rdfs:Property .
-f:has_segment    a rdfs:Property .
-f:host           a rdfs:Property .
-f:segment_name   a rdfs:Property .
-f:segment_number a rdfs:Property .
-f:state          a rdfs:Property .
-f:strain_name    a rdfs:Property .
-f:subtype        a rdfs:Property .
-
-
-# ---------------------------------------------------------------------------
 
 # Properties with the strain domain are not fields in the class object, using
 # them to describe a subject leads to the inference that the subject is a
 # strain. That is, these properties must only be used with subjects that are
-# strains. For this reason, terms such as "country", "state", "date", and
+# strains. For this reason, terms such as "world", "state", "date", and
 # "host", which are all used to describe a strain, should not be listed has
 # having strain as a domain, since they could be used in other contexts.
 f:strain_name    rdfs:domain f:Strain .
@@ -69,3 +47,35 @@ f:genbank_id rdfs:range f:Sequence .
 f:gisaid_seqid rdfs:range f:Sequence .
 
 f:has_feature rdfs:range f:Feature .
+f:has_segment rdfs:subPropertyOf f:has_part .
+
+# ===== ANNOTATIONS ==========================================================================
+f:barcode        rdfs:comment "(property) an A0, TOSU or some other sequence identifier" .
+f:chksum         rdfs:comment "(property) the md5 checksum of some value" .
+f:constellation  rdfs:comment "(property) a 6 character identifier for internal gene clades" .
+f:world          rdfs:comment "(property) a world" .
+f:date           rdfs:comment "(property) a date" .
+f:dna_sequence   rdfs:comment "(property) link to DNA sequence" .
+f:gene           rdfs:comment "(property) the name of the primary gene on a segment" .
+f:gisaid_isolate rdfs:comment "(property) the GISAID isolate id for a strain" .
+f:global_clade   rdfs:comment "(property) the global clade for a strain" .
+f:ha_clade       rdfs:comment "(property) the HA clade for a strain" .
+f:has_segment    rdfs:comment "(property) link from a strain to a segment" .
+f:host           rdfs:comment "(property) the animal host of a virus" .
+f:segment_name   rdfs:comment "(property) the name of the primary gene on a segment" .
+f:segment_number rdfs:comment "(property) the segment number of a IAV (1-8)" .
+f:state          rdfs:comment "(property) one of the 50 states from the United States" .
+f:strain_name    rdfs:comment "(property) the name of the influenza strain" .
+f:subtype        rdfs:comment "(property) influenza A subtype" .
+# -- examples may be used as documentation or in tests/demos
+f:example rdfs:subPropertyOf rdfs:comment .
+# -----
+f:barcode f:example "A01444560", "13TOSU6273" .
+f:constellation f:example "TTTTTT", "TPVPPT" .
+f:world f:example "USA", "Canada", "Mexico" .
+f:host f:example "Swine", "Human" .
+f:segment_name f:example "HA", "NA", "PB1", "PB2", "M" .
+f:state f:example "New_York", "IA" .
+f:strain_name f:example "A/swine/Wyoming/A01445305/2013" .
+f:subtype f:example "H1N1" .
+# TODO: fill in examples for everything else

@@ -5,7 +5,7 @@ from typing import List
 
 import src.util as U
 
-from src.nomenclature import P, O, make_uri, make_literal
+from src.nomenclature import P, O, make_uri, make_literal, make_usa_state_uri
 
 import src.domain.geography as geo
 from src.domain.date import p_year, p_longyear, p_month, p_day, p_date
@@ -93,14 +93,17 @@ def regexWithin(regex: re.Pattern, context: p.Parser):
 
     return regexWithinParser
 
-
-p_country = wordset(geo.COUNTRIES.keys(), label="country")
 p_usa_state = wordset(
-    words=list(geo.STATE_ABBR.values())
-    + list(geo.STATE_ABBR.keys())
-    + list(geo.STATE_MISPELLINGS.keys()),
+    words=list(geo.STATE_NAME2ABBR.values()) + list(geo.STATE_NAME2ABBR.keys()),
     label="usa_state",
 )
+
+@p.Parser
+def p_country(text, index=0):
+    if country_to_code(text):
+        return p.Value.success(index + len(text))
+    else:
+        return p.Value.failure(index, "I do not currenlty recognize this country, take it up with the UN")
 
 RelationSet = namedtuple(
     "RelationSet", ["subjects", "relations", "generators", "objectify", "default"]
@@ -110,21 +113,17 @@ RelationSet = namedtuple(
 class RdfBuilder:
     def __init__(
         self,
-        make_name={},
         relation_sets=[],  # (<set1>, <set2>)), both sets include names from the field parser,
         munge_map={},  # (<field>, <function>), munge <field> with <function> (e.g. to correct spelling)
         sub_builders=[],  # (<field>, <function>), create new triples from <field> using <function>,
         unknown_tag="unknown",
         tag=None
-        # e.g., to parse host name from a strain name.
     ):
-        self.make_name = make_name
         self.relation_sets = relation_sets
         self.munge_map = munge_map
         self.sub_builders = sub_builders
         self.unknown_tag = unknown_tag
         self.tag = tag
-        # e.g., to parse host name from a strain name.
 
     def build(self, g, fieldss):
         """
@@ -178,9 +177,6 @@ class RdfBuilder:
                         if k_ in r.relations:
                             g.add((make_uri(v), r.relations[k_], r.objectify[k_](v_)))
 
-            # set rdfs:label for this field
-            if k in self.make_name:
-                g.add((make_uri(v), P.name, make_literal(self.make_name[k](v), False)))
             # tag top-level fields
             if self.tag and k in self.relation_sets[0][0]:
                 g.add((make_uri(v), P.tag, make_literal(self.tag, False)))

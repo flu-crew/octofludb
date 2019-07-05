@@ -14,12 +14,14 @@ def get_gbs(gb_ids: List[str]) -> List[dict]:
     count = len(gb_ids)
     for start in tqdm(range(0, count, batch_size)):
         end = min(count, start + batch_size)
-        cache_filename = f".gb_{start}-{end}.xml" 
+        cache_filename = f".gb_{start}-{end}.xml"
         attempt = 0
         while attempt < 10:
             try:
                 if not os.path.exists(cache_filename):
-                    h = Entrez.efetch(db="nucleotide", id=gb_ids[start:end], retmode="xml")
+                    h = Entrez.efetch(
+                        db="nucleotide", id=gb_ids[start:end], retmode="xml"
+                    )
                     x = h.read()
                     h.close()
                     with open(cache_filename, "w") as f:

@@ -2,7 +2,7 @@ import sys
 import math
 from rdflib import ConjunctiveGraph, Literal
 import src.domain.flu as flu
-from src.nomenclature import P, O, uidgen, make_uri, make_literal, make_property
+from src.nomenclature import P, O, uidgen, make_uri, make_literal, make_property, make_country_uri
 from src.util import replace, fixLookup, make_maybe_add
 import src.parser as p
 from src.fasta import parse_fasta, print_fasta, graph_fasta
@@ -187,9 +187,14 @@ def load_influenza_na(g: ConjunctiveGraph, filename: str) -> None:
                     g.add((strain_uid, P.barcode, Literal(barcode_name)))
                     g.add((barcode_uid, P.sameAs, strain_uid))
 
+                (country_uri, alt_name) = make_country_uri(field["country"])
+                g.add((strain_uid, P.country, country_uri))
+                if alt_name:
+                    # The alternative name is used only if the given name is not recognized
+                    g.add((strain_uid, P.country_name, Literal(alt_name)))
+
                 maybe_add = make_maybe_add(g, field, strain_uid)
                 maybe_add(P.host, "host")
-                maybe_add(P.country, "country")
                 maybe_add(P.date, "date")
 
                 if field["date"] != None:
