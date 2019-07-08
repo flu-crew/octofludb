@@ -2,7 +2,15 @@ import sys
 import math
 from rdflib import ConjunctiveGraph, Literal
 import src.domain.flu as flu
-from src.nomenclature import P, O, uidgen, make_uri, make_literal, make_property, make_country_uri
+from src.nomenclature import (
+    P,
+    O,
+    uidgen,
+    make_uri,
+    make_literal,
+    make_property,
+    make_country_uri,
+)
 from src.util import replace, fixLookup, make_maybe_add
 import src.parser as p
 from src.fasta import parse_fasta, print_fasta, graph_fasta
@@ -58,14 +66,15 @@ def load_blast(g, filename, tag=None):
             g.add((huid, P.sseqid, make_uri(sseqid)))
             g.add((huid, P.pident, Literal(float(pident))))
             g.add((huid, P.length, Literal(int(length))))
-            g.add((huid, P.mismatch, Literal(int(mismatch))))
-            g.add((huid, P.gapopen, Literal(int(gapopen))))
-            g.add((huid, P.qstart, Literal(int(qstart))))
-            g.add((huid, P.qend, Literal(int(qend))))
-            g.add((huid, P.sstart, Literal(int(sstart))))
-            g.add((huid, P.send, Literal(int(send))))
-            g.add((huid, P.evalue, Literal(float(evalue))))
-            g.add((huid, P.bitscore, Literal(float(bitscore))))
+            #  # I'm leaving these out currently for performance reasons
+            #  g.add((huid, P.mismatch, Literal(int(mismatch))))
+            #  g.add((huid, P.gapopen, Literal(int(gapopen))))
+            #  g.add((huid, P.qstart, Literal(int(qstart))))
+            #  g.add((huid, P.qend, Literal(int(qend))))
+            #  g.add((huid, P.sstart, Literal(int(sstart))))
+            #  g.add((huid, P.send, Literal(int(send))))
+            #  g.add((huid, P.evalue, Literal(float(evalue))))
+            #  g.add((huid, P.bitscore, Literal(float(bitscore))))
 
     g.commit()
 

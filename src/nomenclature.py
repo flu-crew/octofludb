@@ -1,8 +1,10 @@
 import itertools
 import rdflib
+import urllib.parse as url
 import sys
 import src.domain.geography as geo
-from rdflib.namespace import RDF, RDFS, OWL
+import src.domain.date as date
+from rdflib.namespace import RDF, RDFS, OWL, XSD
 from src.util import padDigit
 
 ni = rdflib.Namespace("https://flucrew.org/id/")
@@ -21,31 +23,34 @@ def make_uri(x):
     if isinstance(x, rdflib.term.URIRef):
         return x
     else:
-        return ni.term(x.lower().strip().replace(" ", "_"))
+        return ni.term(url.quote_plus(x.lower().strip()))
 
 
 def make_usa_state_uri(code):
     abbr = geo.state_to_code(code)
     if not abbr:
-        print("Expected a USA state name or postal abbreviation", file=sys.stderr)
+        print(
+            f"Expected a USA state name or postal abbreviation, found '{code}'",
+            file=sys.stderr,
+        )
         sys.exit(1)
     return nusa.term(abbr)
 
 
-def make_country_uri(name):
+def make_country_uri(countryStr):
     """ Returns a tuple with the URI and an alternative name no code was found """
-    code = geo.country_to_code(name)
+    code = geo.country_to_code(countryStr)
     if code:
         uri = ncountry.term(code)
         alt = None
     else:
-        uri = make_uri(name)
-        alt = name
+        uri = make_uri(countryStr)
+        alt = countryStr
     return (uri, alt)
 
 
-def make_date(date):
-    return rdflib.Literal(str(p_date.parse(x)), datatype=XSD.date)
+def make_date(dateStr):
+    return rdflib.Literal(str(date.p_date.parse(dateStr)), datatype=XSD.date)
 
 
 def make_property(x):
@@ -57,7 +62,7 @@ def make_literal(x, infer=True):
         return rdflib.Literal(x)
     try:
         # Can x be a date?
-        return rdflib.Literal(str(p_date.parse(x)), datatype=XSD.date)
+        return rdflib.Literal(str(date.p_date.parse(x)), datatype=XSD.date)
     except:
         return rdflib.Literal(x)
 

@@ -67,7 +67,8 @@ def state_to_code(name):
     name = name.strip()
     if name.upper() in STATE_ABBR:
         return name.upper()
-    elif name in STATE_NAME2ABBR:
+    name = name.lower().replace(" ", "_")
+    if name in STATE_NAME2ABBR:
         return STATE_NAME2ABBR[name]
     else:
         return None
@@ -349,6 +350,8 @@ COUNTRY_3LETTER_CODES = {
     "united_kingdom": "GBR",
     "united_states_minor_outlying_islands": "UMI",
     "united_states": "USA",
+    "us": "USA",
+    "united_states_of_america": "USA",
     "uruguay": "URY",
     "uzbekistan": "UZB",
     "vanuatu": "VUT",
@@ -373,6 +376,8 @@ COUNTRY_NAMES = set(COUNTRY_3LETTER_CODES.keys())
 COUNTRY_ABBREVIATIONS = set(COUNTRY_3LETTER_CODES.values())
 
 clean_name = re.compile("of_|the_|and_|_of|_the|_and")
+
+
 def country_to_code(name):
     """ Get the ISO 3-letter codes for a country. Return None on failure. """
     name = name.strip()

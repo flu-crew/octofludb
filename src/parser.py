@@ -93,17 +93,22 @@ def regexWithin(regex: re.Pattern, context: p.Parser):
 
     return regexWithinParser
 
+
 p_usa_state = wordset(
     words=list(geo.STATE_NAME2ABBR.values()) + list(geo.STATE_NAME2ABBR.keys()),
     label="usa_state",
 )
 
+
 @p.Parser
 def p_country(text, index=0):
-    if country_to_code(text):
-        return p.Value.success(index + len(text))
+    if geo.country_to_code(text):
+        return p.Value.success(index + len(text), text)
     else:
-        return p.Value.failure(index, "I do not currenlty recognize this country, take it up with the UN")
+        return p.Value.failure(
+            index, "I do not currenlty recognize this country, take it up with the UN"
+        )
+
 
 RelationSet = namedtuple(
     "RelationSet", ["subjects", "relations", "generators", "objectify", "default"]
@@ -117,7 +122,7 @@ class RdfBuilder:
         munge_map={},  # (<field>, <function>), munge <field> with <function> (e.g. to correct spelling)
         sub_builders=[],  # (<field>, <function>), create new triples from <field> using <function>,
         unknown_tag="unknown",
-        tag=None
+        tag=None,
     ):
         self.relation_sets = relation_sets
         self.munge_map = munge_map
