@@ -76,6 +76,8 @@ if __name__ == "__main__":
             fastaout=args["--write-fasta"],
         )
 
+    g.commit() # just in case we missed anything
+
     if args["serialize"]:
         g.serialize(destination=args["<serial_filename>"], format=args["--format"])
 
