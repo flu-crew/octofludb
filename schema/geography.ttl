@@ -174,7 +174,6 @@ usa:Region4 rdfs:subClassOf world:USA .
 usa:Region5 rdfs:subClassOf world:USA .
 
 # list all the countries
-f:world rdfs:range world:Country .
 world:name rdfs:domain world:Country .
 world:code rdfs:domain world:Country .
 # none of these are really countries, but I include them since they can show up
