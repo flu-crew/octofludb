@@ -1,33 +1,16 @@
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX f: <https://flucrew.org/term/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX world: <https://flucrew.org/geo/country/>
+select DISTINCT ?name ?gid ?seq where {
+    ?sid f:barcode ?name .
+    ?sid f:country world:USA .
+    ?sid f:has_segment ?gid .
+} LIMIT 10
 
-# SELECT (GROUP_CONCAT(DISTINCT ?event; SEPARATOR="|") AS ?events)
-#        ?strain ?constellation ?gb ?seq
-# WHERE {
-#     ?sid a f:strain .
-#     OPTIONAL {
-#         ?eid ?p ?sid .
-#         ?eid rdfs:label ?event .
-#     }
-#     ?sid f:constellation ?constellation .
-#     ?sid f:date ?date .
-#     ?sid rdfs:label ?strain .
-#     ?sid f:h_genbank ?gb .
-#     ?gid rdfs:label ?gb .
-#     ?gid f:dna_sequence ?seq .
-# }
-# GROUP BY ?strain ?constellation ?gb ?seq
-
-
-SELECT DISTINCT ?o ?p ?o2
-WHERE {
-    ?sid a f:strain .
-    # ?sid f:strain_name ?strain_name .
-    # ?sid f:host "Swine" .
-    # ?sid f:h1 "pandemic" .
-    # ?sid f:hasPart/f:hasPart ?o .
-    OPTIONAL {
-        ?sid f:tag ?tag .
-    }
-}
-LIMIT 20
+    # ?sid f:has_segment ?gid .
+    # BIND (YEAR(?date) as ?year) .
+    # BIND (MONTH(?date) as ?month) .
+    # FILTER (?year = 2019 && ?month = 3 ) .
+    # ?gid f:dnaseq ?seq .

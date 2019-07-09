@@ -3,8 +3,11 @@ PREFIX f: <https://flucrew.org/term/>
 
 SELECT DISTINCT ?gb
 WHERE {
-    ?strain_id f:host "Swine" .
-    ?strain_id a f:strain .
-    ?strain_id f:hasPart ?gb_id .
+    ?strain_id f:has_segment ?gb_id .
     ?gb_id f:genbank_id ?gb .
+    {
+        ?strain_id f:host "Swine" .
+    } UNION {
+        ?strain_id f:tag ?tag
+    }
 }

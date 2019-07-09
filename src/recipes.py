@@ -7,6 +7,7 @@ from src.nomenclature import (
     O,
     uidgen,
     make_uri,
+    make_date,
     make_literal,
     make_property,
     make_country_uri,
@@ -204,10 +205,11 @@ def load_influenza_na(g: ConjunctiveGraph, filename: str) -> None:
 
                 maybe_add = make_maybe_add(g, field, strain_uid)
                 maybe_add(P.host, "host")
-                maybe_add(P.date, "date")
 
-                if field["date"] != None:
-                    g.add((strain_uid, P.date, make_literal(field["date"])))
+                if field["date"] is not None:
+                    date = make_date(field["date"])
+                    if date is not None:
+                        g.add((strain_uid, P.date, date))
             else:
                 print(
                     f'  could not parse strain: {"|".join(els)}',

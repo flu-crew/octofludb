@@ -58,6 +58,7 @@ STATE_ABBR = set(STATE_NAME2ABBR.values())
 
 state_correction = make_flat_wordfinder(STATE_NAME2ABBR.keys())
 
+
 def state_to_code(name):
     """ Get the two letter code from a state name. Return None on failure. """
     name = name.strip()
@@ -384,6 +385,7 @@ COUNTRY_ABBREVIATIONS = set(COUNTRY_3LETTER_CODES.values())
 clean_name = re.compile("of_|the_|and_|_of|_the|_and")
 
 country_correction = make_flat_wordfinder(COUNTRY_NAMES)
+
 
 def country_to_code(name):
     """ Get the ISO 3-letter codes for a country. Return None on failure. """

@@ -8,7 +8,7 @@ import src.util as U
 from src.nomenclature import P, O, make_uri, make_literal, make_usa_state_uri
 
 import src.domain.geography as geo
-from src.domain.date import p_year, p_longyear, p_month, p_day, p_date
+from src.domain.date import p_year, p_longyear, p_month, p_day, p_date, p_any_date
 from src.domain.flu import (
     p_HA,
     p_NA,
@@ -92,6 +92,19 @@ def regexWithin(regex: re.Pattern, context: p.Parser):
             return p.Value.failure(index, "Could not match regex")
 
     return regexWithinParser
+
+
+def splitMatchFirst(psr: p.Parser, splitStr: str, text: str):
+    """
+    Rethink whether this is needed ...
+    """
+    fields = text.split(splitStr)
+    for field in fields:
+        try:
+            return psr.parse_strict(field)
+        except:
+            continue
+    return None
 
 
 p_usa_state = wordset(

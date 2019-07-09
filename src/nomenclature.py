@@ -52,7 +52,11 @@ def make_country_uri(countryStr):
 
 
 def make_date(dateStr):
-    return rdflib.Literal(str(date.p_date.parse(dateStr)), datatype=XSD.date)
+    try:
+        uri = date.p_any_date.parse_strict(dateStr).as_uri()
+    except:
+        uri = None
+    return uri
 
 
 def make_property(x):
