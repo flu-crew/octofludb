@@ -1,4 +1,5 @@
 import re
+from src.spellcheck import make_flat_wordfinder
 
 STATE_NAME2ABBR = {
     "alaska": "AK",
@@ -52,15 +53,10 @@ STATE_NAME2ABBR = {
     "wisconsin": "WI",
     "west_virginia": "WV",
     "wyoming": "WY",
-    # some mispellings:
-    "nebraksa": "NE",
-    "minneosta": "MN",
-    "missourri": "MI",
-    "ilinois": "IL",
-    "pennsyvania": "PA",
 }
 STATE_ABBR = set(STATE_NAME2ABBR.values())
 
+state_correction = make_flat_wordfinder(STATE_NAME2ABBR.keys())
 
 def state_to_code(name):
     """ Get the two letter code from a state name. Return None on failure. """
@@ -68,6 +64,9 @@ def state_to_code(name):
     if name.upper() in STATE_ABBR:
         return name.upper()
     name = name.lower().replace(" ", "_")
+    name = state_correction(name)
+    if name is None:
+        return None
     if name in STATE_NAME2ABBR:
         return STATE_NAME2ABBR[name]
     else:
@@ -122,6 +121,7 @@ COUNTRY_3LETTER_CODES = {
     "chad": "TCD",
     "chile": "CHL",
     "china": "CHN",
+    "prc": "CHN",
     "christmas_island": "CXR",
     "cocos_islands": "CCK",
     "cocos_(keeling)_islands": "CCK",
@@ -348,10 +348,16 @@ COUNTRY_3LETTER_CODES = {
     "ukraine": "UKR",
     "united_arab_emirates": "ARE",
     "united_kingdom": "GBR",
+    "united_kingdom_of_great_britain": "GBR",
+    "uk": "GBR",
+    "britain": "GBR",
+    "england": "GBR",
     "united_states_minor_outlying_islands": "UMI",
     "united_states": "USA",
+    "united_states_america": "USA",
     "us": "USA",
-    "united_states_of_america": "USA",
+    "america": "USA",
+    "gringoland": "USA",
     "uruguay": "URY",
     "uzbekistan": "UZB",
     "vanuatu": "VUT",
@@ -377,6 +383,7 @@ COUNTRY_ABBREVIATIONS = set(COUNTRY_3LETTER_CODES.values())
 
 clean_name = re.compile("of_|the_|and_|_of|_the|_and")
 
+country_correction = make_flat_wordfinder(COUNTRY_NAMES)
 
 def country_to_code(name):
     """ Get the ISO 3-letter codes for a country. Return None on failure. """
@@ -385,6 +392,9 @@ def country_to_code(name):
         return name.upper()
     name = name.lower().strip().replace(" ", "_")
     name = clean_name.sub("", name)
+    name = country_correction(name)
+    if name is None:
+        return None
     if name in COUNTRY_NAMES:
         return COUNTRY_3LETTER_CODES[name]
     else:

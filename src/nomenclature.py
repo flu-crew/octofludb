@@ -2,6 +2,7 @@ import itertools
 import rdflib
 import urllib.parse as url
 import sys
+import re
 import src.domain.geography as geo
 import src.domain.date as date
 from rdflib.namespace import RDF, RDFS, OWL, XSD
@@ -23,7 +24,8 @@ def make_uri(x):
     if isinstance(x, rdflib.term.URIRef):
         return x
     else:
-        return ni.term(url.quote_plus(x.lower().strip()))
+        x = re.sub(" +", "_", x.strip()).lower()
+        return ni.term(url.quote_plus(x))
 
 
 def make_usa_state_uri(code):
