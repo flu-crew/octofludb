@@ -23,25 +23,28 @@ class TestNomenclature(unittest.TestCase):
         self.assertEqual(make_date("30"), Literal("1930", datatype=XSD.gYear))
         # * YM
         self.assertEqual(
-            make_date("2011/05"), Literal("2011/05", datatype=XSD.gYearMonth)
+            make_date("2011/05"), Literal("2011-05", datatype=XSD.gYearMonth)
         )
         # * MY
         self.assertEqual(
-            make_date("05/2011"), Literal("2011/05", datatype=XSD.gYearMonth)
+            make_date("05/2011"), Literal("2011-05", datatype=XSD.gYearMonth)
         )
         # * YMD
         self.assertEqual(
-            make_date("2011/05/31"), Literal("2011/05/31", datatype=XSD.date)
+            make_date("2011/05/31"), Literal("2011-05-31", datatype=XSD.date)
         )
         self.assertEqual(
-            make_date("20110531"), Literal("2011/05/31", datatype=XSD.date)
+            make_date("20110531"), Literal("2011-05-31", datatype=XSD.date)
+        )
+        self.assertEqual(
+            str(make_date("20110531")), "2011-05-31"
         )
         # * MDY
         self.assertEqual(
-            make_date("05/31/2011"), Literal("2011/05/31", datatype=XSD.date)
+            make_date("05/31/2011"), Literal("2011-05-31", datatype=XSD.date)
         )
         self.assertEqual(
-            make_date("05312011"), Literal("2011/05/31", datatype=XSD.date)
+            make_date("05312011"), Literal("2011-05-31", datatype=XSD.date)
         )
         # * DO NOT SUPPORT SHORT YEARS
         self.assertEqual(make_date("11/05"), None)

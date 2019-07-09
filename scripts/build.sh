@@ -56,11 +56,11 @@ mkdir ttl || log "Overwriting files in ttl/"
 # file="${DATADIR}/pdm-2019.fasta"
 # log "Loading $file"
 # time d79 load_fasta "$file" --tag="pdm-2019" --format="turtle" --delimiter="|" --rdf="ttl/pdm-2019.ttl"
-#
-#
-# file="${DATADIR}/influenza_na.dat"
-# log "Loading IVR data dump from '$file'"
-# time d79 load_strains "$file" --rdf="ttl/influenza_na.ttl" --format="turtle"
+
+
+file="${DATADIR}/influenza_na.dat"
+log "Loading IVR data dump from '$file'"
+time d79 load_strains "$file" --rdf="ttl/influenza_na.ttl" --format="turtle"
 
 
 # file="${DATADIR}/blast.txt"
@@ -75,8 +75,8 @@ mkdir ttl || log "Overwriting files in ttl/"
 # # # # For now just use the existing swine-ids.txt, it is quite good enough
 # # # log "Retrieving all swine Genbank IDs and selected human IDs (saved in gb-id.txt)"
 # # # time q79 ~/src/git/d79/turtles/fetch-swine-gids.ttl > gb.ids
-log "Compiling Genbank records for each of these IDs"
-time d79 load_gbids gb.ids --rdf="ttl/genbank.ttl" --format="turtle"
+# log "Compiling Genbank records for each of these IDs"
+# time d79 load_gbids gb.ids --rdf="ttl/genbank.ttl" --format="turtle"
 
 log $(date)
 log "done"

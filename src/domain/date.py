@@ -26,13 +26,13 @@ class Date:
             uri = Literal(self.year, datatype=XSD.gYear)
         # 2015/05
         elif self.year and self.month and self.day is None:
-            uri = Literal(f"{self.year}/{self.month}", datatype=XSD.gYearMonth)
+            uri = Literal(f"{self.year}-{self.month}", datatype=XSD.gYearMonth)
         # 2015/05/31
         elif self.year and self.month and self.day:
-            uri = Literal(f"{self.year}/{self.month}/{self.day}", datatype=XSD.date)
+            uri = Literal(f"{self.year}-{self.month}-{self.day}", datatype=XSD.date)
         # 05/31
         elif self.year is None and self.month and self.day:
-            uri = Literal(f"{self.month}/{self.day}", datatype=XSD.gMonthDay)
+            uri = Literal(f"{self.month}-{self.day}", datatype=XSD.gMonthDay)
         # 05
         elif self.year is None and self.month and self.day is None:
             uri = Literal(f"{self.month}", datatype=XSD.gMonth)
