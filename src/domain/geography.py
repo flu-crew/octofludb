@@ -61,7 +61,10 @@ state_correction = make_flat_wordfinder(STATE_NAME2ABBR.keys())
 
 def state_to_code(name):
     """ Get the two letter code from a state name. Return None on failure. """
-    name = name.strip()
+    try:
+        name = name.strip()
+    except:
+        return None
     if name.upper() in STATE_ABBR:
         return name.upper()
     name = name.lower().replace(" ", "_")
@@ -389,7 +392,10 @@ country_correction = make_flat_wordfinder(COUNTRY_NAMES)
 
 def country_to_code(name):
     """ Get the ISO 3-letter codes for a country. Return None on failure. """
-    name = name.strip()
+    try:
+        name = name.strip()
+    except:
+        return None
     if name.upper() in COUNTRY_ABBREVIATIONS:
         return name.upper()
     name = name.lower().strip().replace(" ", "_")

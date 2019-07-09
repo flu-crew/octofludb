@@ -2,6 +2,7 @@ import sys
 import math
 from rdflib import ConjunctiveGraph, Literal
 import src.domain.flu as flu
+import src.domain.geography as geo
 from src.nomenclature import (
     P,
     O,
@@ -10,9 +11,10 @@ from src.nomenclature import (
     make_date,
     make_literal,
     make_property,
+    make_usa_state_uri,
     make_country_uri,
 )
-from src.util import replace, fixLookup, make_maybe_add
+from src.util import replace, fixLookup, make_maybe_add, rmNone
 import src.parser as p
 from src.fasta import parse_fasta, print_fasta, graph_fasta
 import src.entrez as entrez
@@ -103,9 +105,45 @@ def infer_property(x):
         return P.gisaid_seqid
     return None
 
+def get_field_handler(xs):
+    """
+    Infer the type of the elements in a list
+    Return a tuple containing 1) a function mapping them to a URI and 2) a type name
+    """
+    N = len(xs)
+    try:
+        # if this is an excel date column, interpet it as such
+        str(xs[0].date())
+        return (make_date, "date")
+    except:
+        pass
+    countries = [(geo.country_to_code(x) != None) for x in xs]
+    states = [(geo.state_to_code(x) != None) for x in xs]
+    dates = [(make_date(x) != None) for x in xs] 
+    if sum(countries)/N > 0.8:
+        return (make_country_uri, "country")
+    elif sum(states)/N > 0.8: 
+        return (make_usa_state_uri, "state")
+    elif sum(dates)/N > 0.8:
+        return (make_date, "date")
+    else:
+        return (Literal, "auto")
 
-def load_excel(g: ConjunctiveGraph, filename: str, tag=None) -> None:
+def load_excel(g: ConjunctiveGraph, filename: str, tag=None, handlers=None) -> None:
     d = pd.read_excel(filename)
+
+    handler = dict()
+    relation = dict()
+    print(f"Inferring column types for {filename}", file=sys.stderr)
+    for (i,colname) in enumerate(d):
+        if i == 0: # skip the id column
+            continue
+        vals = rmNone(d[colname])
+        handler[colname] = get_field_handler(vals)
+        # the predict shouldn't have spaces and I convert to lower case to avoid
+        # case mismatches in lookups
+        relation[colname] = make_property(colname.lower().replace(" ", "_"))
+        print(f" - '{colname}':{handler[colname][1]} as '{str(relation[colname])}'", file=sys.stderr)
 
     for i in tqdm(range(d.shape[0])):
         s = d.iloc[i][0]  # subject - the id from the table's key column
@@ -127,18 +165,17 @@ def load_excel(g: ConjunctiveGraph, filename: str, tag=None) -> None:
             g.add((uri, prop, Literal(s)))
 
         # associate the ID with each element in the row with column names as predicates
-        for j in range(1, d.shape[1]):
-            p = d.columns[j]  # predicate - the column name
+        for (j, colname) in enumerate(d):
+            if j == 0: # skip the id column
+                continue
+            p = relation[colname] # predicate - based on the column name
             o = d.iloc[i][j]  # object - the value in the cell
-
-            # the predict shouldn't have spaces and I convert to lower case to avoid
-            # case mismatches in lookups
-            p = p.lower().replace(" ", "_")
 
             #  print(f'{type(o)} {str(o)} {type(o) == "float" and math.isnan(o)}')
             #  if not (o == None or (type(o) == "float" and math.isnan(o))):
             if not (o == None or o != o):
-                g.add((uri, make_property(p), make_literal(o)))
+                o = handler[colname][0](o)
+                g.add((uri, p, make_literal(o)))
 
     g.commit()
 

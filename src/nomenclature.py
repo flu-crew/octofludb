@@ -53,6 +53,12 @@ def make_country_uri(countryStr):
 
 def make_date(dateStr):
     try:
+        # Parse this to a date if it is of the pandas date type
+        # This will remove any time annotation
+        dateStr = str(dateStr.date())
+    except:
+        pass
+    try:
         uri = date.p_any_date.parse_strict(dateStr).as_uri()
     except:
         uri = None

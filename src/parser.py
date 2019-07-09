@@ -226,6 +226,12 @@ def groupSortToOrderedDict(xs):
 
     return OrderedDict(ys)
 
+def maybe_parse(p, x):
+    try:
+        return p.parse_strict(x)
+    except:
+        return None
+
 
 def guess_fields(fieldss: List[List[str]], parserSet=None):
     for fields in fieldss:

@@ -44,25 +44,25 @@ mkdir ttl || log "Overwriting files in ttl/"
 # tag="vaccine"
 # log "Loading strain recommended by WHO for vaccines from '$file' as tag '$tag'"
 # time d79 tag "$file" "$tag" --rdf="ttl/$tag.ttl" --format="turtle"
-#
-#
-# tag="fair"
-# log "Loading fair data from files '${DATADIR}/fair/201[678].xlsx'' as tag '$tag'"
-# time d79 load_excel "${DATADIR}/fair/2016.xlsx" --rdf="ttl/fair2016.ttl" --tag="fair" --format="turtle"
-# time d79 load_excel "${DATADIR}/fair/2017.xlsx" --rdf="ttl/fair2017.ttl" --tag="fair" --format="turtle"
-# time d79 load_excel "${DATADIR}/fair/2018.xlsx" --rdf="ttl/fair2018.ttl" --tag="fair" --format="turtle"
-#
-#
+
+
+tag="fair"
+log "Loading fair data from files '${DATADIR}/fair/201[678].xlsx'' as tag '$tag'"
+time d79 load_excel "${DATADIR}/fair/2016.xlsx" --rdf="ttl/fair2016.ttl" --tag="fair" --format="turtle"
+time d79 load_excel "${DATADIR}/fair/2017.xlsx" --rdf="ttl/fair2017.ttl" --tag="fair" --format="turtle"
+time d79 load_excel "${DATADIR}/fair/2018.xlsx" --rdf="ttl/fair2018.ttl" --tag="fair" --format="turtle"
+
+
 # file="${DATADIR}/pdm-2019.fasta"
 # log "Loading $file"
 # time d79 load_fasta "$file" --tag="pdm-2019" --format="turtle" --delimiter="|" --rdf="ttl/pdm-2019.ttl"
-
-
-file="${DATADIR}/influenza_na.dat"
-log "Loading IVR data dump from '$file'"
-time d79 load_strains "$file" --rdf="ttl/influenza_na.ttl" --format="turtle"
-
-
+#
+#
+# file="${DATADIR}/influenza_na.dat"
+# log "Loading IVR data dump from '$file'"
+# time d79 load_strains "$file" --rdf="ttl/influenza_na.ttl" --format="turtle"
+#
+#
 # file="${DATADIR}/blast.txt"
 # log "Loading blast results from $file"
 # time d79 load_blast "$file" --tag="blast" --rdf="ttl/blast.ttl"  --format="turtle"
