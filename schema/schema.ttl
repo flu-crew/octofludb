@@ -1,6 +1,43 @@
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX f: <https://flucrew.org/term/>
 
+f:h1 rdfs:subPropertyOf f:ha .
+f:h2 rdfs:subPropertyOf f:ha .
+f:h3 rdfs:subPropertyOf f:ha .
+f:h4 rdfs:subPropertyOf f:ha .
+f:h5 rdfs:subPropertyOf f:ha .
+f:h6 rdfs:subPropertyOf f:ha .
+f:h7 rdfs:subPropertyOf f:ha .
+f:h8 rdfs:subPropertyOf f:ha .
+f:h9 rdfs:subPropertyOf f:ha .
+f:h10 rdfs:subPropertyOf f:ha .
+f:h11 rdfs:subPropertyOf f:ha .
+f:h12 rdfs:subPropertyOf f:ha .
+f:h13 rdfs:subPropertyOf f:ha .
+f:h14 rdfs:subPropertyOf f:ha .
+f:h15 rdfs:subPropertyOf f:ha .
+f:h16 rdfs:subPropertyOf f:ha .
+f:h17 rdfs:subPropertyOf f:ha .
+f:h18 rdfs:subPropertyOf f:ha .
+
+f:n1 rdfs:subPropertyOf f:na .
+f:n2 rdfs:subPropertyOf f:na .
+f:n3 rdfs:subPropertyOf f:na .
+f:n4 rdfs:subPropertyOf f:na .
+f:n5 rdfs:subPropertyOf f:na .
+f:n6 rdfs:subPropertyOf f:na .
+f:n7 rdfs:subPropertyOf f:na .
+f:n8 rdfs:subPropertyOf f:na .
+f:n9 rdfs:subPropertyOf f:na .
+f:n10 rdfs:subPropertyOf f:na .
+f:n11 rdfs:subPropertyOf f:na .
+
+f:pb2 rdfs:subPropertyOf f:internalGene .
+f:pb1 rdfs:subPropertyOf f:internalGene .
+f:pa rdfs:subPropertyOf f:internalGene .
+f:np rdfs:subPropertyOf f:internalGene .
+f:m rdfs:subPropertyOf f:internalGene .
+f:ns1 rdfs:subPropertyOf f:internalGene .
 
 # Properties with the strain domain are not fields in the class object, using
 # them to describe a subject leads to the inference that the subject is a
