@@ -13,6 +13,12 @@ nt = rdflib.Namespace("https://flucrew.org/term/")
 nusa = rdflib.Namespace("https://flucrew.org/geo/usa/")
 ncountry = rdflib.Namespace("https://flucrew.org/geo/country/")
 
+manager = rdflib.namespace.NamespaceManager(rdflib.Graph())
+manager.bind("fid", ni)
+manager.bind("f", nt)
+manager.bind("usa", nusa)
+manager.bind("world", ncountry)
+
 
 def uidgen(base="_", pad=3, start=0):
     base = base.replace(" ", "_")
@@ -56,7 +62,7 @@ def make_date(dateStr):
         # Parse this to a date if it is of the pandas date type
         # This will remove any time annotation
         dateStr = str(dateStr.date())
-    except:
+    except AttributeError:
         pass
     try:
         uri = date.p_any_date.parse_strict(dateStr).as_uri()

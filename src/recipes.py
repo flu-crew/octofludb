@@ -29,7 +29,7 @@ STRAIN_PAT = re.compile("[ABCD]/[^()\[\]]+")
 BARCODE_PAT = re.compile("A0\d{7}|\d+TOSU\d+|EPI_ISL_\d+")
 
 
-def load_fasta(g, filename, tag=None, columns=None, sep="|", fastaout=False):
+def load_fasta(g, filename, tag=None, sep="|", fastaout=False):
     entries = parse_fasta(filename, sep=sep)
     if fastaout:
         print_fasta(entries, tag=tag)

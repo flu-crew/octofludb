@@ -4,30 +4,28 @@
 Build a local SPARQL database.
 
 Usage:
-  d79 load_strains <table_filename> [<db>] [--rdf=<rdf>] [--format=<format>]
-  d79 tag <idlist_filename> <tag> [<db>]  [--rdf=<rdf>] [--format=<format>]
-  d79 load_excel <table_filename> [<db>] [--tag=<tag>] [--rdf=<rdf>] [--format=<format>]
-  d79 load_gbids <gb_list_filename> [<db>] [--rdf=<rdf>] [--format=<format>]
-  d79 load_blast <blast_filename> [<db>] [--tag=<tag>] [--rdf=<rdf>] [--format=<format>]
-  d79 load_fasta <fasta_filename> [<db>] [--tag=<tag>] [--write-fasta] [--rdf=<rdf>] [--format=<format>] [--columns=<columns>] [--delimiter=<del>]
-  d79 serialize <serial_filename> <db> [--format=<format>]
+  d79 load_strains <table_filename> [<db>] [--rdf=<rdf>]
+  d79 tag <idlist_filename> <tag> [<db>]  [--rdf=<rdf>]
+  d79 load_excel <table_filename> [<db>] [--tag=<tag>] [--rdf=<rdf>]
+  d79 load_gbids <gb_list_filename> [<db>] [--rdf=<rdf>]
+  d79 load_blast <blast_filename> [<db>] [--tag=<tag>] [--rdf=<rdf>]
+  d79 load_fasta <fasta_filename> [<db>] [--tag=<tag>] [--write-fasta] [--rdf=<rdf>] [--delimiter=<del>]
 
 Options:
   -h --help               Show this screen.
   -k --key-type <key>     The subject type to merge on [default:"strain"]
-  -f --format <format>    The RDF format ("turtle" or "ntriples")
   --delimiter <del>       Field delimiter for FASTA headers [default:"|"]
   --write-fasta           Write output as a FASTA to STDOUT
-  -c --columns <columns>  Columns of a table for fields in a header (e.g., "sid[host,date,gid],gid[clade],host,date,clade|(sid,type,strain_id);(gid,type,barcode);(gid,type,genbank_id)"
 """
 
-import sys
 import os
+import sys
 from docopt import docopt
-from rdflib import ConjunctiveGraph
+from rdflib import Graph
 import src.recipes as recipe
 import src.entrez as entrez
 import src.genbank as gb
+from src.nomenclature import manager
 import signal
 
 if __name__ == "__main__":
@@ -37,11 +35,7 @@ if __name__ == "__main__":
 
     args = docopt(__doc__, version="build.sh 0.0.1")
 
-    if args["<db>"]:
-        g = ConjunctiveGraph(store="Sleepycat")
-        g.open(args["<db>"], create=True)
-    else:
-        g = ConjunctiveGraph()
+    g = Graph(namespace_manager=manager)
 
     if args["load_strains"]:
         # load big table from IVR, with roughly the following format:
@@ -67,21 +61,24 @@ if __name__ == "__main__":
         recipe.load_blast(g, args["<blast_filename>"], tag=args["--tag"])
 
     if args["load_fasta"]:
+        if not args["--delimiter"]:
+            sep="|"
+        else:
+            sep=args["--delimiter"]
         recipe.load_fasta(
             g,
             args["<fasta_filename>"],
             tag=args["--tag"],
-            columns=args["--columns"],
-            sep=args["--delimiter"],
+            sep=sep,
             fastaout=args["--write-fasta"],
         )
 
     g.commit() # just in case we missed anything
 
-    if args["serialize"]:
-        g.serialize(destination=args["<serial_filename>"], format=args["--format"])
-
     if args["--rdf"]:
-        g.serialize(destination=args["--rdf"], format=args["--format"])
+        g.serialize(destination=args["--rdf"], format="turtle")
+    elif not args["--write-fasta"]:
+        for l in g.serialize(format="turtle").splitlines():
+            print(l.decode("ascii"))
 
     g.close()

@@ -4,7 +4,7 @@ import src.parser as parser
 import src.util as U
 from rdflib import Literal
 from src.hash import chksum
-from src.nomenclature import P, O, make_uri, make_literal, make_usa_state_uri, make_date
+from src.nomenclature import P, O, make_uri, make_literal, make_usa_state_uri, make_country_uri, make_date
 from tqdm import tqdm
 
 fastaHeaderFieldParsers = (
@@ -12,9 +12,9 @@ fastaHeaderFieldParsers = (
     ("A0", parser.p_A0),
     ("tosu", parser.p_tosu),
     ("gisaid_isolate", parser.p_gisaid_isolate),
-    ("strain", parser.p_strain),
+    ("strain_name", parser.p_strain),
     # sequence ids
-    ("gb", parser.p_gb),
+    ("genbank_id", parser.p_gb),
     ("gisaid_seqid", parser.p_gisaid_seqid),
     # other flu info
     ("global_clade", parser.p_global_clade),
@@ -71,8 +71,8 @@ def graph_fasta(g, fieldss, tag=None):
     # - Link segment ID to each segment property
     fastaRelationSets = [
         parser.RelationSet(
-            {"strain", "A0", "tosu", "gisaid_isolate"},
-            {
+            subjects={"strain_name", "A0", "tosu", "gisaid_isolate"},
+            relations={
                 "global_clade": P.global_clade,
                 "constellation": P.constellation,
                 "host": P.host,
@@ -80,43 +80,43 @@ def graph_fasta(g, fieldss, tag=None):
                 "state": P.state,
                 "country": P.country,
                 "subtype": P.subtype,
-                "gb": P.has_segment,
+                "genbank_id": P.has_segment,
                 "gisaid_seqid": P.has_segment,
                 "dnaseq": P.has_segment,
             },
-            {},
-            {
+            generators={},
+            objectifier={
                 "global_clade": Literal,
                 "constellation": Literal,
                 "host": Literal,
                 "date": make_date,
                 "state": make_usa_state_uri,
-                "country": Literal,
+                "country": U.compose(lambda x: x[0], make_country_uri),
                 "subtype": Literal,
-                "gb": make_uri,
+                "genbank_id": make_uri,
                 "gisaid_seqid": make_uri,
                 "dnaseq": U.compose(make_uri, chksum),
             },
-            "unknown_strain",
+            default="unknown_strain",
         ),
         parser.RelationSet(
-            {"gb", "gisaid_seqid", "dnaseq"},
-            {
+            subjects={"genbank_id", "gisaid_seqid"},
+            relations={
                 "segment_name": P.segment_name,
                 "segment_number": P.segment_number,
                 "proseq": P.proseq,
                 "dnaseq": P.dnaseq,
                 "unknown": P.unknown_unknown,
             },
-            {"dnaseq": ("md5", U.compose(make_uri, chksum))},
-            {
+            generators={"dnaseq": ("chksum", U.compose(make_uri, chksum))},
+            objectifier={
                 "segment_name": Literal,
                 "segment_number": Literal,
                 "proseq": Literal,
                 "dnaseq": Literal,
                 "unknown": Literal,
             },
-            "unknown_sequence",
+            default="unknown_sequence",
         ),
     ]
 
@@ -128,7 +128,7 @@ def graph_fasta(g, fieldss, tag=None):
                 # use the chksum of the protein sequence as a URI
                 uri = make_uri(chksum(v))
                 for (t2, v2) in fields:
-                    if t2 in {"gb", "gisaid_seqid"}:
+                    if t2 in {"genbank_id", "gisaid_seqid"}:
                         # link the segment ids to the protein feature
                         g.add((make_uri(v2), P.has_feature, uri))
                         # link the protein feature to the protein sequence
@@ -136,7 +136,7 @@ def graph_fasta(g, fieldss, tag=None):
             if t == "dnaseq":
                 uri = make_uri(chksum(v))
                 for (t2, v2) in fields:
-                    if t2 in {"gb", "gisaid_seqid"}:
+                    if t2 in {"genbank_id", "gisaid_seqid"}:
                         g.add((make_uri(v2), P.sameAs, uri))
 
     # - Generate additional triples
