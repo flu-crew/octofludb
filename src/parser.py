@@ -1,11 +1,13 @@
 import parsec as p
 import re
+import rdflib
+import sys
 from collections import defaultdict, OrderedDict, namedtuple
 from typing import List
 
 import src.util as U
 
-from src.nomenclature import P, O, make_uri, make_literal, make_usa_state_uri
+from src.nomenclature import P, O, make_uri, make_literal, make_property, make_usa_state_uri
 
 import src.domain.geography as geo
 from src.domain.date import p_year, p_longyear, p_month, p_day, p_date, p_any_date
@@ -124,7 +126,7 @@ def p_country(text, index=0):
 
 
 RelationSet = namedtuple(
-    "RelationSet", ["subjects", "relations", "generators", "objectify", "default"]
+    "RelationSet", ["subjects", "relations", "generators", "objectifier", "default"]
 )
 
 
@@ -170,30 +172,35 @@ class RdfBuilder:
 
         # make URIs for each relation level
         for r in self.relation_sets:
-            if not r.subjects & fieldSet:
-                genfield = set(r.generators.keys()) & fieldSet
-                if genfield:
-                    for (k, v) in fields:
-                        if k in genfield:
-                            default = r.generators[k][0]
-                            uri = r.generators[k][1](v)
-                            fields.append((default, uri))
-                            r.subjects.add(default)
-                            fieldSet.add(default)
-                else:
-                    uri = "e" + str(idx) + "_" + str(hash(str(fields)))
-                    default = r.default
-                    fields.append((r.default, uri))
-                    r.subjects.add(r.default)
-                    fieldSet.add(r.default)
+            #  print(f"> r.subjects: {r.subjects}  | fieldSet: {fieldSet}")
+            genfield = set(r.generators.keys()) & fieldSet
+            #  print(f"genfield: {genfield}")
+            if genfield:
+                for (k, v) in fields:
+                    #  print(f" k={k} v={v}")
+                    if k in genfield:
+                        default = r.generators[k][0]
+                        uri = r.generators[k][1](v)
+                        fields.append((default, uri))
+                        r.subjects.add(default)
+                        fieldSet.add(default)
+            if not r.subjects:
+                uri = "e" + str(idx) + "_" + str(hash(str(fields)))
+                default = r.default
+                fields.append((r.default, uri))
+                r.subjects.add(r.default)
+                fieldSet.add(r.default)
 
         for k, v in fields:
             # make hierarchical relations
             for r in self.relation_sets:
                 if k in r.subjects:
+                    uri = make_uri(v)
+                    if not isinstance(v, rdflib.term.URIRef):
+                        g.add((uri, make_property(k), make_literal(v)))
                     for k_, v_ in fields:
                         if k_ in r.relations:
-                            g.add((make_uri(v), r.relations[k_], r.objectify[k_](v_)))
+                            g.add((uri, r.relations[k_], r.objectifier[k_](v_)))
 
             # tag top-level fields
             if self.tag and k in self.relation_sets[0][0]:
