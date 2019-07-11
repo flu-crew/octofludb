@@ -95,7 +95,6 @@ class P:
     # standard semantic web predicates
     name = RDFS.label
     sameAs = OWL.sameAs
-    has_segment = nt.has_segment
     unknown_unknown = nt.unknown
     chksum = nt.chksum
     # flu relations
@@ -129,6 +128,7 @@ class P:
     barcode = nt.barcode
     gisaid_isolate = nt.gisaid_isolate
     has_segment = nt.has_segment
+    has_genbank = nt.has_genbank
     # the local curated data
     ref_reason = nt.ref_reason
     subtype = nt.subtype

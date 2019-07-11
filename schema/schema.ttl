@@ -39,6 +39,51 @@ f:np rdfs:subPropertyOf f:internalGene .
 f:m rdfs:subPropertyOf f:internalGene .
 f:ns1 rdfs:subPropertyOf f:internalGene .
 
+# These relationships allow a strain to be directly linked to its child
+# segments. This is important since all identical sequences are merged into a
+# giant SameAs relation through DNA chksums.
+f:pb2_genbank rdfs:subPropertyOf f:has_genbank .
+f:pb1_genbank rdfs:subPropertyOf f:has_genbank .
+f:pa_genbank rdfs:subPropertyOf f:has_genbank .
+f:np_genbank rdfs:subPropertyOf f:has_genbank .
+f:m_genbank rdfs:subPropertyOf f:has_genbank .
+f:ns1_genbank rdfs:subPropertyOf f:has_genbank .
+f:m_genbank rdfs:subPropertyOf f:has_genbank .
+f:ha_genbank rdfs:subPropertyOf f:has_genbank .
+f:na_genbank rdfs:subPropertyOf f:has_genbank .
+f:h_genbank rdfs:subPropertyOf f:has_genbank . # aka
+f:n_genbank rdfs:subPropertyOf f:has_genbank . # aka
+# H* and N* are subProperties of HA and NA
+f:h1_genbank rdfs:subPropertyOf f:ha_genbank .
+f:h2_genbank rdfs:subPropertyOf f:ha_genbank .
+f:h3_genbank rdfs:subPropertyOf f:ha_genbank .
+f:h4_genbank rdfs:subPropertyOf f:ha_genbank .
+f:h5_genbank rdfs:subPropertyOf f:ha_genbank .
+f:h6_genbank rdfs:subPropertyOf f:ha_genbank .
+f:h7_genbank rdfs:subPropertyOf f:ha_genbank .
+f:h8_genbank rdfs:subPropertyOf f:ha_genbank .
+f:h9_genbank rdfs:subPropertyOf f:ha_genbank .
+f:h10_genbank rdfs:subPropertyOf f:ha_genbank .
+f:h11_genbank rdfs:subPropertyOf f:ha_genbank .
+f:h12_genbank rdfs:subPropertyOf f:ha_genbank .
+f:h13_genbank rdfs:subPropertyOf f:ha_genbank .
+f:h14_genbank rdfs:subPropertyOf f:ha_genbank .
+f:h15_genbank rdfs:subPropertyOf f:ha_genbank .
+f:h16_genbank rdfs:subPropertyOf f:ha_genbank .
+f:h17_genbank rdfs:subPropertyOf f:ha_genbank .
+f:h18_genbank rdfs:subPropertyOf f:ha_genbank .
+f:n1_genbank rdfs:subPropertyOf f:na_genbank .
+f:n2_genbank rdfs:subPropertyOf f:na_genbank .
+f:n3_genbank rdfs:subPropertyOf f:na_genbank .
+f:n4_genbank rdfs:subPropertyOf f:na_genbank .
+f:n5_genbank rdfs:subPropertyOf f:na_genbank .
+f:n6_genbank rdfs:subPropertyOf f:na_genbank .
+f:n7_genbank rdfs:subPropertyOf f:na_genbank .
+f:n8_genbank rdfs:subPropertyOf f:na_genbank .
+f:n9_genbank rdfs:subPropertyOf f:na_genbank .
+f:n10_genbank rdfs:subPropertyOf f:na_genbank .
+f:n11_genbank rdfs:subPropertyOf f:na_genbank .
+
 # Properties with the strain domain are not fields in the class object, using
 # them to describe a subject leads to the inference that the subject is a
 # strain. That is, these properties must only be used with subjects that are

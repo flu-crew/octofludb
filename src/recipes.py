@@ -183,14 +183,15 @@ def load_excel(g: ConjunctiveGraph, filename: str, tag=None, handlers=None) -> N
 def load_influenza_na(g: ConjunctiveGraph, filename: str) -> None:
     with open(filename, "r") as f:
         field = dict()
-        for (i, row) in tqdm(enumerate(i, f.readlines())):
+        for (i, row) in enumerate(tqdm(f.readlines())):
             process_influenza_row(g, row)
             if i % 1000:
                 g.commit()
         g.commit()
 
 def process_influenza_row(g: ConjunctiveGraph, line: dict)->None:
-    els = row.split("\t")
+    els = line.split("\t")
+    field = dict()
     try:
         field["gb"] = els[0]
         field["host"] = els[1]
@@ -231,6 +232,10 @@ def process_influenza_row(g: ConjunctiveGraph, line: dict)->None:
         strain_uid = make_uri(strain)
         maybe_add = make_maybe_add(g, field, strain_uid)
         g.add((strain_uid, P.has_segment, gb_uid))
+        # This field stores an unambiguous link to the Genbank ID. gb_uid is
+        # SameAs with the sequence checksum, thus creating a many strains to
+        # one Genbank sitution. has_genbank can resolve these duplicates.
+        g.add((strain_uid, P.has_genbank, Literal(field["gb"])))
         g.add((strain_uid, P.strain_name, Literal(strain)))
 
         barcode_match = re.search(BARCODE_PAT, strain)
