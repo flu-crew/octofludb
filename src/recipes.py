@@ -17,6 +17,7 @@ from src.nomenclature import (
 from src.util import replace, fixLookup, make_maybe_add, rmNone
 import src.parser as p
 from src.fasta import parse_fasta, print_fasta, graph_fasta
+import src.colors as colors
 import src.entrez as entrez
 import re
 import pandas as pd
@@ -143,7 +144,7 @@ def load_excel(g: ConjunctiveGraph, filename: str, tag=None, handlers=None) -> N
         # the predict shouldn't have spaces and I convert to lower case to avoid
         # case mismatches in lookups
         relation[colname] = make_property(colname.lower().replace(" ", "_"))
-        print(f" - '{colname}':{handler[colname][1]} as '{str(relation[colname])}'", file=sys.stderr)
+        print(f" - '{colname}':{colors.good(handler[colname][1])} as '{str(relation[colname])}'", file=sys.stderr)
 
     for i in tqdm(range(d.shape[0])):
         s = d.iloc[i][0]  # subject - the id from the table's key column
