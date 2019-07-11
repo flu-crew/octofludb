@@ -18,6 +18,7 @@ Options:
 from SPARQLWrapper import SPARQLWrapper, JSON
 from docopt import docopt
 import os
+import sys
 import signal
 
 if __name__ == "__main__":
@@ -55,7 +56,13 @@ if __name__ == "__main__":
         header_fields = results["head"]["vars"][:-1]
         seq_field = results["head"]["vars"][-1]
         for row in results["results"]["bindings"]:
-            header = "|".join(row[field]["value"] for field in header_fields)
+            fields = []
+            for f in header_fields:
+                if f in row:
+                    fields.append(row[f]["value"])
+                else:
+                    fields.append("")
+            header = "|".join(fields)
             sequence = row[seq_field]["value"]
             print(">" + header)
             print(sequence)
