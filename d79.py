@@ -79,6 +79,6 @@ if __name__ == "__main__":
         g.serialize(destination=args["--rdf"], format="turtle")
     elif not args["--write-fasta"]:
         for l in g.serialize(format="turtle").splitlines():
-            print(l.decode("ascii"))
+            print(l.decode("utf-8"))
 
     g.close()
