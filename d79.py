@@ -4,12 +4,12 @@
 Build a local SPARQL database.
 
 Usage:
-  d79 load_strains <table_filename> [<db>]
-  d79 tag <idlist_filename> <tag> [<db>]
-  d79 load_excel <table_filename> [<db>] [--tag=<tag>]
-  d79 load_gbids <gb_list_filename> [<db>]
-  d79 load_blast <blast_filename> [<db>] [--tag=<tag>]
-  d79 load_fasta <fasta_filename> [<db>] [--tag=<tag>] [--delimiter=<del>]
+  d79 load_strains <filename> [<db>]
+  d79 tag <filename> <tag> [<db>]
+  d79 load_excel <filename> [<db>] [--tag=<tag>]
+  d79 load_gbids <filename> [<db>]
+  d79 load_blast <filename> [<db>] [--tag=<tag>]
+  d79 load_fasta <filename> [<db>] [--tag=<tag>] [--delimiter=<del>]
 
 Options:
   -h --help               Show this screen.
@@ -42,13 +42,14 @@ if __name__ == "__main__":
     if args["load_strains"]:
         # load big table from IVR, with roughly the following format:
         # (gb | host | ? | subtype | date | ? | "Influenza A virus (<strain>(<subtype>))" | ...)
-        recipe.load_influenza_na(g, args["<table_filename>"])
+        recipe.load_influenza_na(g, args["<filename>"])
 
     if args["tag"]:
-        recipe.tag(g, args["<idlist_filename>"], args["<tag>"])
+        recipe.tag(g, args["<filename>"], args["<tag>"])
 
     if args["load_gbids"]:
-        with open(args["<gb_list_filename>"], "r") as f:
+        log(f"Retrieving and parsing genbank ids from '{args['<filename>']}'")
+        with open(args["<filename>"], "r") as f:
             gbids = [g.strip() for g in f.readlines()]
             for gb_metas in entrez.get_gbs(gbids):
                 for gb_meta in gb_metas:
@@ -57,13 +58,14 @@ if __name__ == "__main__":
                 g.commit()
 
     if args["load_excel"]:
-        classes.Table(args["<table_filename>"], tag=args["--tag"]).connect(g)
+        classes.Table(args["<filename>"], tag=args["--tag"]).connect(g)
 
     if args["load_blast"]:
-        recipe.load_blast(g, args["<blast_filename>"], tag=args["--tag"])
+        log(f"Retrieving and parsing blast results from '{args['<filename>']}'")
+        recipe.load_blast(g, args["<filename>"], tag=args["--tag"])
 
     if args["load_fasta"]:
-        classes.Ragged(args["<fasta_filename>"], tag=args["--tag"]).connect(g)
+        classes.Ragged(args["<filename>"], tag=args["--tag"]).connect(g)
 
     g.commit() # just in case we missed anything
 
