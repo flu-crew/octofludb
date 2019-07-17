@@ -1,38 +1,10 @@
 import parsec as p
 import re
 import rdflib
-import sys
-from collections import defaultdict, OrderedDict, namedtuple
+from collections import defaultdict, namedtuple
 from typing import List
 
-import src.util as U
-
 from src.nomenclature import P, O, make_uri, make_literal, make_property, make_usa_state_uri
-
-import src.domain.geography as geo
-from src.domain.date import p_year, p_longyear, p_month, p_day, p_date, p_any_date
-from src.domain.flu import (
-    p_HA,
-    p_NA,
-    p_internal_gene,
-    p_segment,
-    p_segment_number,
-    p_HANA,
-    p_strain_obj,
-    p_constellation,
-)
-from src.domain.identifier import (
-    p_global_clade,
-    p_A0,
-    p_tosu,
-    p_gisaid_isolate,
-    p_strain,
-    p_gb,
-    p_gisaid_seqid,
-)
-
-from src.domain.animal import p_host
-from src.domain.sequence import p_dnaseq, p_proseq
 
 # parsec operators:
 #  - "|" choice, any matching substring, even partially, is
@@ -55,7 +27,7 @@ def parse_match(parser, text):
 def wordset(words, label, f=lambda x: x.lower().replace(" ", "_")):
     """
   Create a log(n) parser for a set of n strings.
-  @param "label" is a arbitrary name for the wordset that is used in error messages 
+  @param "label" is a arbitrary name for the wordset that is used in error messages
   @param "f" is a function used to convert matching strings in the wordset and text (e.g to match on lower case).
   """
     d = defaultdict(set)
@@ -109,22 +81,6 @@ def splitMatchFirst(psr: p.Parser, splitStr: str, text: str):
     return None
 
 
-p_usa_state = wordset(
-    words=list(geo.STATE_NAME2ABBR.values()) + list(geo.STATE_NAME2ABBR.keys()),
-    label="usa_state",
-)
-
-
-@p.Parser
-def p_country(text, index=0):
-    if geo.country_to_code(text):
-        return p.Value.success(index + len(text), text)
-    else:
-        return p.Value.failure(
-            index, "I do not currenlty recognize this country, take it up with the UN"
-        )
-
-
 RelationSet = namedtuple(
     "RelationSet", ["subjects", "relations", "generators", "objectifier", "default"]
 )
@@ -134,20 +90,18 @@ class RdfBuilder:
     def __init__(
         self,
         relation_sets=[],  # (<set1>, <set2>)), both sets include names from the field parser,
-        munge_map={},  # (<field>, <function>), munge <field> with <function> (e.g. to correct spelling)
         sub_builders=[],  # (<field>, <function>), create new triples from <field> using <function>,
         unknown_tag="unknown",
         tag=None,
     ):
         self.relation_sets = relation_sets
-        self.munge_map = munge_map
         self.sub_builders = sub_builders
         self.unknown_tag = unknown_tag
         self.tag = tag
 
     def build(self, g, fieldss):
         """
-        g is a 
+        g is a
         """
 
         for i, fields in enumerate(fieldss):
@@ -162,11 +116,6 @@ class RdfBuilder:
             t, v = fields[i]
             if t is None:
                 fields[i] = (self.unknown_tag, v)
-
-        for i in range(len(fields)):
-            t, v = fields[i]
-            if t in self.munge_map:
-                fields[i] = (t, self.munge_map[t](v))
 
         fieldSet = {x[0] for x in fields}
 
@@ -214,30 +163,9 @@ class RdfBuilder:
 def resolve(xss):
     """
     For now I resolve ambiguities by just taking the first matching parser.
-    Eventually I can replace this with real context-dependent choices. 
+    Eventually I can replace this with real context-dependent choices.
     """
     return ([(x[0][0], x[0][1]) for x in xs] for xs in xss)
-
-
-def groupSortToOrderedDict(xs):
-    """
-    condense :: [(Key, Val)] -> {Key : [Val]} 
-    """
-    xs.sorted()
-    ys = [(xs[0][0], [xs[0][1]])]
-    for k, v in xs[1:]:
-        if k == ys[-1][0]:
-            ys[-1][1].append(k)
-        else:
-            ys.append((k, [v]))
-
-    return OrderedDict(ys)
-
-def maybe_parse(p, x):
-    try:
-        return p.parse_strict(x)
-    except:
-        return None
 
 
 def guess_fields(fieldss: List[List[str]], parserSet=None):

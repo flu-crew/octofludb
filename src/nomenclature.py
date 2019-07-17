@@ -10,6 +10,7 @@ from src.util import padDigit
 
 ni = rdflib.Namespace("https://flucrew.org/id/")
 nt = rdflib.Namespace("https://flucrew.org/term/")
+ntag = rdflib.Namespace("https://flucrew.org/tag/")
 nusa = rdflib.Namespace("https://flucrew.org/geo/usa/")
 ncountry = rdflib.Namespace("https://flucrew.org/geo/country/")
 
@@ -19,6 +20,18 @@ manager.bind("f", nt)
 manager.bind("usa", nusa)
 manager.bind("world", ncountry)
 
+def make_tag_uri(x):
+    tag = x.strip().replace(" ", "_").lower()
+    tag = url.quote_plus(tag)
+    return ntag.term(tag)
+
+
+def define_subproperty(p1, p2, g):
+    """
+    define p1 as a subproperty of p2 in graph g
+    """
+    if p1 != p2:
+        g.add((p1, RDFS.subPropertyOf, p2))
 
 def uidgen(base="_", pad=3, start=0):
     base = base.replace(" ", "_")
@@ -27,6 +40,8 @@ def uidgen(base="_", pad=3, start=0):
 
 
 def make_uri(x):
+    if not x:
+        return None
     if isinstance(x, rdflib.term.URIRef):
         return x
     else:
@@ -131,12 +146,15 @@ class P:
     has_genbank = nt.has_genbank
     # the local curated data
     ref_reason = nt.ref_reason
-    subtype = nt.subtype
     country = nt.country
     country_name = nt.country_name
     state = nusa.state
+    subtype = nt.subtype
     ha_clade = nt.ha_clade
+    na_clade = nt.na_clade
     date = nt.date
+    time = nt.time
+    file = nt.file
     host = nt.host
     encodes = nt.gene
     # -----------------------------------------------------------------------

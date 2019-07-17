@@ -3,6 +3,7 @@ import math
 from rdflib import ConjunctiveGraph, Literal
 import src.domain.flu as flu
 import src.domain.geography as geo
+import src.classes as classes
 from src.nomenclature import (
     P,
     O,
@@ -14,10 +15,8 @@ from src.nomenclature import (
     make_usa_state_uri,
     make_country_uri,
 )
-from src.util import replace, fixLookup, make_maybe_add, rmNone
+from src.util import replace, fixLookup, make_maybe_add, rmNone, log
 import src.parser as p
-from src.fasta import parse_fasta, print_fasta, graph_fasta
-import src.colors as colors
 import src.entrez as entrez
 import re
 import pandas as pd
@@ -27,13 +26,6 @@ from tqdm import tqdm
 
 STRAIN_PAT = re.compile("[ABCD]/[^()\[\]]+")
 BARCODE_PAT = re.compile("A0\d{7}|\d+TOSU\d+|EPI_ISL_\d+")
-
-
-def load_fasta(g, filename, tag=None, sep="|", fastaout=False):
-    entries = parse_fasta(filename, sep=sep)
-    if fastaout:
-        print_fasta(entries, tag=tag)
-    return graph_fasta(g, entries, tag=tag)
 
 
 def load_blast(g, filename, tag=None):
@@ -91,95 +83,6 @@ def tag(g: ConjunctiveGraph, filename: str, tag: str) -> None:
     g.commit()
 
 
-def infer_property(x):
-    if p.parse_match(p.p_strain, x):
-        return P.strain_name
-    elif p.parse_match(p.p_gisaid_isolate, x):
-        return P.gisaid_isolate
-    elif p.parse_match(p.p_A0, x):
-        return P.barcode
-    elif p.parse_match(p.p_tosu, x):
-        return P.barcode
-    elif p.parse_match(p.p_gb, x):
-        return P.gb
-    elif p.parse_match(p.p_gisaid_seqid, x):
-        return P.gisaid_seqid
-    return None
-
-def get_field_handler(xs):
-    """
-    Infer the type of the elements in a list
-    Return a tuple containing 1) a function mapping them to a URI and 2) a type name
-    """
-    N = len(xs)
-    try:
-        # if this is an excel date column, interpet it as such
-        str(xs[0].date())
-        return (make_date, "date")
-    except:
-        pass
-    countries = [(geo.country_to_code(x) != None) for x in xs]
-    states = [(geo.state_to_code(x) != None) for x in xs]
-    dates = [(make_date(x) != None) for x in xs] 
-    if sum(countries)/N > 0.8:
-        return (make_country_uri, "country")
-    elif sum(states)/N > 0.8: 
-        return (make_usa_state_uri, "state")
-    elif sum(dates)/N > 0.8:
-        return (make_date, "date")
-    else:
-        return (Literal, "auto")
-
-def load_excel(g: ConjunctiveGraph, filename: str, tag=None, handlers=None) -> None:
-    d = pd.read_excel(filename)
-
-    handler = dict()
-    relation = dict()
-    print(f"Inferring column types for {filename}", file=sys.stderr)
-    for (i,colname) in enumerate(d):
-        if i == 0: # skip the id column
-            continue
-        vals = rmNone(d[colname])
-        handler[colname] = get_field_handler(vals)
-        # the predict shouldn't have spaces and I convert to lower case to avoid
-        # case mismatches in lookups
-        relation[colname] = make_property(colname.lower().replace(" ", "_"))
-        print(f" - '{colname}':{colors.good(handler[colname][1])} as '{str(relation[colname])}'", file=sys.stderr)
-
-    for i in tqdm(range(d.shape[0])):
-        s = d.iloc[i][0]  # subject - the id from the table's key column
-        # the subject URI cannot have spaces
-        uri = make_uri(s)
-
-        if tag:
-            g.add((uri, P.tag, Literal(tag)))
-
-        # associate the ID with a name, there may be multiple names for this
-        # entity, due to the sameAs rules.
-        g.add((uri, P.name, Literal(s)))
-
-        # try to determine the type of the ID (e.g., strain, genebank or barcode)
-        # if successful, add a triple linking the id to its type
-        prop = infer_property(s)
-        if prop is not None:
-            # associate the ID with its specific name
-            g.add((uri, prop, Literal(s)))
-
-        # associate the ID with each element in the row with column names as predicates
-        for (j, colname) in enumerate(d):
-            if j == 0: # skip the id column
-                continue
-            p = relation[colname] # predicate - based on the column name
-            o = d.iloc[i][j]  # object - the value in the cell
-
-            #  print(f'{type(o)} {str(o)} {type(o) == "float" and math.isnan(o)}')
-            #  if not (o == None or (type(o) == "float" and math.isnan(o))):
-            if not (o == None or o != o):
-                o = handler[colname][0](o)
-                g.add((uri, p, make_literal(o)))
-
-    g.commit()
-
 def load_influenza_na(g: ConjunctiveGraph, filename: str) -> None:
     with open(filename, "r") as f:
         field = dict()
@@ -200,10 +103,7 @@ def process_influenza_row(g: ConjunctiveGraph, line: dict)->None:
         field["date"] = els[5]
         is_complete = els[10].strip() == "c"
     except IndexError:
-        print(
-            f"Expected 11 columns, found only {len(els)}. This is unexpected and a little frightening.",
-            file=sys.stderr,
-        )
+        log(f"Expected 11 columns, found only {len(els)}. This is unexpected and a little frightening.")
 
     gb_uid = make_uri(field["gb"])
     g.add((gb_uid, P.gb, Literal(field["gb"])))
@@ -259,8 +159,4 @@ def process_influenza_row(g: ConjunctiveGraph, line: dict)->None:
             if date is not None:
                 g.add((strain_uid, P.date, date))
     else:
-        print(
-            f'  could not parse strain: {"|".join(els)}',
-            file=sys.stderr,
-            end="",
-        )
+        log(f'  could not parse strain: {"|".join(els)}', end="")

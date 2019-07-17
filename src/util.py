@@ -1,6 +1,29 @@
 from typing import List
 from rdflib import Literal
+import math
+import sys
 
+def log(msg, end="\n"):
+    print(msg, file=sys.stderr, flush=True, end=end)
+
+def zipGen(x, y):
+    if x is None:
+        x = []
+    if y is None:
+        y = []
+    x += [None] * (len(y) - len(x))
+    y += [None] * (len(x) - len(y))
+    return zip(x,y)
+
+def strOrNone(x):
+    try:
+        if math.isnan(x): 
+            x = None
+    except:
+        pass
+    if x is not None:
+        x = str(x)
+    return(x)
 
 def identity(x):
     x

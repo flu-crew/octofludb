@@ -10,7 +10,7 @@ p_HA = p.regex("H\d+") ^ p.regex("pdmH\d+")
 p_NA = p.regex("N\d+")
 p_internal_gene = p.regex("PB2|PB1|PA|NP|M|NS1")
 p_segment = p_internal_gene ^ p_HA ^ p_NA ^ p.string("HA") ^ p.string("NA")
-p_HANA = p.regex("H\d+N\d+(v)?")
+p_subtype = p.regex("H\d+N\d+(v)?")
 p_constellation = p.regex("[TPV]{6}")
 p_segment_number = p.regex("[1-8]")
 
@@ -59,7 +59,7 @@ def p_s3():
     flutype = yield p.regex("[ABC]") << p.string("/")
     place = yield p_strain_field << p.string("/")
     year = yield p_year
-    subtype = yield p.optional(p.string("(") >> p_HANA << p.string(")"))
+    subtype = yield p.optional(p.string("(") >> p_subtype << p.string(")"))
     return Strain(flutype=flutype, place=place, year=year, subtype=subtype)
 
 
@@ -74,7 +74,7 @@ def p_s4():
     place = yield p_strain_field << p.string("/")
     ident = yield p_strain_field << p.string("/")
     year = yield p_year
-    subtype = yield p.optional(p.string("(") >> p_HANA << p.string(")"))
+    subtype = yield p.optional(p.string("(") >> p_subtype << p.string(")"))
     return Strain(flutype=flutype, place=place, year=year, ident=ident, subtype=subtype)
 
 
@@ -90,7 +90,7 @@ def p_s5():
     place = yield p_strain_field << p.string("/")
     ident = yield p_strain_field << p.string("/")
     year = yield p_year
-    subtype = yield p.optional(p.string("(") >> p_HANA << p.string(")"))
+    subtype = yield p.optional(p.string("(") >> p_subtype << p.string(")"))
     return Strain(
         flutype=flutype, host=host, place=place, year=year, ident=ident, subtype=subtype
     )

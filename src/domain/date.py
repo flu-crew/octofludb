@@ -54,6 +54,7 @@ def p_date_ymd():
     m = yield p_month
     yield p.optional(p.regex("[-/]"))
     d = yield p_day
+    yield p.optional(p.regex(" \d\d:\d\d:\d\d(\.\d+)?"))
     return Date(month=m, day=d, year=y)
 
 
@@ -64,6 +65,7 @@ def p_date_mdy():
     d = yield p_day
     yield p.optional(p.regex("[-/]"))
     y = yield p_longyear
+    yield p.optional(p.regex(" \d\d:\d\d:\d\d(\.\d+)?"))
     return Date(month=m, day=d, year=y)
 
 

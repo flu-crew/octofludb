@@ -4,18 +4,17 @@
 Build a local SPARQL database.
 
 Usage:
-  d79 load_strains <table_filename> [<db>] [--rdf=<rdf>]
-  d79 tag <idlist_filename> <tag> [<db>]  [--rdf=<rdf>]
-  d79 load_excel <table_filename> [<db>] [--tag=<tag>] [--rdf=<rdf>]
-  d79 load_gbids <gb_list_filename> [<db>] [--rdf=<rdf>]
-  d79 load_blast <blast_filename> [<db>] [--tag=<tag>] [--rdf=<rdf>]
-  d79 load_fasta <fasta_filename> [<db>] [--tag=<tag>] [--write-fasta] [--rdf=<rdf>] [--delimiter=<del>]
+  d79 load_strains <table_filename> [<db>]
+  d79 tag <idlist_filename> <tag> [<db>]
+  d79 load_excel <table_filename> [<db>] [--tag=<tag>]
+  d79 load_gbids <gb_list_filename> [<db>]
+  d79 load_blast <blast_filename> [<db>] [--tag=<tag>]
+  d79 load_fasta <fasta_filename> [<db>] [--tag=<tag>] [--delimiter=<del>]
 
 Options:
   -h --help               Show this screen.
   -k --key-type <key>     The subject type to merge on [default:"strain"]
   --delimiter <del>       Field delimiter for FASTA headers [default:"|"]
-  --write-fasta           Write output as a FASTA to STDOUT
 """
 
 import os
@@ -25,8 +24,11 @@ from rdflib import Graph
 import src.recipes as recipe
 import src.entrez as entrez
 import src.genbank as gb
+import src.classes as classes
 from src.nomenclature import manager
 import signal
+from tqdm import tqdm
+from src.util import log
 
 if __name__ == "__main__":
 
@@ -55,30 +57,20 @@ if __name__ == "__main__":
                 g.commit()
 
     if args["load_excel"]:
-        recipe.load_excel(g, args["<table_filename>"], tag=args["--tag"])
+        classes.Table(args["<table_filename>"], tag=args["--tag"]).connect(g)
 
     if args["load_blast"]:
         recipe.load_blast(g, args["<blast_filename>"], tag=args["--tag"])
 
     if args["load_fasta"]:
-        if not args["--delimiter"]:
-            sep="|"
-        else:
-            sep=args["--delimiter"]
-        recipe.load_fasta(
-            g,
-            args["<fasta_filename>"],
-            tag=args["--tag"],
-            sep=sep,
-            fastaout=args["--write-fasta"],
-        )
+        classes.Ragged(args["<fasta_filename>"], tag=args["--tag"]).connect(g)
 
     g.commit() # just in case we missed anything
 
-    if args["--rdf"]:
-        g.serialize(destination=args["--rdf"], format="turtle")
-    elif not args["--write-fasta"]:
-        for l in g.serialize(format="turtle").splitlines():
-            print(l.decode("utf-8"))
+    log("Serializing to turtle format ... ", end="")
+    turtles = g.serialize(format="turtle")
+    log("done")
+    for l in turtles.splitlines():
+        print(l.decode("utf-8"))
 
     g.close()
