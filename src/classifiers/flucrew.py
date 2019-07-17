@@ -100,6 +100,9 @@ class Host(Token):
     typename = "host"
     parser = p_host
 
+    def munge(self, text):
+        return text.lower()
+
 STRAIN_FIELDS = {"date", "country", "state", "host"}
 
 # --- strain tokens ---
@@ -137,9 +140,15 @@ class Barcode(StrainToken):
     typename = "barcode"
     parser = p_tosu ^ p_A0 ^ p_gisaid_isolate
 
+    def munge(self, text):
+        return text.upper()
+
 class Strain(StrainToken):
     typename = "strain_name"
     parser = p_strain
+
+    def munge(self, text):
+        return text.replace(" ", "_")
 
 
 # --- strain attributes ---
@@ -202,9 +211,15 @@ class Genbank(SegmentToken):
     typename = "genbank"
     parser = p_gb
 
+    def munge(self, text):
+        return text.upper()
+
 class GisaidSeqid(SegmentToken):
     typename = "gisaid_seqid"
     parser = p_gisaid_seqid
+
+    def munge(self, text):
+        return text.upper()
 
 
 # --- segment attributes ---
@@ -226,6 +241,9 @@ class Dnaseq(Token):
     typename = "dnaseq"
     parser = p_dnaseq
 
+    def munge(self, text):
+        return text.upper().replace(" ", "")
+
     def relate(self, fields, g):
         uri = make_uri(chksum(self.clean)) 
         g.add((uri, P.dnaseq, Literal(self.clean)))
@@ -246,6 +264,9 @@ class Dnaseq(Token):
 class Proseq(Token):
     typename = "proseq"
     parser = p_proseq
+
+    def munge(self, text):
+        return text.upper().replace(" ", "")
 
     def _has_segment(self, fields):
         for v in fields.values():
