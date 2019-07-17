@@ -15,7 +15,7 @@ from src.nomenclature import (
     make_usa_state_uri,
     make_country_uri,
 )
-from src.util import replace, fixLookup, make_maybe_add, rmNone, log
+from src.util import replace, fixLookup, make_maybe_add, rmNone, log, file_str
 import src.parser as p
 import src.entrez as entrez
 import re
@@ -28,69 +28,58 @@ STRAIN_PAT = re.compile("[ABCD]/[^()\[\]]+")
 BARCODE_PAT = re.compile("A0\d{7}|\d+TOSU\d+|EPI_ISL_\d+")
 
 
-def load_blast(g, filename, tag=None):
-    igen = uidgen(base=f"blast/{filename}", pad=0)
+def load_blast(g, filehandle, tag=None):
+    igen = uidgen(base=f"blast/{file_str(filehandle)}", pad=0)
 
-    with open(filename, "r") as f:
-        for row in tqdm(f.readlines()):
-            try:
-                (
-                    qseqid,
-                    sseqid,
-                    pident,
-                    length,
-                    mismatch,
-                    gapopen,
-                    qstart,
-                    qend,
-                    sstart,
-                    send,
-                    evalue,
-                    bitscore,
-                ) = row.split("\t")
-            except ValueError:
-                sys.exit(
-                    "Expected blast file to have exactly 12 fields (as per default blast outfmt 6 options)"
-                )
+    for row in tqdm(filehandle.readlines()):
+        try:
+            (
+                qseqid,
+                sseqid,
+                pident,
+                length,
+                mismatch,
+                gapopen,
+                qstart,
+                qend,
+                sstart,
+                send,
+                evalue,
+                bitscore,
+            ) = row.split("\t")
+        except ValueError:
+            sys.exit(
+                "Expected blast file to have exactly 12 fields (as per default blast outfmt 6 options)"
+            )
 
-            huid = next(igen)
+        huid = next(igen)
 
-            if tag:
-                g.add((huid, P.tag, Literal(tag)))
+        if tag:
+            g.add((huid, P.tag, Literal(tag)))
 
-            g.add((huid, P.qseqid, make_uri(qseqid)))
-            g.add((huid, P.sseqid, make_uri(sseqid)))
-            g.add((huid, P.pident, Literal(float(pident))))
-            g.add((huid, P.length, Literal(int(length))))
-            #  # I'm leaving these out currently for performance reasons
-            #  g.add((huid, P.mismatch, Literal(int(mismatch))))
-            #  g.add((huid, P.gapopen, Literal(int(gapopen))))
-            #  g.add((huid, P.qstart, Literal(int(qstart))))
-            #  g.add((huid, P.qend, Literal(int(qend))))
-            #  g.add((huid, P.sstart, Literal(int(sstart))))
-            #  g.add((huid, P.send, Literal(int(send))))
-            #  g.add((huid, P.evalue, Literal(float(evalue))))
-            #  g.add((huid, P.bitscore, Literal(float(bitscore))))
+        g.add((huid, P.qseqid, make_uri(qseqid)))
+        g.add((huid, P.sseqid, make_uri(sseqid)))
+        g.add((huid, P.pident, Literal(float(pident))))
+        g.add((huid, P.length, Literal(int(length))))
+        #  g.add((huid, P.mismatch, Literal(int(mismatch))))
+        #  g.add((huid, P.gapopen, Literal(int(gapopen))))
+        #  g.add((huid, P.qstart, Literal(int(qstart))))
+        #  g.add((huid, P.qend, Literal(int(qend))))
+        #  g.add((huid, P.sstart, Literal(int(sstart))))
+        #  g.add((huid, P.send, Literal(int(send))))
+        #  g.add((huid, P.evalue, Literal(float(evalue))))
+        #  g.add((huid, P.bitscore, Literal(float(bitscore))))
 
     g.commit()
 
 
-def tag(g: ConjunctiveGraph, filename: str, tag: str) -> None:
-    print(filename)
-    with open(filename, "r") as f:
-        for identifier in (s.strip() for s in f.readlines()):
-            g.add((make_uri(identifier), P.tag, Literal(tag)))
+def load_influenza_na(g, filehandle) -> None:
+    field = dict()
+    for (i, row) in enumerate(tqdm(filehandle.readlines())):
+        process_influenza_row(g, row)
+        if i % 1000:
+            g.commit()
     g.commit()
-
-
-def load_influenza_na(g: ConjunctiveGraph, filename: str) -> None:
-    with open(filename, "r") as f:
-        field = dict()
-        for (i, row) in enumerate(tqdm(f.readlines())):
-            process_influenza_row(g, row)
-            if i % 1000:
-                g.commit()
-        g.commit()
 
 def process_influenza_row(g: ConjunctiveGraph, line: dict)->None:
     els = line.split("\t")

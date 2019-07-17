@@ -2,7 +2,7 @@ import sys
 import parsec
 from src.classifiers.flucrew import allClassifiers
 from src.token import (Token, Unknown)
-from src.util import zipGen, strOrNone, log, concat
+from src.util import zipGen, strOrNone, log, concat, file_str
 from src.nomenclature import make_tag_uri, P
 import dateutil.parser as dateparser
 import xlrd
@@ -77,14 +77,14 @@ class HomoList(Interpreter):
         return str([t.clean for t in self.data])
 
 class ParsedPhraseList(Interpreter):
-    def __init__(self, filename, field_name=None, tag=None, classifiers=allClassifiers, default_classifier=Unknown):
-        self.filename = filename
+    def __init__(self, filehandle, field_name=None, tag=None, classifiers=allClassifiers, default_classifier=Unknown):
+        self.filehandle = filehandle
         self.tag = tag
         self.classifiers = classifiers
         self.default_classifier = default_classifier
-        self.data = self.cast(self.parse(filename))
+        self.data = self.cast(self.parse(filehandle))
 
-    def parse(self, filename):
+    def parse(self, filehandle):
         raise NotImplementedError
 
     def connect(self, g):
@@ -94,7 +94,7 @@ class ParsedPhraseList(Interpreter):
             taguri = make_tag_uri(self.tag)
             g.add((taguri, P.name, Literal(self.tag)))
             g.add((taguri, P.time, Literal(str(datetime.datetime.now()))))
-            g.add((taguri, P.file, Literal(self.filename)))
+            g.add((taguri, P.file, Literal(file_str(self.filehandle))))
         else:
             taguri = None
 
@@ -127,20 +127,20 @@ class Table(ParsedPhraseList):
     def cast(self, data):
         return tabularTyping(data)
 
-    def parse(self, filename):
+    def parse(self, filehandle):
         """
         Make a dictionary with column name as key and list of strings as value. Currently only Excel is supported.
         """
-        return self._parse_excel(filename)
+        return self._parse_excel(filehandle)
 
-    def _parse_excel(self, filename):
+    def _parse_excel(self, filehandle):
         try:
-            log(f"Reading {filename} as excel file ...")
-            d = pd.read_excel(filename)
+            log(f"Reading {file_str(filehandle)} as excel file ...")
+            d = pd.read_excel(filehandle)
             # create a dictionary of List(str) with column names as keys
             return {c:[strOrNone(x) for x in d[c]] for c in d}
         except xlrd.biffh.XLRDError as e:
-            log(f"Could not parse '{filename}' as an excel file")
+            log(f"Could not parse '{file_str(filehandle)}' as an excel file")
             sys.exit(1)
         return d
 
@@ -163,13 +163,13 @@ class Ragged(ParsedPhraseList):
         else:
             return [Phrase([Datum(x) for x in row]) for row in data]
 
-    def parse(self, filename):
+    def parse(self, filehandle):
         """
         Return a list of lists of strings. Currently only FASTA is supported. 
         """
-        return self._parse_fasta(filename, sep="|")
+        return self._parse_fasta(filehandle, sep="|")
 
-    def _parse_fasta(self, filename, sep="|"):
+    def _parse_fasta(self, filehandle, sep="|"):
         """
         Parse a fasta file. The header is split into fields on 'sep'. The sequence is added as a final field.
         """
@@ -183,10 +183,9 @@ class Ragged(ParsedPhraseList):
         p_entry = p_header + p_seq
         p_fasta = parsec.many1(p_entry)
 
-        log(f"Reading {filename} as a fasta file:")
-        with open(filename, "r") as f:
-            entries = p_fasta.parse(f.read())
-            row = [h.split(sep) + [q] for (h, q) in entries]
+        log(f"Reading {file_str(filehandle)} as a fasta file:")
+        entries = p_fasta.parse(filehandle.read())
+        row = [h.split(sep) + [q] for (h, q) in entries]
         return row
 
 

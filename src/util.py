@@ -6,6 +6,15 @@ import sys
 def log(msg, end="\n"):
     print(msg, file=sys.stderr, flush=True, end=end)
 
+def file_str(f):
+    if isinstance(f, str):
+        return f 
+    else:
+        try:
+            return f.name # get the name from a filehandle
+        except:
+            return str(f)
+
 def zipGen(x, y):
     if x is None:
         x = []

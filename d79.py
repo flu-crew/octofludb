@@ -4,12 +4,12 @@
 Build a local SPARQL database.
 
 Usage:
-  d79 load_strains <filename>
-  d79 tag <filename> <tag>
-  d79 load_excel <filename> [--tag=<tag>]
-  d79 load_gbids <filename>
-  d79 load_blast <filename> [--tag=<tag>]
-  d79 load_fasta <filename> [--tag=<tag>] [--delimiter=<del>]
+  d79 load_strains [<filename>]
+  d79 tag [<filename>] [--tag=<tag>]
+  d79 load_excel [<filename>] [--tag=<tag>]
+  d79 load_gbids [<filename>]
+  d79 load_blast [<filename>] [--tag=<tag>]
+  d79 load_fasta [<filename>] [--tag=<tag>] [--delimiter=<del>]
 
 Options:
   -h --help               Show this screen.
@@ -28,7 +28,7 @@ import src.classes as classes
 from src.nomenclature import manager
 import signal
 from tqdm import tqdm
-from src.util import log
+from src.util import log, file_str
 
 if __name__ == "__main__":
 
@@ -36,36 +36,43 @@ if __name__ == "__main__":
         signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 
     args = docopt(__doc__, version="build.sh 0.0.1")
+    tagstr = args["--tag"]
+
+    if args["<filename>"]:
+        filehandle = open(args["<filename>"], "r")
+    else:
+        filehandle = sys.stdin
 
     g = Graph(namespace_manager=manager)
 
     if args["load_strains"]:
         # load big table from IVR, with roughly the following format:
         # (gb | host | ? | subtype | date | ? | "Influenza A virus (<strain>(<subtype>))" | ...)
-        recipe.load_influenza_na(g, args["<filename>"])
+        recipe.load_influenza_na(g, filehandle)
 
     if args["tag"]:
-        recipe.tag(g, args["<filename>"], args["<tag>"])
+        for identifier in (s.strip() for s in filehandle.readlines()):
+            g.add((make_uri(identifier), P.tag, Literal(tagstr)))
+        g.commit()
 
     if args["load_gbids"]:
-        log(f"Retrieving and parsing genbank ids from '{args['<filename>']}'")
-        with open(args["<filename>"], "r") as f:
-            gbids = [g.strip() for g in f.readlines()]
-            for gb_metas in entrez.get_gbs(gbids):
-                for gb_meta in gb_metas:
-                    gb.add_gb_meta_triples(g, gb_meta)
-                # commit the current batch (say of 1000 entries)
-                g.commit()
+        log(f"Retrieving and parsing genbank ids from '{file_str(filehandle)}'")
+        gbids = [g.strip() for g in filehandle.readlines()]
+        for gb_metas in entrez.get_gbs(gbids):
+            for gb_meta in gb_metas:
+                gb.add_gb_meta_triples(g, gb_meta)
+            # commit the current batch (say of 1000 entries)
+            g.commit()
 
     if args["load_excel"]:
-        classes.Table(args["<filename>"], tag=args["--tag"]).connect(g)
+        classes.Table(filehandle, tag=tagstr).connect(g)
 
     if args["load_blast"]:
-        log(f"Retrieving and parsing blast results from '{args['<filename>']}'")
-        recipe.load_blast(g, args["<filename>"], tag=args["--tag"])
+        log(f"Retrieving and parsing blast results from '{file_str(filehandle)}'")
+        recipe.load_blast(g, filehandle, tag=tagstr)
 
     if args["load_fasta"]:
-        classes.Ragged(args["<filename>"], tag=args["--tag"]).connect(g)
+        classes.Ragged(filehandle, tag=tagstr).connect(g)
 
     g.commit() # just in case we missed anything
 
@@ -75,4 +82,5 @@ if __name__ == "__main__":
     for l in turtles.splitlines():
         print(l.decode("utf-8"))
 
+    filehandle.close()
     g.close()
