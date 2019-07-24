@@ -1,19 +1,16 @@
 import parsec as p
 import re
 import rdflib
-from collections import defaultdict, namedtuple
 from typing import List
 
-from src.nomenclature import P, O, make_uri, make_literal, make_property, make_usa_state_uri
-
-# parsec operators:
-#  - "|" choice, any matching substring, even partially, is
-#        consumed, thus "^" is normally what you want
-#  - "^" try_choice, partial matches do not consume the stream
-#  - "+" joint, keep the results of each match in a tuple
-#  - ">>" compose, skips the lhs
-#  - "<<" compose, skips the rhs
-#  - "<" ends_with
+from src.nomenclature import (
+    P,
+    O,
+    make_uri,
+    make_literal,
+    make_property,
+    make_usa_state_uri,
+)
 
 
 def parse_match(parser, text):
@@ -22,34 +19,6 @@ def parse_match(parser, text):
     except p.ParseError:
         return False
     return True
-
-
-def wordset(words, label, f=lambda x: x.lower().replace(" ", "_")):
-    """
-  Create a log(n) parser for a set of n strings.
-  @param "label" is a arbitrary name for the wordset that is used in error messages
-  @param "f" is a function used to convert matching strings in the wordset and text (e.g to match on lower case).
-  """
-    d = defaultdict(set)
-    # divide words into sets of words of the same length
-    # this allows exact matches against the sets
-    for word in words:
-        d[len(word)].update([f(word)])
-    # Convert this to a list of (<length>, <set>) tuples reverse sorted by
-    # length. The parser must search for longer strings first to avoid matches
-    # against prefixes.
-    d = sorted(d.items(), key=lambda x: x[0], reverse=True)
-
-    @p.Parser
-    def wordsetParser(text, index=0):
-        for k, v in d:
-            if f(text[index : (index + k)]) in v:
-                return p.Value.success(index + k, text[index : (index + k)])
-        return p.Value.failure(
-            index, f'a term "{f(text[index:(index+k)])}" not in wordset {d}'
-        )
-
-    return wordsetParser
 
 
 def regexWithin(regex: re.Pattern, context: p.Parser):
@@ -79,107 +48,3 @@ def splitMatchFirst(psr: p.Parser, splitStr: str, text: str):
         except:
             continue
     return None
-
-
-RelationSet = namedtuple(
-    "RelationSet", ["subjects", "relations", "generators", "objectifier", "default"]
-)
-
-
-class RdfBuilder:
-    def __init__(
-        self,
-        relation_sets=[],  # (<set1>, <set2>)), both sets include names from the field parser,
-        sub_builders=[],  # (<field>, <function>), create new triples from <field> using <function>,
-        unknown_tag="unknown",
-        tag=None,
-    ):
-        self.relation_sets = relation_sets
-        self.sub_builders = sub_builders
-        self.unknown_tag = unknown_tag
-        self.tag = tag
-
-    def build(self, g, fieldss):
-        """
-        g is a
-        """
-
-        for i, fields in enumerate(fieldss):
-            self._buildOne(g, fields, idx=i)
-        g.commit()
-
-    def _buildOne(self, g, fields, idx):
-        # fields :: [(Tag, String)]
-
-        # replace unknown tags
-        for i in range(len(fields)):
-            t, v = fields[i]
-            if t is None:
-                fields[i] = (self.unknown_tag, v)
-
-        fieldSet = {x[0] for x in fields}
-
-        # make URIs for each relation level
-        for r in self.relation_sets:
-            #  print(f"> r.subjects: {r.subjects}  | fieldSet: {fieldSet}")
-            genfield = set(r.generators.keys()) & fieldSet
-            #  print(f"genfield: {genfield}")
-            if genfield:
-                for (k, v) in fields:
-                    #  print(f" k={k} v={v}")
-                    if k in genfield:
-                        default = r.generators[k][0]
-                        uri = r.generators[k][1](v)
-                        fields.append((default, uri))
-                        r.subjects.add(default)
-                        fieldSet.add(default)
-            if not r.subjects:
-                uri = "e" + str(idx) + "_" + str(hash(str(fields)))
-                default = r.default
-                fields.append((r.default, uri))
-                r.subjects.add(r.default)
-                fieldSet.add(r.default)
-
-        for k, v in fields:
-            # make hierarchical relations
-            for r in self.relation_sets:
-                if k in r.subjects:
-                    uri = make_uri(v)
-                    if not isinstance(v, rdflib.term.URIRef):
-                        g.add((uri, make_property(k), make_literal(v)))
-                    for k_, v_ in fields:
-                        if k_ in r.relations:
-                            g.add((uri, r.relations[k_], r.objectifier[k_](v_)))
-
-            # tag top-level fields
-            if self.tag and k in self.relation_sets[0][0]:
-                g.add((make_uri(v), P.tag, make_literal(self.tag, False)))
-
-        # build other stuff from the whole fields
-        for builder in self.sub_builders:
-            builder(g, fields)
-
-
-def resolve(xss):
-    """
-    For now I resolve ambiguities by just taking the first matching parser.
-    Eventually I can replace this with real context-dependent choices.
-    """
-    return ([(x[0][0], x[0][1]) for x in xs] for xs in xss)
-
-
-def guess_fields(fieldss: List[List[str]], parserSet=None):
-    for fields in fieldss:
-        xs = list()
-        for field in fields:
-            field_results = list()
-            for (name, parser) in parserSet:
-                try:
-                    s = parser.parse_strict(field)
-                    field_results.append((name, s))
-                except p.ParseError:
-                    next
-            if not field_results:
-                field_results = [(None, field)]
-            xs.append(field_results)
-        yield xs

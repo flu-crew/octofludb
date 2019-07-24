@@ -81,7 +81,8 @@ def load_influenza_na(g, filehandle) -> None:
             g.commit()
     g.commit()
 
-def process_influenza_row(g: ConjunctiveGraph, line: dict)->None:
+
+def process_influenza_row(g: ConjunctiveGraph, line: dict) -> None:
     els = line.split("\t")
     field = dict()
     try:
@@ -92,7 +93,9 @@ def process_influenza_row(g: ConjunctiveGraph, line: dict)->None:
         field["date"] = els[5]
         is_complete = els[10].strip() == "c"
     except IndexError:
-        log(f"Expected 11 columns, found only {len(els)}. This is unexpected and a little frightening.")
+        log(
+            f"Expected 11 columns, found only {len(els)}. This is unexpected and a frightening."
+        )
 
     gb_uid = make_uri(field["gb"])
     g.add((gb_uid, P.gb, Literal(field["gb"])))
@@ -113,10 +116,12 @@ def process_influenza_row(g: ConjunctiveGraph, line: dict)->None:
     #     unidentified influenza virus
     # * In the current database (06/04/2019) 541/712177 entries are pathological
     strain_match = re.search(STRAIN_PAT, els[7])
-    if strain_match:
-        strain = strain_match.group(
-            0
-        ).strip()  # yes, some of them can end in space
+    if not strain_match:
+        log(f'  could not parse strain: {"|".join(els)}', end="")
+        return None
+    else:
+        # yes, sometimes they end in space
+        strain = strain_match.group(0).strip()
 
         strain_uid = make_uri(strain)
         maybe_add = make_maybe_add(g, field, strain_uid)
@@ -134,18 +139,18 @@ def process_influenza_row(g: ConjunctiveGraph, line: dict)->None:
             g.add((strain_uid, P.barcode, Literal(barcode_name)))
             g.add((barcode_uid, P.sameAs, strain_uid))
 
-        (country_uri, alt_name) = make_country_uri(field["country"])
-        g.add((strain_uid, P.country, country_uri))
-        if alt_name:
-            # The alternative name is used only if the given name is not recognized
-            g.add((strain_uid, P.country_name, Literal(alt_name)))
+        # some entries do not have countries associated
+        if field["country"]:
+            (country_uri, alt_name) = make_country_uri(field["country"])
+            g.add((strain_uid, P.country, country_uri))
+            if alt_name:
+                # The alternative name is used only if the given name is not recognized
+                g.add((strain_uid, P.country_name, Literal(alt_name)))
 
         maybe_add = make_maybe_add(g, field, strain_uid)
         maybe_add(P.host, "host")
 
-        if field["date"] is not None:
+        if field["date"]:
             date = make_date(field["date"])
-            if date is not None:
+            if date:
                 g.add((strain_uid, P.date, date))
-    else:
-        log(f'  could not parse strain: {"|".join(els)}', end="")

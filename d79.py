@@ -22,12 +22,12 @@ Options:
 import os
 import sys
 from docopt import docopt
-from rdflib import Graph
+from rdflib import Graph, Literal
 import src.recipes as recipe
 import src.entrez as entrez
 import src.genbank as gb
 import src.classes as classes
-from src.nomenclature import manager
+from src.nomenclature import manager, make_uri, P
 import signal
 from tqdm import tqdm
 from src.util import log, file_str
@@ -82,23 +82,15 @@ if __name__ == "__main__":
 
         if args["load_excel"]:
             classes.Table(
-                filehandle,
-                tag=tagstr,
-                include=inc,
-                exclude=exc,
-                log=True,
+                filehandle, tag=tagstr, include=inc, exclude=exc, log=True
             ).connect(g)
 
         if args["load_fasta"]:
             classes.Ragged(
-                filehandle,
-                tag=tagstr,
-                include=inc,
-                exclude=exc,
-                log=True,
+                filehandle, tag=tagstr, include=inc, exclude=exc, log=True
             ).connect(g)
 
-    g.commit() # just in case we missed anything
+    g.commit()  # just in case we missed anything
 
     log("Serializing to turtle format ... ", end="")
     turtles = g.serialize(format="turtle")

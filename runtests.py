@@ -1,100 +1,13 @@
 #!/usr/bin/env python3
 
-import src.parser as parser
-import src.domain.geography as geo
-from src.nomenclature import make_uri, make_date, make_usa_state_uri, make_country_uri
+import src.classifiers.flucrew as ftok
+from src.nomenclature import make_uri, make_usa_state_uri, make_country_uri
 import unittest
+import rdflib
 import urllib.parse as url
-from rdflib.namespace import XSD
-from rdflib import Literal
 
 
-class TestNomenclature(unittest.TestCase):
-    def test_make_date(self):
-        # The make_date function is intended to be a catchall for when
-        # something really really should be a date. It tries very hard to
-        # match.
-        # * Y
-        self.assertEqual(make_date("2011"), Literal("2011", datatype=XSD.gYear))
-        # 2-digit years are cast in 19XX is greater than 29
-        self.assertEqual(make_date("99"), Literal("1999", datatype=XSD.gYear))
-        self.assertEqual(make_date("00"), Literal("2000", datatype=XSD.gYear))
-        self.assertEqual(make_date("29"), Literal("2029", datatype=XSD.gYear))
-        self.assertEqual(make_date("30"), Literal("1930", datatype=XSD.gYear))
-        # * YM
-        self.assertEqual(
-            make_date("2011/05"), Literal("2011-05", datatype=XSD.gYearMonth)
-        )
-        # * MY
-        self.assertEqual(
-            make_date("05/2011"), Literal("2011-05", datatype=XSD.gYearMonth)
-        )
-        # * YMD
-        self.assertEqual(
-            make_date("2011/05/31"), Literal("2011-05-31", datatype=XSD.date)
-        )
-        self.assertEqual(
-            make_date("20110531"), Literal("2011-05-31", datatype=XSD.date)
-        )
-        self.assertEqual(
-            str(make_date("20110531")), "2011-05-31"
-        )
-        # * MDY
-        self.assertEqual(
-            make_date("05/31/2011"), Literal("2011-05-31", datatype=XSD.date)
-        )
-        self.assertEqual(
-            make_date("05312011"), Literal("2011-05-31", datatype=XSD.date)
-        )
-        # * DO NOT SUPPORT SHORT YEARS
-        self.assertEqual(make_date("11/05"), None)
-        self.assertEqual(make_date("05/11"), None)
-        self.assertEqual(make_date("11/05/31"), None)
-        self.assertEqual(make_date("05/31/11"), None)
-        # make_date must match the entire input string, so these should fail:
-        self.assertEqual(make_date("20195"), None)
-        self.assertEqual(make_date("201905067"), None)
-        self.assertEqual(make_date("05/06/01/6"), None)
-        self.assertEqual(make_date("asdf"), None)
-        # TODO: allow month names to be parsed (e.g. "May 5, 2019")
-
-
-class TestParsers(unittest.TestCase):
-    def test_p_country(self):
-        self.assertEqual(parser.p_country.parse("USA"), "USA")
-        self.assertEqual(parser.p_country.parse("indonesia"), "indonesia")
-
-    def test_p_date(self):
-        self.assertEqual(str(parser.p_date.parse("2015/09/01")), "2015-09-01")
-        self.assertEqual(
-            str(parser.p_date.parse("09/01/2015")),
-            str(parser.p_date.parse("2015/09/01")),
-        )
-        self.assertEqual(
-            str(parser.p_date.parse("09-01-2015")),
-            str(parser.p_date.parse("2015/09/01")),
-        )
-
-    def test_p_year(self):
-        self.assertEqual(parser.p_year.parse("09"), parser.p_year.parse("2009"))
-
-    def test_country_to_code(self):
-        self.assertEqual(geo.country_to_code("united states"), "USA")
-        self.assertEqual(geo.country_to_code("US"), "USA")
-        self.assertEqual(geo.country_to_code("USA"), "USA")
-        self.assertEqual(
-            geo.country_to_code("The Democratic Republic of the Congo"), "COD"
-        )
-        self.assertEqual(geo.country_to_code("democratic republic of the congo"), "COD")
-
-    def test_state_to_code(self):
-        self.assertEqual(geo.state_to_code("wyoming"), ("WY"))
-        self.assertEqual(geo.state_to_code("WY"), ("WY"))
-        self.assertEqual(geo.state_to_code("Wyoming"), ("WY"))
-        self.assertEqual(geo.state_to_code("District of Columbia"), ("DC"))
-        self.assertEqual(geo.state_to_code("North_Dakota"), ("ND"))
-        self.assertEqual(geo.state_to_code("North dakota"), ("ND"))
-
+class TestMakeUri(unittest.TestCase):
     def test_make_uri(self):
         # space/underscore differences shouldn't yield different URIs
         self.assertEqual(make_uri("foo bar baz"), make_uri("foo_bar_baz"))
@@ -123,6 +36,132 @@ class TestParsers(unittest.TestCase):
             make_country_uri("USA"), make_country_uri("united states of america")
         )
         self.assertEqual(make_country_uri("britain"), make_country_uri("UK"))
+
+
+class TestDate(unittest.TestCase):
+    def test_date_meta(self):
+        d = ftok.Date("May 17, 1986")
+        self.assertEqual(d.clean, "1986-05-17")
+        self.assertEqual(d.dirty, "May 17, 1986")
+        self.assertEqual(d.as_uri(), None)  # dates should NEVER be URIs
+        self.assertEqual(
+            d.as_literal(), rdflib.Literal("1986-05-17", datatype=rdflib.XSD.date)
+        )
+        y = ftok.Date("1990")
+        self.assertEqual(
+            y.as_literal(), rdflib.Literal("1990", datatype=rdflib.XSD.gYear)
+        )
+
+    def test_year(self):
+        self.assertEqual(ftok.Date("2011").clean, "2011")
+        self.assertEqual(ftok.Date("11").clean, "2011")
+        self.assertEqual(ftok.Date("90").clean, "1990")
+        # 2-digit years are cast in 19XX is greater than 29
+        self.assertEqual(
+            ftok.Date("99").as_literal(),
+            rdflib.Literal("1999", datatype=rdflib.XSD.gYear),
+        )
+        self.assertEqual(
+            ftok.Date("00").as_literal(),
+            rdflib.Literal("2000", datatype=rdflib.XSD.gYear),
+        )
+        self.assertEqual(
+            ftok.Date("29").as_literal(),
+            rdflib.Literal("2029", datatype=rdflib.XSD.gYear),
+        )
+        self.assertEqual(
+            ftok.Date("30").as_literal(),
+            rdflib.Literal("1930", datatype=rdflib.XSD.gYear),
+        )
+
+    def test_ymd(self):
+        self.assertEqual(ftok.Date("05-Jun-2011").clean, "2011-06-05")
+        self.assertEqual(ftok.Date("Jun-2011").clean, "2011-06")
+        self.assertEqual(ftok.Date("May 17, 1986").clean, "1986-05-17")
+        self.assertEqual(ftok.Date("May17,1986").clean, "1986-05-17")
+        self.assertEqual(ftok.Date("1986-05-17").clean, "1986-05-17")
+        self.assertEqual(ftok.Date("19860517").clean, "1986-05-17")
+        self.assertEqual(ftok.Date("1986/05/17").clean, "1986-05-17")
+        self.assertEqual(ftok.Date("05/17/1986").clean, "1986-05-17")
+        self.assertEqual(ftok.Date("1986-05-17").clean, "1986-05-17")
+        # testing year ranges
+        self.assertEqual(ftok.Date("05/17/1886").clean, "1886-05-17")
+
+    def test_partial_dates(self):
+        # * YM
+        self.assertEqual(
+            ftok.Date("2011/05").as_literal(),
+            rdflib.Literal("2011-05", datatype=rdflib.XSD.gYearMonth),
+        )
+        # * MY
+        self.assertEqual(
+            ftok.Date("05/2011").as_literal(),
+            rdflib.Literal("2011-05", datatype=rdflib.XSD.gYearMonth),
+        )
+        # * YMD
+        self.assertEqual(
+            ftok.Date("2011/05/31").as_literal(),
+            rdflib.Literal("2011-05-31", datatype=rdflib.XSD.date),
+        )
+        self.assertEqual(
+            ftok.Date("20110531").as_literal(),
+            rdflib.Literal("2011-05-31", datatype=rdflib.XSD.date),
+        )
+        # * MDY
+        self.assertEqual(
+            ftok.Date("05/31/2011").as_literal(),
+            rdflib.Literal("2011-05-31", datatype=rdflib.XSD.date),
+        )
+        self.assertEqual(
+            ftok.Date("05312011").as_literal(),
+            rdflib.Literal("2011-05-31", datatype=rdflib.XSD.date),
+        )
+
+    def test_utc(self):
+        self.assertEqual(ftok.Date("1986-05-17T22:01:30Z").clean, "1986-05-17")
+        self.assertEqual(ftok.Date("1986-05-17T22:01:30+00:00").clean, "1986-05-17")
+
+    def test_bad_dates(self):
+        # Dates that I won't accept (there clemency has limits)
+        self.assertEqual(ftok.Date("May 17, 19").clean, None)
+        self.assertEqual(ftok.Date("05 17, 1999").clean, None)
+        self.assertEqual(ftok.Date("05/17/86").clean, None)
+        # * DO NOT SUPPORT SHORT YEARS
+        self.assertEqual(ftok.Date("11/05").clean, None)
+        self.assertEqual(ftok.Date("05/11").clean, None)
+        self.assertEqual(ftok.Date("11/05/31").clean, None)
+        self.assertEqual(ftok.Date("05/31/11").clean, None)
+        # ftok.Date must match the entire input string, so these should fail:
+        self.assertEqual(ftok.Date("20195").clean, None)
+        self.assertEqual(ftok.Date("201905067").clean, None)
+        self.assertEqual(ftok.Date("05/06/01/6").clean, None)
+        self.assertEqual(ftok.Date("asdf").clean, None)
+
+
+class TestCountry(unittest.TestCase):
+    def test_country(self):
+        self.assertEqual(ftok.Country("USA").clean, "USA")
+        self.assertEqual(ftok.Country("united states").clean, "USA")
+        self.assertEqual(ftok.Country("US").clean, "USA")
+        self.assertEqual(ftok.Country("indonesia").clean, "IDN")
+        self.assertEqual(
+            ftok.Country("The Democratic Republic of the Congo").clean, "COD"
+        )
+        self.assertEqual(ftok.Country("democratic republic congo").clean, "COD")
+
+    def test_misspelled_countries(self):
+        self.assertEqual(ftok.Country("unitde states").clean, "USA")
+        self.assertEqual(ftok.Country("indoesia").clean, "IDN")
+        self.assertEqual(ftok.Country("indonesa").clean, "IDN")
+
+
+class TestState(unittest.TestCase):
+    def test_state_to_code(self):
+        self.assertEqual(ftok.StateUSA("wyoming").clean, ("WY"))
+        self.assertEqual(ftok.StateUSA("WY").clean, ("WY"))
+        self.assertEqual(ftok.StateUSA("District of Columbia").clean, ("DC"))
+        self.assertEqual(ftok.StateUSA("North_Dakota").clean, ("ND"))
+        self.assertEqual(ftok.StateUSA("North dakota").clean, ("ND"))
 
 
 if __name__ == "__main__":

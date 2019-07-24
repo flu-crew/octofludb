@@ -3,17 +3,20 @@ from rdflib import Literal
 import math
 import sys
 
+
 def log(msg, end="\n"):
     print(msg, file=sys.stderr, flush=True, end=end)
 
+
 def file_str(f):
     if isinstance(f, str):
-        return f 
+        return f
     else:
         try:
-            return f.name # get the name from a filehandle
+            return f.name  # get the name from a filehandle
         except:
             return str(f)
+
 
 def zipGen(x, y):
     if x is None:
@@ -22,17 +25,19 @@ def zipGen(x, y):
         y = []
     x += [None] * (len(y) - len(x))
     y += [None] * (len(x) - len(y))
-    return zip(x,y)
+    return zip(x, y)
+
 
 def strOrNone(x):
     try:
-        if math.isnan(x): 
+        if math.isnan(x):
             x = None
     except:
         pass
     if x is not None:
         x = str(x)
-    return(x)
+    return x
+
 
 def identity(x):
     x

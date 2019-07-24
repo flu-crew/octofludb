@@ -74,8 +74,11 @@ class Date(Token):
     parser = p_any_date
     class_predicate = P.date
 
+    def munge(self, text):
+        return str(p_any_date.parse(text))
+
     def as_literal(self):
-        return make_date(self.clean)
+        return make_date(self.dirty)
 
 
 class Host(Token):
@@ -192,6 +195,8 @@ class SegmentToken(Token):
             return
         uri = self.as_uri()
         for (name, other) in fields.items():
+            if other.clean is None:
+                continue
             if (
                 other.matches
                 and other.group == "segment_id"
@@ -260,6 +265,8 @@ class Dnaseq(SequenceToken):
         uri = self.as_uri()
         g.add((uri, P.dnaseq, Literal(self.clean)))
         for other in fields.values():
+            if other.clean is None:
+                continue
             if other.group == "segment_id":
                 g.add((other.as_uri(), P.sameAs, uri))
             elif other.group == "strain_id":
@@ -283,6 +290,8 @@ class Proseq(SequenceToken):
         g.add((uri, P.proseq, Literal(self.clean)))
         has_segment = self._has_segment(fields)
         for other in fields.values():
+            if other.clean is None:
+                continue
             if other.group == "segment_id":
                 g.add((other.as_uri(), P.has_feature, uri))
             elif other.group == "strain_id":

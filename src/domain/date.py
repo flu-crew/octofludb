@@ -2,6 +2,35 @@ import parsec as p
 from src.util import padDigit, rmNone
 from rdflib.namespace import XSD
 from rdflib import Literal
+from collections import defaultdict
+
+
+def wordset(words, label, f=lambda x: x.lower().replace(" ", "_")):
+    """
+    Create a log(n) parser for a set of n strings.
+    @param "label" is a arbitrary name for the wordset that is used in error messages
+    @param "f" is a function used to convert matching strings in the wordset and text (e.g to match on lower case).
+    """
+    d = defaultdict(set)
+    # divide words into sets of words of the same length
+    # this allows exact matches against the sets
+    for word in words:
+        d[len(word)].update([f(word)])
+    # Convert this to a list of (<length>, <set>) tuples reverse sorted by
+    # length. The parser must search for longer strings first to avoid matches
+    # against prefixes.
+    d = sorted(d.items(), key=lambda x: x[0], reverse=True)
+
+    @p.Parser
+    def wordsetParser(text, index=0):
+        for k, v in d:
+            if f(text[index : (index + k)]) in v:
+                return p.Value.success(index + k, text[index : (index + k)])
+        return p.Value.failure(
+            index, f'a term "{f(text[index:(index+k)])}" not in wordset {d}'
+        )
+
+    return wordsetParser
 
 
 def expandYear(x: str) -> str:
@@ -70,6 +99,34 @@ def p_date_mdy():
 
 
 @p.generate
+def p_date_dMy():
+    """
+    01-Apr-2002
+    """
+    d = yield p_day
+    yield p.optional(p.regex("[-/]"))
+    m = yield p_month_str
+    yield p.optional(p.regex("[-/]"))
+    y = yield p_year
+    yield p.optional(p.regex(" \d\d:\d\d:\d\d(\.\d+)?"))
+    return Date(month=m, day=d, year=y)
+
+
+@p.generate
+def p_date_polite():
+    """
+    May 31, 2018
+    """
+    m = yield p_month_str
+    yield p.spaces()
+    d = yield p_day
+    yield p.string(",")
+    yield p.spaces()
+    y = yield p_longyear
+    return Date(day=d, month=m, year=y)
+
+
+@p.generate
 def p_date_my():
     m = yield p_month
     yield p.regex("[-/]")
@@ -85,15 +142,80 @@ def p_date_ym():
     return Date(month=m, year=y)
 
 
-p_year = p.regex("20\d\d") ^ p.regex("19\d\d") ^ p.regex("\d\d").parsecmap(expandYear)
-p_longyear = p.regex("20\d\d") | p.regex("19\d\d")
-p_month = p.regex("10|11|12|0?[1-9]").parsecmap(padDigit)
+@p.generate
+def p_utc_date():
+    y = yield p_longyear
+    yield p.optional(p.string("-"))
+    m = yield p_month_num
+    yield p.optional(p.string("-"))
+    d = yield p_day
+    yield p.string("T")
+    yield p_iso8601_time
+    return Date(year=y, month=m, day=d)
+
+
+@p.generate
+def p_iso8601_time():
+    h = yield p_hour
+    yield p.optional(p.string(":"))
+    m = yield p_minute
+    yield p.optional(p.string(":"))
+    s = yield p_second
+    yield p.optional((p.string("Z") | (p.string("+") >> p.regex("\d\d:\d\d"))))
+    return h + m + s
+
+
+p_hour = p.regex("[01]\d") ^ p.regex("2[0-3]")
+p_minute = p.regex("[0-5]\d")
+p_second = p.regex("[0-5]\d")
+
+
+p_year = p.regex("20\d\d") ^ p.regex("1\d\d\d") ^ p.regex("\d\d").parsecmap(expandYear)
+p_longyear = p.regex("20\d\d") | p.regex("1[89]\d\d")
 p_day = p.regex("3[01]|[012]?\d").parsecmap(padDigit)
 
-p_date = p_date_ymd ^ p_date_mdy
+months = {
+    "jan": "1",
+    "feb": "2",
+    "mar": "3",
+    "apr": "4",
+    "may": "5",
+    "jun": "6",
+    "jul": "7",
+    "aug": "8",
+    "sep": "9",
+    "oct": "10",
+    "nov": "11",
+    "dec": "12",
+    "january": "1 ",
+    "february": "2",
+    "march": "3",
+    "april": "4",
+    "may": "5",
+    "june": "6",
+    "july": "7",
+    "august": "8",
+    "september": "9",
+    "october": "10",
+    "november": "11",
+    "december": "12",
+}
+
+p_month_num = p.regex("10|11|12|0?[1-9]").parsecmap(padDigit)
+p_month_str = (
+    wordset(months.keys(), "date")
+    .parsecmap(lambda x: months[x.lower()])
+    .parsecmap(padDigit)
+)
+p_month = p_month_num ^ p_month_str
+
+p_date = p_utc_date ^ p_date_polite ^ p_date_ymd ^ p_date_mdy ^ p_date_dMy
 
 p_any_date = (
-    p_date_ymd
+    p_utc_date
+    ^ p_date_polite
+    ^ p_date_dMy
+    ^ p_date_ymd
     ^ p_date_mdy
     ^ p_date_my
     ^ p_date_ym

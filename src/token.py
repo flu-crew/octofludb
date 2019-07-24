@@ -1,23 +1,20 @@
 import parsec as p
-from src.nomenclature import (
-    make_property,
-    make_literal,
-    define_subproperty,
-)
+from src.nomenclature import make_property, make_literal, define_subproperty
 import rdflib
 import sys
-from src.util import (rmNone)
+from src.util import rmNone
+
 
 class Token:
     parser = None
     group = None
-    typename = "auto" 
+    typename = "auto"
     class_predicate = None
 
     def __init__(self, text, field_name=None):
         self.matches = self.testOne(text)
         self.dirty = text
-        self.field_name=field_name
+        self.field_name = field_name
         if self.matches:
             self.clean = self.munge(text)
         else:
@@ -36,7 +33,7 @@ class Token:
         """
         Cast this token as a URI
         """
-        return None # default tokens cannot be URIs
+        return None  # default tokens cannot be URIs
 
     def as_predicate(self):
         return make_property(self.choose_field_name().lower())
@@ -58,9 +55,13 @@ class Token:
         """
         Add knowledge to the graph
         """
-        if self.field_name and self.field_name != self.typename and self.class_predicate and self.matches:
+        if (
+            self.field_name
+            and self.field_name != self.typename
+            and self.class_predicate
+            and self.matches
+        ):
             define_subproperty(self.as_predicate(), self.class_predicate, g)
-
 
     def relate(self, fields, g):
         """
@@ -98,19 +99,21 @@ class Token:
 
 class Missing(Token):
     parser = None
-    typename = "missing" 
+    typename = "missing"
 
 
 class Unknown(Token):
     typename = "unknown"
-    parser = p.regex(".*")
+    parser = p.regex(".+")  # not ".*" to avoid adding empty fields
 
     @classmethod
     def testOne(cls, item):
         return True
 
+
 class Empty(Token):
-    """ If you want to throw out any field that is not recognized, make this the default """ 
+    """ If you want to throw out any field that is not recognized, make this the default """
+
     typename = "empty"
     parser = p.regex(".*")
 

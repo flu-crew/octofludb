@@ -20,6 +20,7 @@ manager.bind("f", nt)
 manager.bind("usa", nusa)
 manager.bind("world", ncountry)
 
+
 def make_tag_uri(x):
     tag = x.strip().replace(" ", "_").lower()
     tag = url.quote_plus(tag)
@@ -32,6 +33,7 @@ def define_subproperty(p1, p2, g):
     """
     if p1 != p2:
         g.add((p1, RDFS.subPropertyOf, p2))
+
 
 def uidgen(base="_", pad=3, start=0):
     base = base.replace(" ", "_")

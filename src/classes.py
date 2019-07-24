@@ -1,7 +1,7 @@
 import sys
 import parsec
 from src.classifiers.flucrew import allClassifiers
-from src.token import (Token, Unknown)
+from src.token import Token, Unknown
 from src.util import zipGen, strOrNone, log, concat, file_str
 from src.nomenclature import make_tag_uri, P
 import dateutil.parser as dateparser
@@ -12,6 +12,7 @@ import datetime as datetime
 from rdflib import Literal
 from tqdm import tqdm
 
+
 def updateClassifiers(classifiers, include, exclude):
     keys = list(classifiers.keys())
     for classifier in keys:
@@ -20,6 +21,7 @@ def updateClassifiers(classifiers, include, exclude):
         if classifier in include:
             classifiers.pop(classifier)
     return list(classifiers.values())
+
 
 class Interpreter:
     def __init__(
@@ -57,10 +59,12 @@ class Interpreter:
         else:
             log(f"{colors.bad('No tag given')}")
 
+
 class Datum(Interpreter):
     """
     Interpret a single word. This should not be used much.
     """
+
     def cast(self, data):
         for t in (c(data, field_name=self.field_name) for c in self.classifiers):
             if t:
@@ -76,10 +80,12 @@ class Datum(Interpreter):
     def __str__(self):
         return str(self.data.clean)
 
+
 class HomoList(Interpreter):
     """
     Interpret a list of items assumed to be of the same type
     """
+
     def cast(self, data):
         for classifier in self.classifiers:
             if classifier.goodness(data) > 0.8:
@@ -91,11 +97,14 @@ class HomoList(Interpreter):
 
     def connect(self, g):
         for token in self.data:
+            if token.clean is None:
+                continue
             token.add_triples(g)
         g.commit()
 
     def __str__(self):
         return str([t.clean for t in self.data])
+
 
 class ParsedPhraseList(Interpreter):
     def __init__(
@@ -137,14 +146,16 @@ class ParsedPhraseList(Interpreter):
                 g.commit()
         g.commit()
 
+
 def tabularTyping(data):
     cols = []
-    for k,v in data.items():
+    for k, v in data.items():
         hl = HomoList(v, field_name=k).data
         log(f" - '{k}':{colors.good(hl[0].typename)}")
         cols.append(hl)
     phrases = [Phrase([col[i] for col in cols]) for i in range(len(cols[0]))]
     return phrases
+
 
 def headlessTabularTyping(data):
     cols = []
@@ -155,8 +166,8 @@ def headlessTabularTyping(data):
     phrases = [Phrase([col[i] for col in cols]) for i in range(len(cols[0]))]
     return phrases
 
-class Table(ParsedPhraseList):
 
+class Table(ParsedPhraseList):
     def cast(self, data):
         return tabularTyping(data)
 
@@ -171,7 +182,7 @@ class Table(ParsedPhraseList):
             log(f"Reading {file_str(filehandle)} as excel file ...")
             d = pd.read_excel(filehandle.name)
             # create a dictionary of List(str) with column names as keys
-            return {c:[strOrNone(x) for x in d[c]] for c in d}
+            return {c: [strOrNone(x) for x in d[c]] for c in d}
         except xlrd.biffh.XLRDError as e:
             log(f"Could not parse '{file_str(filehandle)}' as an excel file")
             sys.exit(1)
@@ -184,6 +195,7 @@ class Ragged(ParsedPhraseList):
     each sublist as a Phrase. I could probable extract some type information
     from comparing phrases.
     """
+
     def cast(self, data):
 
         # If all entries have the same number of entries, I treat them as a
@@ -240,13 +252,14 @@ class Ragged(ParsedPhraseList):
 
 class Phrase:
     levels = []
+
     def __init__(self, tokens):
         self.tokens = tokens
         try:
-            self.fields = {token.choose_field_name():token for token in tokens}
+            self.fields = {token.choose_field_name(): token for token in tokens}
         except:
             print("FAILURE IN PHRASE", file=sys.stderr)
-            print([type(t) for t in tokens], file=sys.stderr) 
+            print([type(t) for t in tokens], file=sys.stderr)
             sys.exit(1)
 
     def connect(self, g, taguri=None):
@@ -255,13 +268,14 @@ class Phrase:
         by fields in a fasta header or elements in a row in a table.
         """
         for (name, token) in self.fields.items():
+            if token.clean is None:
+                continue
             token.relate(self.fields, g)
             token.add_triples(g)
             if taguri and token.group:
                 turi = token.as_uri()
                 if turi:
                     g.add((turi, P.tag, taguri))
-
 
     def __str__(self):
         return str([(t.typename, t.field_name, t.clean) for t in self.tokens])

@@ -11,7 +11,7 @@ p_NA = p.regex("N\d+")
 p_internal_gene = p.regex("PB2|PB1|PA|NP|M|NS1")
 p_segment = p_internal_gene ^ p_HA ^ p_NA ^ p.string("HA") ^ p.string("NA")
 p_subtype = p.regex("H\d+N\d+(v)?")
-p_constellation = p.regex("[TPV]{6}")
+p_constellation = p.regex("[TPV-]{6}")
 p_segment_number = p.regex("[1-8]")
 
 
