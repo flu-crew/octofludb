@@ -105,6 +105,7 @@ class Unknown(Token):
     typename = "unknown"
     parser = p.regex(".*")
 
+    @classmethod
     def testOne(cls, item):
         return True
 

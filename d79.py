@@ -6,15 +6,17 @@ Build a local SPARQL database.
 Usage:
   d79 load_strains [<filename>]
   d79 tag [<filename>] [--tag=<tag>]
-  d79 load_excel [<filename>] [--tag=<tag>]
   d79 load_gbids [<filename>]
   d79 load_blast [<filename>] [--tag=<tag>]
-  d79 load_fasta [<filename>] [--tag=<tag>] [--delimiter=<del>]
+  d79 load_excel [<filename>] [--tag=<tag>] [--include=<inc>] [--exclude=<exc>]
+  d79 load_fasta [<filename>] [--tag=<tag>] [--delimiter=<del>] [--include=<inc>] [--exclude=<exc>]
 
 Options:
   -h --help               Show this screen.
   -k --key-type <key>     The subject type to merge on [default:"strain"]
   --delimiter <del>       Field delimiter for FASTA headers [default:"|"]
+  --include <inc>         Only parse using these tokens (comma-delimited list) [default:""]
+  --exclude <exc>         Remove these tokens (comma-delimited list) [default:""]
 """
 
 import os
@@ -64,15 +66,37 @@ if __name__ == "__main__":
             # commit the current batch (say of 1000 entries)
             g.commit()
 
-    if args["load_excel"]:
-        classes.Table(filehandle, tag=tagstr).connect(g)
-
     if args["load_blast"]:
         log(f"Retrieving and parsing blast results from '{file_str(filehandle)}'")
         recipe.load_blast(g, filehandle, tag=tagstr)
 
-    if args["load_fasta"]:
-        classes.Ragged(filehandle, tag=tagstr).connect(g)
+    if args["load_excel"] or args["load_fasta"]:
+        if not args["--include"]:
+            inc = {}
+        else:
+            inc = set(args["--include"].split(","))
+        if not args["--exclude"]:
+            exc = {}
+        else:
+            exc = set(args["--exclude"].split(","))
+
+        if args["load_excel"]:
+            classes.Table(
+                filehandle,
+                tag=tagstr,
+                include=inc,
+                exclude=exc,
+                log=True,
+            ).connect(g)
+
+        if args["load_fasta"]:
+            classes.Ragged(
+                filehandle,
+                tag=tagstr,
+                include=inc,
+                exclude=exc,
+                log=True,
+            ).connect(g)
 
     g.commit() # just in case we missed anything
 

@@ -2,6 +2,7 @@ import parsec as p
 from src.hash import chksum
 from src.util import log
 from rdflib import Literal
+from collections import OrderedDict
 
 from src.domain.identifier import (
     p_global_clade,
@@ -24,38 +25,18 @@ from src.domain.flu import (
     p_constellation,
 )
 
-from src.domain.date import (
-    p_year,
-    p_longyear,
-    p_month,
-    p_day,
-    p_date,
-    p_any_date,
-)
+from src.domain.date import p_year, p_longyear, p_month, p_day, p_date, p_any_date
 
-from src.domain.geography import (
-    country_to_code,
-    state_to_code,
-)
+from src.domain.geography import country_to_code, state_to_code
 
-from src.domain.animal import (
-    p_host,
-)
+from src.domain.animal import p_host
 
-from src.domain.sequence import (
-    p_dnaseq,
-    p_proseq,
-)
+from src.domain.sequence import p_dnaseq, p_proseq
 
-from src.token import Token
+from src.token import Token, Unknown
 from src.util import rmNone
-from src.nomenclature import (
-    make_uri,       
-    make_date,
-    make_property,
-    make_usa_state_uri,
-    P,
-)
+from src.nomenclature import make_uri, make_date, make_property, make_usa_state_uri, P
+
 
 class Country(Token):
     typename = "country"
@@ -71,6 +52,7 @@ class Country(Token):
     def as_uri(self):
         return make_country_uri(self.clean)
 
+
 class StateUSA(Token):
     typename = "state"
     class_predicate = P.state
@@ -85,7 +67,6 @@ class StateUSA(Token):
     def object_of(self, g, uri):
         if uri and self.matches:
             g.add((uri, P.state, make_usa_state_uri(self.clean)))
-
 
 
 class Date(Token):
@@ -104,6 +85,7 @@ class Host(Token):
     def munge(self, text):
         return text.lower()
 
+
 STRAIN_FIELDS = {"date", "country", "state", "host"}
 
 # --- strain tokens ---
@@ -120,7 +102,7 @@ class StrainToken(Token):
         return None
 
     def relate(self, fields, g):
-        if self.clean is None or not self.matches: 
+        if self.clean is None or not self.matches:
             return
         uri = self.as_uri()
         has_segment = self._has_segment(fields)
@@ -137,12 +119,14 @@ class StrainToken(Token):
             elif not has_segment:
                 other.object_of(g, uri)
 
+
 class Barcode(StrainToken):
     typename = "barcode"
     parser = p_tosu ^ p_A0 ^ p_gisaid_isolate
 
     def munge(self, text):
         return text.upper()
+
 
 class Strain(StrainToken):
     typename = "strain_name"
@@ -159,6 +143,7 @@ class StrainAttribute(Token):
             if other.group == "strain_id" and other.typename != self.typename:
                 self.object_of(g, other.as_uri())
 
+
 class Subtype(StrainAttribute):
     typename = "subtype"
     parser = p_subtype
@@ -170,20 +155,24 @@ class Constellation(StrainAttribute):
     parser = p_constellation
     class_predicate = P.constellation
 
+
 class GlobalClade(StrainAttribute):
     typename = "global_clade"
     parser = p_global_clade
     class_predicate = P.global_clade
+
 
 class HA(StrainAttribute):
     typename = "HA"
     parser = p_HA
     class_predicate = P.ha_clade
 
+
 class NA(StrainAttribute):
     typename = "NA"
     parser = p_NA
     class_predicate = P.na_clade
+
 
 class InternalGene(StrainAttribute):
     typename = "internal_gene"
@@ -203,10 +192,15 @@ class SegmentToken(Token):
             return
         uri = self.as_uri()
         for (name, other) in fields.items():
-            if other.matches and other.group == "segment_id" and other.typename != self.typename:
+            if (
+                other.matches
+                and other.group == "segment_id"
+                and other.typename != self.typename
+            ):
                 g.add(uri, P.sameAs, other.as_uri())
-            elif not other.typename in STRAIN_FIELDS: 
+            elif not other.typename in STRAIN_FIELDS:
                 other.object_of(g, uri)
+
 
 class Genbank(SegmentToken):
     typename = "genbank"
@@ -214,6 +208,7 @@ class Genbank(SegmentToken):
 
     def munge(self, text):
         return text.upper()
+
 
 class GisaidSeqid(SegmentToken):
     typename = "gisaid_seqid"
@@ -230,13 +225,16 @@ class SegmentAttribute(Token):
             if other.group == "segment_id":
                 self.object_of(g, other.as_uri())
 
+
 class Segment(SegmentAttribute):
     typename = "segment"
     parser = p_segment
 
+
 class SegmentNumber(SegmentAttribute):
     typename = "segment_number"
     parser = p_segment_number
+
 
 class SequenceToken(Token):
     group = "sequence"
@@ -245,7 +243,7 @@ class SequenceToken(Token):
         return text.upper().replace(" ", "")
 
     def as_uri(self):
-        return make_uri(chksum(self.clean)) 
+        return make_uri(chksum(self.clean))
 
     @classmethod
     def goodness(cls, items):
@@ -266,8 +264,9 @@ class Dnaseq(SequenceToken):
                 g.add((other.as_uri(), P.sameAs, uri))
             elif other.group == "strain_id":
                 g.add((other.as_uri(), P.has_segment, uri))
-            elif not other.typename in STRAIN_FIELDS: 
+            elif not other.typename in STRAIN_FIELDS:
                 other.object_of(g, uri)
+
 
 class Proseq(SequenceToken):
     typename = "proseq"
@@ -289,27 +288,33 @@ class Proseq(SequenceToken):
             elif other.group == "strain_id":
                 if has_segment:
                     log("WARNING: I don't know how to connect a protein to a strain id")
-            elif not other.typename in STRAIN_FIELDS and not has_segment: 
+            elif not other.typename in STRAIN_FIELDS and not has_segment:
                 other.object_of(g, uri)
 
-allClassifiers = dict(
-  "barcode" = Barcode,
-  "constellation" = Constellation,
-  "country" = Country,
-  "date" = Date,
-  "genbank" = Genbank,
-  "gisaidSeqid" = GisaidSeqid,
-  "globalClade" = GlobalClade,
-  "subtype" = Subtype,
-  "HA" = HA,
-  "NA" = NA,
-  "host" = Host,
-  "internalGene" = InternalGene,
-  "segment" = Segment,
-  "segmentNumber" = SegmentNumber,
-  "strain" = Strain,
-  "state" = StateUSA,
-  "dnaseq" = Dnaseq,
-  "proseq" = Proseq,
-  "default" = Unknown,
+
+allClassifiers = OrderedDict(
+    [
+        (c.typename, c)
+        for c in [
+            Barcode,
+            Constellation,
+            Country,
+            Date,
+            Genbank,
+            GisaidSeqid,
+            GlobalClade,
+            Subtype,
+            HA,
+            NA,
+            Host,
+            InternalGene,
+            Segment,
+            SegmentNumber,
+            Strain,
+            StateUSA,
+            Dnaseq,
+            Proseq,
+            Unknown,
+        ]
+    ]
 )

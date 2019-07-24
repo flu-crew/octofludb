@@ -12,6 +12,14 @@ import datetime as datetime
 from rdflib import Literal
 from tqdm import tqdm
 
+def updateClassifiers(classifiers, include, exclude):
+    keys = list(classifiers.keys())
+    for classifier in keys:
+        if classifier in exclude:
+            classifiers.pop(classifier)
+        if classifier in include:
+            classifiers.pop(classifier)
+    return list(classifiers.values())
 
 class Interpreter:
     def __init__(
@@ -20,10 +28,14 @@ class Interpreter:
         field_name=None,
         tag=None,
         classifiers=allClassifiers,
-        
+        include={},
+        exclude={},
+        log=False,
     ):
         self.tag = tag
-        self.classifiers = classifiers
+        self.classifiers = updateClassifiers(classifiers, include, exclude)
+        if log:
+            self.log()
         self.field_name = field_name
         self.data = self.cast(data)
 
@@ -36,6 +48,14 @@ class Interpreter:
     def summarize(self):
         raise NotImplementedError
 
+    def log(self):
+        log("Parsing with the following tokens:")
+        for classifier in self.classifiers:
+            log(f"  {colors.good(classifier.typename)}")
+        if self.tag:
+            log(f"Tagging as '{self.tag}'")
+        else:
+            log(f"{colors.bad('No tag given')}")
 
 class Datum(Interpreter):
     """
@@ -78,10 +98,22 @@ class HomoList(Interpreter):
         return str([t.clean for t in self.data])
 
 class ParsedPhraseList(Interpreter):
-    def __init__(self, filehandle, field_name=None, tag=None, classifiers=allClassifiers, default_classifier=Unknown):
-        self.filehandle = filehandle
+    def __init__(
+        self,
+        filehandle,
+        field_name=None,
+        tag=None,
+        classifiers=allClassifiers,
+        default_classifier=Unknown,
+        include={},
+        exclude={},
+        log=False,
+    ):
+        self.classifiers = updateClassifiers(classifiers, include, exclude)
         self.tag = tag
-        self.classifiers = classifiers
+        if log:
+            self.log()
+        self.filehandle = filehandle
         self.default_classifier = default_classifier
         self.data = self.cast(self.parse(filehandle))
 
@@ -137,7 +169,7 @@ class Table(ParsedPhraseList):
     def _parse_excel(self, filehandle):
         try:
             log(f"Reading {file_str(filehandle)} as excel file ...")
-            d = pd.read_excel(filehandle)
+            d = pd.read_excel(filehandle.name)
             # create a dictionary of List(str) with column names as keys
             return {c:[strOrNone(x) for x in d[c]] for c in d}
         except xlrd.biffh.XLRDError as e:
