@@ -1,5 +1,6 @@
 import parsec as p
 from src.hash import chksum
+from src.util import log
 from rdflib import Literal
 
 from src.domain.identifier import (
@@ -204,7 +205,7 @@ class SegmentToken(Token):
         for (name, other) in fields.items():
             if other.matches and other.group == "segment_id" and other.typename != self.typename:
                 g.add(uri, P.sameAs, other.as_uri())
-            elif not g.typename in STRAIN_FIELDS: 
+            elif not other.typename in STRAIN_FIELDS: 
                 other.object_of(g, uri)
 
 class Genbank(SegmentToken):
@@ -227,7 +228,7 @@ class SegmentAttribute(Token):
     def relate(self, fields, g):
         for (name, other) in fields.items():
             if other.group == "segment_id":
-                self.object_of(other.as_uri(), g)
+                self.object_of(g, other.as_uri())
 
 class Segment(SegmentAttribute):
     typename = "segment"
@@ -237,15 +238,28 @@ class SegmentNumber(SegmentAttribute):
     typename = "segment_number"
     parser = p_segment_number
 
-class Dnaseq(Token):
-    typename = "dnaseq"
-    parser = p_dnaseq
+class SequenceToken(Token):
+    group = "sequence"
 
     def munge(self, text):
         return text.upper().replace(" ", "")
 
+    def as_uri(self):
+        return make_uri(chksum(self.clean)) 
+
+    @classmethod
+    def goodness(cls, items):
+        matches = [(cls.testOne(item=x) and len(str(x)) > 20) for x in rmNone(items)]
+        goodness = sum(matches) / len(matches)
+        return goodness
+
+
+class Dnaseq(SequenceToken):
+    typename = "dnaseq"
+    parser = p_dnaseq
+
     def relate(self, fields, g):
-        uri = make_uri(chksum(self.clean)) 
+        uri = self.as_uri()
         g.add((uri, P.dnaseq, Literal(self.clean)))
         for other in fields.values():
             if other.group == "segment_id":
@@ -255,18 +269,9 @@ class Dnaseq(Token):
             elif not other.typename in STRAIN_FIELDS: 
                 other.object_of(g, uri)
 
-    @classmethod
-    def goodness(cls, items):
-        matches = [(cls.testOne(item=x) and len(str(x)) > 20) for x in rmNone(items)]
-        goodness = sum(matches) / len(matches)
-        return goodness
-
-class Proseq(Token):
+class Proseq(SequenceToken):
     typename = "proseq"
     parser = p_proseq
-
-    def munge(self, text):
-        return text.upper().replace(" ", "")
 
     def _has_segment(self, fields):
         for v in fields.values():
@@ -275,7 +280,7 @@ class Proseq(Token):
         return None
 
     def relate(self, fields, g):
-        uri = make_uri(chksum(self.clean)) 
+        uri = self.as_uri()
         g.add((uri, P.proseq, Literal(self.clean)))
         has_segment = self._has_segment(fields)
         for other in fields.values():
@@ -284,32 +289,27 @@ class Proseq(Token):
             elif other.group == "strain_id":
                 if has_segment:
                     log("WARNING: I don't know how to connect a protein to a strain id")
-            elif not g.typename in STRAIN_FIELDS and not has_segment: 
+            elif not other.typename in STRAIN_FIELDS and not has_segment: 
                 other.object_of(g, uri)
 
-    @classmethod
-    def goodness(cls, items):
-        matches = [(cls.testOne(item=x) and len(str(x)) > 20) for x in rmNone(items)]
-        goodness = sum(matches) / len(matches)
-        return goodness
-
-allClassifiers = [
-        Barcode,
-        Constellation,
-        Country,
-        Date,
-        Genbank,
-        GisaidSeqid,
-        GlobalClade,
-        Subtype,
-        HA,
-        NA,
-        Host,
-        InternalGene,
-        Segment,
-        SegmentNumber,
-        Strain,
-        StateUSA,
-        Dnaseq,
-        Proseq,
-    ]
+allClassifiers = dict(
+  "barcode" = Barcode,
+  "constellation" = Constellation,
+  "country" = Country,
+  "date" = Date,
+  "genbank" = Genbank,
+  "gisaidSeqid" = GisaidSeqid,
+  "globalClade" = GlobalClade,
+  "subtype" = Subtype,
+  "HA" = HA,
+  "NA" = NA,
+  "host" = Host,
+  "internalGene" = InternalGene,
+  "segment" = Segment,
+  "segmentNumber" = SegmentNumber,
+  "strain" = Strain,
+  "state" = StateUSA,
+  "dnaseq" = Dnaseq,
+  "proseq" = Proseq,
+  "default" = Unknown,
+)

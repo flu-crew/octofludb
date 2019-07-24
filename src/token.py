@@ -98,7 +98,7 @@ class Token:
 
 class Missing(Token):
     parser = None
-    typename = "missing_data" 
+    typename = "missing" 
 
 
 class Unknown(Token):
@@ -107,3 +107,11 @@ class Unknown(Token):
 
     def testOne(cls, item):
         return True
+
+class Empty(Token):
+    """ If you want to throw out any field that is not recognized, make this the default """ 
+    typename = "empty"
+    parser = p.regex(".*")
+
+    def munge(self, text):
+        return ""

@@ -14,10 +14,16 @@ from tqdm import tqdm
 
 
 class Interpreter:
-    def __init__(self, data, field_name=None, tag=None, classifiers=allClassifiers, default_classifier=Unknown):
+    def __init__(
+        self,
+        data,
+        field_name=None,
+        tag=None,
+        classifiers=allClassifiers,
+        
+    ):
         self.tag = tag
         self.classifiers = classifiers
-        self.default_classifier = default_classifier
         self.field_name = field_name
         self.data = self.cast(data)
 
@@ -39,7 +45,7 @@ class Datum(Interpreter):
         for t in (c(data, field_name=self.field_name) for c in self.classifiers):
             if t:
                 return t
-        return self.default_classifier
+        return self.default_classifier(data)
 
     def summarize(self):
         log(f"typename: {self.data.typename}")
@@ -49,11 +55,6 @@ class Datum(Interpreter):
 
     def __str__(self):
         return str(self.data.clean)
-
-    def connect(self, g):
-        token.add_triples(g)
-        g.commit()
-
 
 class HomoList(Interpreter):
     """
@@ -161,7 +162,7 @@ class Ragged(ParsedPhraseList):
             tabular_data = [[row[i] for row in data] for i in range(N)]
             return headlessTabularTyping(tabular_data)
         else:
-            return [Phrase([Datum(x) for x in row]) for row in data]
+            return [Phrase([Datum(x).data for x in row]) for row in data]
 
     def parse(self, filehandle):
         """
@@ -209,7 +210,12 @@ class Phrase:
     levels = []
     def __init__(self, tokens):
         self.tokens = tokens
-        self.fields = {token.choose_field_name():token for token in tokens}
+        try:
+            self.fields = {token.choose_field_name():token for token in tokens}
+        except:
+            print("FAILURE IN PHRASE", file=sys.stderr)
+            print([type(t) for t in tokens], file=sys.stderr) 
+            sys.exit(1)
 
     def connect(self, g, taguri=None):
         """
