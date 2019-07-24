@@ -1,36 +1,8 @@
 import parsec as p
 from src.util import padDigit, rmNone
+from src.parser import wordset
 from rdflib.namespace import XSD
 from rdflib import Literal
-from collections import defaultdict
-
-
-def wordset(words, label, f=lambda x: x.lower().replace(" ", "_")):
-    """
-    Create a log(n) parser for a set of n strings.
-    @param "label" is a arbitrary name for the wordset that is used in error messages
-    @param "f" is a function used to convert matching strings in the wordset and text (e.g to match on lower case).
-    """
-    d = defaultdict(set)
-    # divide words into sets of words of the same length
-    # this allows exact matches against the sets
-    for word in words:
-        d[len(word)].update([f(word)])
-    # Convert this to a list of (<length>, <set>) tuples reverse sorted by
-    # length. The parser must search for longer strings first to avoid matches
-    # against prefixes.
-    d = sorted(d.items(), key=lambda x: x[0], reverse=True)
-
-    @p.Parser
-    def wordsetParser(text, index=0):
-        for k, v in d:
-            if f(text[index : (index + k)]) in v:
-                return p.Value.success(index + k, text[index : (index + k)])
-        return p.Value.failure(
-            index, f'a term "{f(text[index:(index+k)])}" not in wordset {d}'
-        )
-
-    return wordsetParser
 
 
 def expandYear(x: str) -> str:

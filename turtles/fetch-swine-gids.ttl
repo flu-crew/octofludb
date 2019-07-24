@@ -1,13 +1,17 @@
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX f: <https://flucrew.org/term/>
+PREFIX onto: <http://www.ontotext.com/>
 
 SELECT DISTINCT ?gb
+FROM onto:disable-sameAs
 WHERE {
-    ?strain_id f:has_segment ?gb_id .
-    ?gb_id f:genbank_id ?gb .
     {
         ?strain_id f:host "Swine" .
+        ?strain_id f:has_segment ?gb_id .
+        ?gb_id f:genbank_id ?gb .
     } UNION {
-        ?strain_id f:tag ?tag
+        ?ssid f:tag ?tag .
+        ?ssid f:has_segment ?gb_id .
+        ?gb_id f:genbank_id ?gb .
     }
 }

@@ -61,22 +61,23 @@ mkdir ttl || log "Overwriting files in ttl/"
 # file="${DATADIR}/influenza_na.dat"
 # log "Loading IVR data dump from '$file'"
 # time d79 load_strains "$file" > ttl/influenza_na.ttl
-
-
-file="${DATADIR}/blast.txt"
-log "Loading blast results from $file"
-time d79 load_blast "$file" --tag="blast" > ttl/blast.ttl
-
-
-# # ## TODO: push all files to the GraphDB database before running the fetch step
-# # ## Currently I have to manually stop here, go to the GraphDB browser, and
-# # ## upload the influenza_na dataset (at least).
-# # # #
-# # # # # For now just use the existing swine-ids.txt, it is quite good enough
-# # # # log "Retrieving all swine Genbank IDs and selected human IDs (saved in gb-id.txt)"
-# # # # time q79 ~/src/git/d79/turtles/fetch-swine-gids.ttl > gb.ids
-# # log "Compiling Genbank records for each of these IDs"
-# # time d79 load_gbids gb.ids > ttl/genbank.ttl
 #
+#
+# file="${DATADIR}/blast.txt"
+# log "Loading blast results from $file"
+# time d79 load_blast "$file" --tag="blast" > ttl/blast.ttl
+
+
+# # TODO: push all files to the GraphDB database before running the fetch step
+# # Currently I have to manually stop here, go to the GraphDB browser, and
+# # upload the influenza_na dataset (at least).
+# #
+# # # For now just use the existing swine-ids.txt, it is quite good enough
+# log "Retrieving all swine Genbank IDs and selected human IDs (saved in gb-id.txt)"
+# time q79 ~/src/git/d79/turtles/fetch-swine-gids.ttl > gb.ids
+#
+# log "Compiling Genbank records for each of these IDs"
+# time d79 load_gbids gb.ids > ttl/genbank.ttl
+
 # log $(date)
 # log "done"

@@ -11,7 +11,7 @@ from src.util import padDigit
 ni = rdflib.Namespace("https://flucrew.org/id/")
 nt = rdflib.Namespace("https://flucrew.org/term/")
 ntag = rdflib.Namespace("https://flucrew.org/tag/")
-nusa = rdflib.Namespace("https://flucrew.org/geo/usa/")
+nusa = rdflib.Namespace("https://flucrew.org/geo/country/usa/")
 ncountry = rdflib.Namespace("https://flucrew.org/geo/country/")
 
 manager = rdflib.namespace.NamespaceManager(rdflib.Graph())
@@ -110,7 +110,8 @@ class O:
 
 class P:
     # standard semantic web predicates
-    name = RDFS.label
+    name = nt.name # in scheme: rdfs:label rdfs:subPropertyOf f:name
+    abbr = nt.abbr
     sameAs = OWL.sameAs
     unknown_unknown = nt.unknown
     chksum = nt.chksum

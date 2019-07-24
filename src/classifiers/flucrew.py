@@ -23,6 +23,11 @@ from src.domain.flu import (
     p_subtype,
     p_strain_obj,
     p_constellation,
+    p_h1_clade,
+    p_h3_clade,
+    p_internal_gene_clade,
+    p_n1_clade,
+    p_n2_clade,
 )
 
 from src.domain.date import p_year, p_longyear, p_month, p_day, p_date, p_any_date
@@ -300,6 +305,25 @@ class Proseq(SequenceToken):
             elif not other.typename in STRAIN_FIELDS and not has_segment:
                 other.object_of(g, uri)
 
+class H1Clade(Token): 
+    typename = "h1_clade"
+    parser = p_h1_clade
+
+class H3Clade(Token):
+    typename = "h3_clade"
+    parser = p_h3_clade
+
+class N1Clade(Token): 
+    typename = "n1_clade"
+    parser = p_n1_clade
+
+class N2Clade(Token):
+    typename = "n2_clade"
+    parser = p_n2_clade
+
+class InternalGeneClade(Token):
+    typename = "internal_gene_clade"
+    parser = p_internal_gene_clade
 
 allClassifiers = OrderedDict(
     [
@@ -321,6 +345,11 @@ allClassifiers = OrderedDict(
             SegmentNumber,
             Strain,
             StateUSA,
+            InternalGeneClade,
+            H1Clade,
+            H3Clade,
+            N1Clade,
+            N2Clade,
             Dnaseq,
             Proseq,
             Unknown,
