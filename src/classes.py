@@ -168,8 +168,16 @@ def headlessTabularTyping(data):
 
 
 class Table(ParsedPhraseList):
+    def __init__(self, headers=[], **kwargs):
+        self.headers = headers
+        super().__init__(**kwargs)
+
     def cast(self, data):
-        return tabularTyping(data)
+        if self.headers:
+            raise NotImplemented
+        else:
+            result = tabularTyping(data)
+        return result
 
     def parse(self, filehandle):
         """
@@ -255,22 +263,16 @@ class Phrase:
 
     def __init__(self, tokens):
         self.tokens = tokens
-        try:
-            self.fields = {token.choose_field_name(): token for token in tokens}
-        except:
-            print("FAILURE IN PHRASE", file=sys.stderr)
-            print([type(t) for t in tokens], file=sys.stderr)
-            sys.exit(1)
 
     def connect(self, g, taguri=None):
         """
         Create links between a list of Tokens. For example, they may be related
         by fields in a fasta header or elements in a row in a table.
         """
-        for (name, token) in self.fields.items():
+        for token in self.tokens:
             if token.clean is None:
                 continue
-            token.relate(self.fields, g)
+            token.relate(self.tokens, g)
             token.add_triples(g)
             if taguri and token.group:
                 turi = token.as_uri()

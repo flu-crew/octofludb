@@ -13,6 +13,7 @@ from src.nomenclature import (
     make_usa_state_uri,
 )
 
+
 def wordset(words, label, f=lambda x: x.lower().replace(" ", "_")):
     """
     Create a log(n) parser for a set of n strings.
@@ -39,6 +40,7 @@ def wordset(words, label, f=lambda x: x.lower().replace(" ", "_")):
         )
 
     return wordsetParser
+
 
 def parse_match(parser, text):
     try:

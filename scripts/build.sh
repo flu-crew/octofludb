@@ -75,9 +75,9 @@ mkdir ttl || log "Overwriting files in ttl/"
 # # # For now just use the existing swine-ids.txt, it is quite good enough
 # log "Retrieving all swine Genbank IDs and selected human IDs (saved in gb-id.txt)"
 # time q79 ~/src/git/d79/turtles/fetch-swine-gids.ttl > gb.ids
-#
-# log "Compiling Genbank records for each of these IDs"
-# time d79 load_gbids gb.ids > ttl/genbank.ttl
+
+log "Compiling Genbank records for each of these IDs"
+time d79 load_gbids gb.ids > ttl/genbank.ttl
 
 # log $(date)
 # log "done"

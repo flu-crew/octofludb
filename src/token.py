@@ -104,7 +104,7 @@ class Missing(Token):
 
 class Unknown(Token):
     typename = "unknown"
-    parser = p.regex(".+")  # not ".*" to avoid adding empty fields
+    parser = p.regex(".*")  # not ".*" to avoid adding empty fields
 
     @classmethod
     def testOne(cls, item):

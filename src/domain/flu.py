@@ -15,11 +15,93 @@ p_subtype = p.regex("H\d+N\d+(v)?")
 p_constellation = p.regex("[TPV-]{6}")
 p_segment_number = p.regex("[1-8]")
 
-p_h1_clade = wordset(["alpha", "beta", "delta1", "delta1a", "delta1b", "delta2", "gamma", "gamma2", "gamma2-beta-like", "gamma2_beta_like", "pandemic", "pdm", "pdmH1", "human-delta", "huVac", "predelta", "1B.2.2.2"], label="h1_clade")
-p_h3_clade = wordset(["2010.1", "2010.2", "Cluster_I", "Cluster_II", "Cluster_III", "Cluster_IV", "Cluster_IVA", "Cluster_IVB", "Cluster_IVC", "Cluster_IVD", "Cluster_IVE", "Cluster_IVF", "I", "II", "III", "IV", "IV-A", "IV-B", "IV-C", "IV-D", "IV-E", "IV-F", "huVac", "human-like_2010.1", "human-like_2010.2", "human-like_2016"], label="h3_clade")
-p_n1_clade = wordset(["Human_seasonal", "huVac", "Classical", "Pandemic", "MN99"], label="n1_clade")
-p_n2_clade = wordset(["Human_N2", "2016", "Human-like", "1998", "1998A", "98A", "98A1", "98A_1", "98A2", "98A_2", "1998B", "98B", "98B1", "98B_1", "98B2", "98B_2", "2002", "2002A", "02A1", "02A2", "2002B", "02B1", "02B2", "TX98"], label="n3_clade")
+p_h1_clade = wordset(
+    [
+        "alpha",
+        "beta",
+        "delta1",
+        "delta1a",
+        "delta1b",
+        "delta2",
+        "gamma",
+        "gamma2",
+        "gamma2-beta-like",
+        "gamma2_beta_like",
+        "pandemic",
+        "pdm",
+        "pdmH1",
+        "human-delta",
+        "huVac",
+        "predelta",
+        "1B.2.2.2",
+    ],
+    label="h1_clade",
+)
+p_h3_clade = wordset(
+    [
+        "2010.1",
+        "2010.2",
+        "Cluster_I",
+        "Cluster_II",
+        "Cluster_III",
+        "Cluster_IV",
+        "Cluster_IVA",
+        "Cluster_IVB",
+        "Cluster_IVC",
+        "Cluster_IVD",
+        "Cluster_IVE",
+        "Cluster_IVF",
+        "I",
+        "II",
+        "III",
+        "IV",
+        "IV-A",
+        "IV-B",
+        "IV-C",
+        "IV-D",
+        "IV-E",
+        "IV-F",
+        "huVac",
+        "human-like_2010.1",
+        "human-like_2010.2",
+        "human-like_2016",
+    ],
+    label="h3_clade",
+)
+p_n1_clade = wordset(
+    ["Human_seasonal", "huVac", "Classical", "Pandemic", "MN99"], label="n1_clade"
+)
+p_n2_clade = wordset(
+    [
+        "Human_N2",
+        "2016",
+        "Human-like",
+        "1998",
+        "1998A",
+        "98A",
+        "98A1",
+        "98A_1",
+        "98A2",
+        "98A_2",
+        "1998B",
+        "98B",
+        "98B1",
+        "98B_1",
+        "98B2",
+        "98B_2",
+        "2002",
+        "2002A",
+        "02A1",
+        "02A2",
+        "2002B",
+        "02B1",
+        "02B2",
+        "TX98",
+    ],
+    label="n3_clade",
+)
 p_internal_gene_clade = wordset(["PDM", "TRIG", "VTX98"], label="internal_gene_clade")
+
 
 class Strain:
     def __init__(

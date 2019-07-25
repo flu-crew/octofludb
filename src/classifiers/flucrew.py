@@ -103,19 +103,19 @@ class StrainToken(Token):
     def as_uri(self):
         return make_uri(self.clean)
 
-    def _has_segment(self, fields):
-        for v in fields.values():
-            if v.group == "segment_id" or v.typename == "dnaseq":
+    def _has_segment(self, tokens):
+        for token in tokens:
+            if token.group == "segment_id" or token.typename == "dnaseq":
                 return True
         return None
 
-    def relate(self, fields, g):
+    def relate(self, tokens, g):
         if self.clean is None or not self.matches:
             return
         uri = self.as_uri()
-        has_segment = self._has_segment(fields)
+        has_segment = self._has_segment(tokens)
         g.add((uri, make_property(self.typename), self.as_literal()))
-        for (name, other) in fields.items():
+        for other in tokens:
             if not other.matches or other.clean == self.clean or other.clean is None:
                 continue
             if other.group == "strain_id":
@@ -146,8 +146,8 @@ class Strain(StrainToken):
 
 # --- strain attributes ---
 class StrainAttribute(Token):
-    def relate(self, fields, g):
-        for (name, other) in fields.items():
+    def relate(self, tokens, g):
+        for other in tokens:
             if other.group == "strain_id" and other.typename != self.typename:
                 self.object_of(g, other.as_uri())
 
@@ -195,11 +195,11 @@ class SegmentToken(Token):
     def as_uri(self):
         return make_uri(self.clean)
 
-    def relate(self, fields, g):
+    def relate(self, tokens, g):
         if not self.matches:
             return
         uri = self.as_uri()
-        for (name, other) in fields.items():
+        for other in tokens:
             if other.clean is None:
                 continue
             if (
@@ -230,8 +230,8 @@ class GisaidSeqid(SegmentToken):
 
 # --- segment attributes ---
 class SegmentAttribute(Token):
-    def relate(self, fields, g):
-        for (name, other) in fields.items():
+    def relate(self, tokens, g):
+        for other in tokens:
             if other.group == "segment_id":
                 self.object_of(g, other.as_uri())
 
@@ -266,10 +266,10 @@ class Dnaseq(SequenceToken):
     typename = "dnaseq"
     parser = p_dnaseq
 
-    def relate(self, fields, g):
+    def relate(self, tokens, g):
         uri = self.as_uri()
         g.add((uri, P.dnaseq, Literal(self.clean)))
-        for other in fields.values():
+        for other in tokens:
             if other.clean is None:
                 continue
             if other.group == "segment_id":
@@ -284,17 +284,17 @@ class Proseq(SequenceToken):
     typename = "proseq"
     parser = p_proseq
 
-    def _has_segment(self, fields):
-        for v in fields.values():
-            if v.group == "segment_id":
+    def _has_segment(self, tokens):
+        for token in tokens:
+            if token.group == "segment_id":
                 return True
         return None
 
-    def relate(self, fields, g):
+    def relate(self, tokens, g):
         uri = self.as_uri()
         g.add((uri, P.proseq, Literal(self.clean)))
-        has_segment = self._has_segment(fields)
-        for other in fields.values():
+        has_segment = self._has_segment(tokens)
+        for other in tokens:
             if other.clean is None:
                 continue
             if other.group == "segment_id":
@@ -305,25 +305,31 @@ class Proseq(SequenceToken):
             elif not other.typename in STRAIN_FIELDS and not has_segment:
                 other.object_of(g, uri)
 
-class H1Clade(Token): 
+
+class H1Clade(Token):
     typename = "h1_clade"
     parser = p_h1_clade
+
 
 class H3Clade(Token):
     typename = "h3_clade"
     parser = p_h3_clade
 
-class N1Clade(Token): 
+
+class N1Clade(Token):
     typename = "n1_clade"
     parser = p_n1_clade
+
 
 class N2Clade(Token):
     typename = "n2_clade"
     parser = p_n2_clade
 
+
 class InternalGeneClade(Token):
     typename = "internal_gene_clade"
     parser = p_internal_gene_clade
+
 
 allClassifiers = OrderedDict(
     [

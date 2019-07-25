@@ -110,7 +110,7 @@ class O:
 
 class P:
     # standard semantic web predicates
-    name = nt.name # in scheme: rdfs:label rdfs:subPropertyOf f:name
+    name = nt.name  # in scheme: rdfs:label rdfs:subPropertyOf f:name
     abbr = nt.abbr
     sameAs = OWL.sameAs
     unknown_unknown = nt.unknown
