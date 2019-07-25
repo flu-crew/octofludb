@@ -2,6 +2,8 @@
 
 import src.classifiers.flucrew as ftok
 from src.nomenclature import make_uri, make_usa_state_uri, make_country_uri
+from src.classes import HomoList, Phrase, Datum
+from src.graph import showTriple
 import unittest
 import rdflib
 import urllib.parse as url
@@ -394,6 +396,34 @@ class TestUnknown(unittest.TestCase):
         self.assertEqual(ftok.Unknown("1").clean, "1")
         self.assertEqual(ftok.Unknown("a").clean, "a")
         self.assertEqual(ftok.Unknown("yOlO123").clean, "yOlO123")
+
+
+class TestHomoList(unittest.TestCase):
+    def types(self, xs):
+        return [x.typename for x in HomoList(xs).data]
+
+    def test_homolist(self):
+        self.assertEqual(self.types(["Georgia"]), ["country"])
+        self.assertEqual(self.types(["Georgia", "Texas"]), ["state", "state"])
+
+
+class TestPhrase(unittest.TestCase):
+    def test_phrase(self):
+        self.assertEqual(
+            showTriple(["A01234567", "H1"]),
+            [
+                (
+                    "https://flucrew.org/id/a01234567",
+                    "https://flucrew.org/term/barcode",
+                    "A01234567",
+                ),
+                (
+                    "https://flucrew.org/id/a01234567",
+                    "https://flucrew.org/term/ha",
+                    "H1",
+                ),
+            ],
+        )
 
 
 if __name__ == "__main__":
