@@ -11,6 +11,7 @@ import datetime as datetime
 
 
 def load_blast(g, filehandle, tag=None):
+    timestr = datetime.datetime.now()
     for row in tqdm(filehandle.readlines()):
         try:
             (
@@ -37,7 +38,7 @@ def load_blast(g, filehandle, tag=None):
         if tag:
             taguri = make_tag_uri(tag)
             g.add((taguri, P.name, Literal(tag)))
-            g.add((taguri, P.time, Literal(datetime.datetime.now())))
+            g.add((taguri, P.time, Literal(timestr)))
             g.add((taguri, P.file, Literal(file_str(filehandle))))
             g.add((huid, P.tag, taguri))
 
