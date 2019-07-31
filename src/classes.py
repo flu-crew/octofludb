@@ -218,18 +218,33 @@ class Table(ParsedPhraseList):
         """
         Make a dictionary with column name as key and list of strings as value. Currently only Excel is supported.
         """
-        return self._parse_excel(filehandle)
+        try:
+            data = self._parse_excel(filehandle)
+        except:
+            data = self._parse_table(filehandle)
+        return data
 
     def _parse_excel(self, filehandle):
         try:
             log(f"Reading {file_str(filehandle)} as excel file ...")
+            # FIXME: what if there isn't a header?
             d = pd.read_excel(filehandle.name)
             # create a dictionary of List(str) with column names as keys
             return {c: [strOrNone(x) for x in d[c]] for c in d}
         except xlrd.biffh.XLRDError as e:
             log(f"Could not parse '{file_str(filehandle)}' as an excel file")
-            sys.exit(1)
+            raise e
         return d
+
+    def _parse_table(self, filehandle, delimiter="\t"):
+        log(f"Reading {file_str(filehandle)} as tab-delimited file ...")
+        rows = [r.split(delimiter) for r in filehandle.readlines()]
+        # FIXME: I can't assume there is a header
+        header = [c.strip() for c in rows[0]]
+        indices = range(len(header))
+        rows = rows[1:]
+        columns = {header[i]:[strOrNone(r[i].strip()) for r in rows] for i in indices}
+        return columns
 
 
 class Ragged(ParsedPhraseList):
