@@ -1,7 +1,7 @@
 import sys
 import parsec
 from src.classifiers.flucrew import allClassifiers
-from src.token import Token, Unknown
+from src.token import Token, Unknown, Missing
 from src.util import zipGen, strOrNone, log, concat, file_str
 from src.nomenclature import make_tag_uri, P
 import dateutil.parser as dateparser
@@ -30,12 +30,16 @@ class Interpreter:
         field_name=None,
         tag=None,
         classifiers=allClassifiers,
+        default_classifier=Unknown,
         include={},
         exclude={},
+        levels=None,
         log=False,
     ):
         self.tag = tag
+        self.levels = levels
         self.classifiers = updateClassifiers(classifiers, include, exclude)
+        self.default_classifier=Unknown,
         if log:
             self.log()
         self.field_name = field_name
@@ -66,10 +70,18 @@ class Datum(Interpreter):
     """
 
     def cast(self, data):
-        for t in (c(data, field_name=self.field_name) for c in self.classifiers):
-            if t:
-                return t
-        return self.default_classifier(data)
+        if data == "":
+            return Missing(data)
+        for classifer in self.classifiers:
+            try:
+                token = classifer(data, field_name=self.field_name)
+            except TypeError:
+                log(data)
+                log(token)
+                sys.exit(1)
+            if token:
+                return token
+        return self.default_classifier(data, field_name=self.field_name)
 
     def summarize(self):
         log(f"typename: {self.data.typename}")
@@ -100,7 +112,6 @@ class HomoList(Interpreter):
             if token.clean is None:
                 continue
             token.add_triples(g)
-        g.commit()
 
     def __str__(self):
         return str([t.clean for t in self.data])
@@ -116,10 +127,12 @@ class ParsedPhraseList(Interpreter):
         default_classifier=Unknown,
         include={},
         exclude={},
+        levels=None,
         log=False,
     ):
         self.classifiers = updateClassifiers(classifiers, include, exclude)
         self.tag = tag
+        self.levels = levels
         if log:
             self.log()
         self.filehandle = filehandle
@@ -135,36 +148,51 @@ class ParsedPhraseList(Interpreter):
         if self.tag:
             taguri = make_tag_uri(self.tag)
             g.add((taguri, P.name, Literal(self.tag)))
-            g.add((taguri, P.time, Literal(str(datetime.datetime.now()))))
+            g.add((taguri, P.time, Literal(datetime.datetime.now())))
             g.add((taguri, P.file, Literal(file_str(self.filehandle))))
         else:
             taguri = None
 
         for (i, phrase) in enumerate(tqdm(self.data)):
             phrase.connect(g, taguri=taguri)
-            if i % 1000 == 0:
-                g.commit()
-        g.commit()
 
 
-def tabularTyping(data):
+def tabularTyping(data, levels=None):
     cols = []
     for k, v in data.items():
         hl = HomoList(v, field_name=k).data
         log(f" - '{k}':{colors.good(hl[0].typename)}")
         cols.append(hl)
-    phrases = [Phrase([col[i] for col in cols]) for i in range(len(cols[0]))]
+    phrases = [Phrase([col[i] for col in cols], levels=levels) for i in range(len(cols[0]))]
     return phrases
 
 
-def headlessTabularTyping(data):
+def headlessTabularTyping(data, levels=None):
     cols = []
     for (i, xs) in enumerate(data):
         hl = HomoList(xs).data
         log(f" - 'X{i}':{colors.good(hl[0].typename)}")
         cols.append(hl)
-    phrases = [Phrase([col[i] for col in cols]) for i in range(len(cols[0]))]
+    phrases = [Phrase([col[i] for col in cols], levels=levels) for i in range(len(cols[0]))]
     return phrases
+
+
+class Column:
+    def __init__(self, field_name, classifier=Unknown, extractWith=None):
+        self.classifier = classifier
+        self.field_name = field_name
+        self.unwrap = lambda x: x
+        if extractWith:
+
+            def unwrap(self, x):
+                try:
+                    match = re.search(extractWith, x).group(0)
+                except AttributeError:
+                    match = ""
+                return match
+
+    def cast(self, xs):
+        return [self.classifier(self.unwrap(x), field_name=field_name) for x in xs]
 
 
 class Table(ParsedPhraseList):
@@ -174,9 +202,16 @@ class Table(ParsedPhraseList):
 
     def cast(self, data):
         if self.headers:
-            raise NotImplemented
+            if len(self.headers) != len(data):
+                log(
+                    "The number of described columns doesn't equal the number of observed columns"
+                )
+                exit(1)
+            else:
+                cols = [c.cast(d) for c, d in zip(headers, data)]
+                result = [Phrase([col[i] for col in cols], levels=self.levels) for i in range(len(cols[0]))]
         else:
-            result = tabularTyping(data)
+            result = tabularTyping(data, levels=self.levels)
         return result
 
     def parse(self, filehandle):
@@ -212,9 +247,9 @@ class Ragged(ParsedPhraseList):
             N = len(data[0])
             log(f"Applying column type inference (all headers have {N-1} fields)")
             tabular_data = [[row[i] for row in data] for i in range(N)]
-            return headlessTabularTyping(tabular_data)
+            return headlessTabularTyping(tabular_data, levels=self.levels)
         else:
-            return [Phrase([Datum(x).data for x in row]) for row in data]
+            return [Phrase([Datum(x).data for x in row], levels=self.levels) for row in data]
 
     def parse(self, filehandle):
         """
@@ -237,7 +272,11 @@ class Ragged(ParsedPhraseList):
         p_fasta = parsec.many1(p_entry)
 
         log(f"Reading {file_str(filehandle)} as a fasta file:")
-        entries = p_fasta.parse(filehandle.read())
+        try:
+            entries = p_fasta.parse(filehandle.read())
+        except AttributeError:
+            # in case I want to pass in a list of strings, e.g., in tests
+            entries = p_fasta.parse(filehandle)
         row = [h.split(sep) + [q] for (h, q) in entries]
         return row
 
@@ -259,10 +298,9 @@ class Ragged(ParsedPhraseList):
 
 
 class Phrase:
-    levels = []
-
-    def __init__(self, tokens):
+    def __init__(self, tokens, levels=None):
         self.tokens = tokens
+        self.levels = levels
 
     def connect(self, g, taguri=None):
         """
@@ -272,7 +310,8 @@ class Phrase:
         for token in self.tokens:
             if token.clean is None:
                 continue
-            token.relate(self.tokens, g)
+            if (self.levels is None) or (token.group in self.levels):
+                token.relate(self.tokens, g, levels=self.levels)
             token.add_triples(g)
             if taguri and token.group:
                 turi = token.as_uri()

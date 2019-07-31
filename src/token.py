@@ -15,8 +15,8 @@ class Token:
         self.matches = self.testOne(text)
         self.dirty = text
         self.field_name = field_name
-        if self.matches:
-            self.clean = self.munge(text)
+        if self.matches is not None:
+            self.clean = self.munge(self.matches)
         else:
             self.clean = None
 
@@ -63,7 +63,7 @@ class Token:
         ):
             define_subproperty(self.as_predicate(), self.class_predicate, g)
 
-    def relate(self, fields, g):
+    def relate(self, fields, g, levels=None):
         """
         Create links as desired between Tokens.
         """
@@ -73,7 +73,7 @@ class Token:
         return self.clean
 
     def __bool__(self):
-        return self.matches
+        return self.matches is not None and self.matches != ""
 
     @classmethod
     def testOne(cls, item):
@@ -82,33 +82,45 @@ class Token:
         that can be turned into a string is a member.
         """
         if item is None:
-            return False
+            return None
         try:
             result = cls.parser.parse_strict(item)
-            return bool(result)
+            return result
         except p.ParseError:
-            return False
-        return True
+            return None
 
     @classmethod
     def goodness(cls, items):
-        matches = [cls.testOne(item=x) for x in rmNone(items)]
+        matches = [(cls.testOne(item=x) != None) for x in rmNone(items)]
         goodness = sum(matches) / len(matches)
         return goodness
 
 
 class Missing(Token):
-    parser = None
+    parser = lambda x: None
     typename = "missing"
+
+    @classmethod
+    def testOne(cls, item):
+        return None
 
 
 class Unknown(Token):
     typename = "unknown"
-    parser = p.regex(".*")  # not ".*" to avoid adding empty fields
+    parser = lambda x: x
 
     @classmethod
     def testOne(cls, item):
-        return True
+        return item
+
+
+class Ignore(Token):
+    typename = "ignore_me"
+    parser = lambda x: None
+
+    @classmethod
+    def testOne(cls, item):
+        return None
 
 
 class Empty(Token):

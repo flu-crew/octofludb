@@ -1,8 +1,10 @@
 import parsec as p
 from src.hash import chksum
 from src.util import log
+from src.domain.flu import SEGMENT
 from rdflib import Literal
 from collections import OrderedDict
+import re
 
 from src.domain.identifier import (
     p_global_clade,
@@ -40,7 +42,7 @@ from src.domain.sequence import p_dnaseq, p_proseq
 
 from src.token import Token, Unknown
 from src.util import rmNone
-from src.nomenclature import make_uri, make_date, make_property, make_usa_state_uri, P
+from src.nomenclature import make_uri, make_date, make_property, make_usa_state_uri, make_country_uri, P
 
 
 class Country(Token):
@@ -52,22 +54,28 @@ class Country(Token):
 
     @classmethod
     def testOne(cls, item):
-        return bool(country_to_code(item))
+        return country_to_code(item)
 
     def as_uri(self):
-        return make_country_uri(self.clean)
+        return make_country_uri(self.dirty)
+
+    def object_of(self, g, uri):
+        # I am allowing a link even when there was no match. This allows
+        # unusual country names to be treated as countries when the context
+        # suggests they are countries. But they do at least have to be
+        # non-empty strings.
+        if uri and self.dirty:
+            g.add((uri, self.as_predicate(), self.as_uri()))
 
 
 class StateUSA(Token):
     typename = "state"
     class_predicate = P.state
-
-    def munge(self, text):
-        return state_to_code(text)
+    parser = state_to_code
 
     @classmethod
     def testOne(cls, item):
-        return bool(state_to_code(item))
+        return state_to_code(item)
 
     def object_of(self, g, uri):
         if uri and self.matches:
@@ -80,7 +88,7 @@ class Date(Token):
     class_predicate = P.date
 
     def munge(self, text):
-        return str(p_any_date.parse(text))
+        return str(text)
 
     def as_literal(self):
         return make_date(self.dirty)
@@ -94,37 +102,40 @@ class Host(Token):
         return text.lower()
 
 
-STRAIN_FIELDS = {"date", "country", "state", "host"}
+STRAIN_FIELDS = {"date", "country", "state", "host", "global_clade", "subtype", "strain_name"}
 
 # --- strain tokens ---
 class StrainToken(Token):
-    group = "strain_id"
+    group = "strain"
 
     def as_uri(self):
         return make_uri(self.clean)
 
     def _has_segment(self, tokens):
         for token in tokens:
-            if token.group == "segment_id" or token.typename == "dnaseq":
+            if token.group == "segment" or token.typename == "dnaseq":
                 return True
         return None
 
-    def relate(self, tokens, g):
+    def relate(self, tokens, g, levels=None):
         if self.clean is None or not self.matches:
             return
         uri = self.as_uri()
         has_segment = self._has_segment(tokens)
+        use_segment = (levels is None and has_segment) or (levels is not None and "segment" in levels and has_segment)
         g.add((uri, make_property(self.typename), self.as_literal()))
         for other in tokens:
             if not other.matches or other.clean == self.clean or other.clean is None:
                 continue
-            if other.group == "strain_id":
+            if other.group == "strain":
                 g.add((uri, P.sameAs, other.as_uri()))
-            elif other.group == "segment_id":
+            elif other.group == "segment":
                 g.add((uri, P.has_segment, other.as_uri()))
-            elif other.typename in STRAIN_FIELDS:
+                if other.typename == "genbank":
+                    g.add((uri, P.has_genbank, other.as_literal()))
+            elif (other.typename in STRAIN_FIELDS):
                 other.object_of(g, uri)
-            elif not has_segment:
+            elif not use_segment:
                 other.object_of(g, uri)
 
 
@@ -135,20 +146,37 @@ class Barcode(StrainToken):
     def munge(self, text):
         return text.upper()
 
+    def add_triples(self, g):
+        if self.clean:
+            g.add((self.as_uri(), P.barcode, self.as_literal()))
+
 
 class Strain(StrainToken):
     typename = "strain_name"
     parser = p_strain
+    BARCODE_PAT = re.compile("A0\d{7}|\d+TOSU\d+|EPI_ISL_\d+")
 
     def munge(self, text):
         return text.replace(" ", "_")
 
+    def add_triples(self, g):
+        if self.clean:
+            uri = self.as_uri()
+            g.add((uri, P.strain_name, self.as_literal()))
+            # some strain names contain a barcode, which is also a unique id
+            barcode_match = re.search(self.BARCODE_PAT, self.clean)
+            if barcode_match:
+                barcode_name = barcode_match.group(0)
+                barcode = Barcode(barcode_name)
+                barcode.add_triples(g)
+                g.add((uri, P.sameAs, barcode.as_uri()))
+
 
 # --- strain attributes ---
 class StrainAttribute(Token):
-    def relate(self, tokens, g):
+    def relate(self, tokens, g, levels=None):
         for other in tokens:
-            if other.group == "strain_id" and other.typename != self.typename:
+            if other.group == "strain" and other.typename != self.typename:
                 self.object_of(g, other.as_uri())
 
 
@@ -189,13 +217,13 @@ class InternalGene(StrainAttribute):
 
 # --- strain tokens ---
 class SegmentToken(Token):
-    group = "segment_id"
+    group = "segment"
     class_predicate = P.has_segment
 
     def as_uri(self):
         return make_uri(self.clean)
 
-    def relate(self, tokens, g):
+    def relate(self, tokens, g, levels=None):
         if not self.matches:
             return
         uri = self.as_uri()
@@ -204,7 +232,7 @@ class SegmentToken(Token):
                 continue
             if (
                 other.matches
-                and other.group == "segment_id"
+                and other.group == "segment"
                 and other.typename != self.typename
             ):
                 g.add(uri, P.sameAs, other.as_uri())
@@ -219,6 +247,10 @@ class Genbank(SegmentToken):
     def munge(self, text):
         return text.upper()
 
+    def add_triples(self, g):
+        if self.clean:
+            g.add((self.as_uri(), P.gb, self.as_literal()))
+
 
 class GisaidSeqid(SegmentToken):
     typename = "gisaid_seqid"
@@ -227,23 +259,32 @@ class GisaidSeqid(SegmentToken):
     def munge(self, text):
         return text.upper()
 
+    def add_triples(self, g):
+        if self.clean:
+            g.add((self.as_uri(), P.gisaid_seqid, self.as_literal()))
+
 
 # --- segment attributes ---
 class SegmentAttribute(Token):
-    def relate(self, tokens, g):
+    def relate(self, tokens, g, levels=None):
         for other in tokens:
-            if other.group == "segment_id":
+            if other.group == "segment":
                 self.object_of(g, other.as_uri())
 
 
-class Segment(SegmentAttribute):
-    typename = "segment"
+class SegmentName(SegmentAttribute):
+    typename = "segment_name"
     parser = p_segment
 
 
 class SegmentNumber(SegmentAttribute):
     typename = "segment_number"
     parser = p_segment_number
+
+    def object_of(self, g, uri):
+        if uri and self.matches:
+            g.add((uri, P.segment_number, Literal(self.clean)))
+            g.add((uri, P.segment_name, Literal(SEGMENT[int(self.clean)-1])))
 
 
 class SequenceToken(Token):
@@ -257,7 +298,7 @@ class SequenceToken(Token):
 
     @classmethod
     def goodness(cls, items):
-        matches = [(cls.testOne(item=x) and len(str(x)) > 20) for x in rmNone(items)]
+        matches = [bool((cls.testOne(item=x)) and len(str(x)) > 20) for x in rmNone(items)]
         goodness = sum(matches) / len(matches)
         return goodness
 
@@ -266,15 +307,15 @@ class Dnaseq(SequenceToken):
     typename = "dnaseq"
     parser = p_dnaseq
 
-    def relate(self, tokens, g):
+    def relate(self, tokens, g, levels=None):
         uri = self.as_uri()
         g.add((uri, P.dnaseq, Literal(self.clean)))
         for other in tokens:
             if other.clean is None:
                 continue
-            if other.group == "segment_id":
+            if other.group == "segment":
                 g.add((other.as_uri(), P.sameAs, uri))
-            elif other.group == "strain_id":
+            elif other.group == "strain":
                 g.add((other.as_uri(), P.has_segment, uri))
             elif not other.typename in STRAIN_FIELDS:
                 other.object_of(g, uri)
@@ -286,20 +327,20 @@ class Proseq(SequenceToken):
 
     def _has_segment(self, tokens):
         for token in tokens:
-            if token.group == "segment_id":
+            if token.group == "segment":
                 return True
         return None
 
-    def relate(self, tokens, g):
+    def relate(self, tokens, g, levels=None):
         uri = self.as_uri()
         g.add((uri, P.proseq, Literal(self.clean)))
         has_segment = self._has_segment(tokens)
         for other in tokens:
             if other.clean is None:
                 continue
-            if other.group == "segment_id":
+            if other.group == "segment":
                 g.add((other.as_uri(), P.has_feature, uri))
-            elif other.group == "strain_id":
+            elif other.group == "strain":
                 if has_segment:
                     log("WARNING: I don't know how to connect a protein to a strain id")
             elif not other.typename in STRAIN_FIELDS and not has_segment:
@@ -347,7 +388,7 @@ allClassifiers = OrderedDict(
             NA,
             Host,
             InternalGene,
-            Segment,
+            SegmentName,
             SegmentNumber,
             Strain,
             StateUSA,

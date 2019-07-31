@@ -8,7 +8,7 @@ Usage:
   d79 tag [<filename>] [--tag=<tag>]
   d79 load_gbids [<filename>]
   d79 load_blast [<filename>] [--tag=<tag>]
-  d79 load_excel [<filename>] [--tag=<tag>] [--include=<inc>] [--exclude=<exc>]
+  d79 load_excel [<filename>] [--tag=<tag>] [--include=<inc>] [--exclude=<exc>] [--levels=<levels>]
   d79 load_fasta [<filename>] [--tag=<tag>] [--delimiter=<del>] [--include=<inc>] [--exclude=<exc>]
 
 Options:
@@ -27,7 +27,8 @@ import src.recipes as recipe
 import src.entrez as entrez
 import src.genbank as gb
 import src.classes as classes
-from src.nomenclature import manager, make_uri, P
+import datetime as datetime
+from src.nomenclature import manager, make_uri, make_tag_uri, P
 import signal
 from tqdm import tqdm
 from src.util import log, file_str
@@ -53,8 +54,12 @@ if __name__ == "__main__":
         recipe.load_influenza_na(g, filehandle)
 
     if args["tag"]:
+        taguri = make_tag_uri(tagstr)
+        g.add((taguri, P.name, Literal(tagstr)))
+        g.add((taguri, P.time, Literal(datetime.datetime.now())))
+        g.add((taguri, P.file, Literal(file_str(filehandle))))
         for identifier in (s.strip() for s in filehandle.readlines()):
-            g.add((make_uri(identifier), P.tag, Literal(tagstr)))
+            g.add((make_uri(identifier), P.tag, taguri))
         g.commit()
 
     if args["load_gbids"]:
@@ -79,15 +84,19 @@ if __name__ == "__main__":
             exc = {}
         else:
             exc = set(args["--exclude"].split(","))
+        if not args["--levels"]:
+            levels = None
+        else:
+            levels = {s.strip() for s in args["--levels"].split(",")}
 
         if args["load_excel"]:
             classes.Table(
-                filehandle, tag=tagstr, include=inc, exclude=exc, log=True
+                filehandle=filehandle, tag=tagstr, include=inc, exclude=exc, log=True, levels=levels
             ).connect(g)
 
         if args["load_fasta"]:
             classes.Ragged(
-                filehandle, tag=tagstr, include=inc, exclude=exc, log=True
+                filehandle, tag=tagstr, include=inc, exclude=exc, log=True, levels=levels
             ).connect(g)
 
     g.commit()  # just in case we missed anything

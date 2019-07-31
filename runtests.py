@@ -2,7 +2,7 @@
 
 import src.classifiers.flucrew as ftok
 from src.nomenclature import make_uri, make_usa_state_uri, make_country_uri
-from src.classes import HomoList, Phrase, Datum
+from src.classes import HomoList, Phrase, Datum, Ragged
 from src.graph import showTriple
 import unittest
 import rdflib
@@ -281,19 +281,19 @@ class TestInternalGene(unittest.TestCase):
         self.assertEqual(ftok.InternalGene("bogus").clean, None)
 
 
-class TestSegment(unittest.TestCase):
-    def test_Segment(self):
-        self.assertEqual(ftok.Segment("PB2").clean, "PB2")
-        self.assertEqual(ftok.Segment("PB1").clean, "PB1")
-        self.assertEqual(ftok.Segment("PA").clean, "PA")
-        self.assertEqual(ftok.Segment("NP").clean, "NP")
-        self.assertEqual(ftok.Segment("M").clean, "M")
-        self.assertEqual(ftok.Segment("NS1").clean, "NS1")
-        self.assertEqual(ftok.Segment("H1").clean, "H1")
-        self.assertEqual(ftok.Segment("HA").clean, "HA")
-        self.assertEqual(ftok.Segment("NA").clean, "NA")
-        self.assertEqual(ftok.Segment("N1").clean, "N1")
-        self.assertEqual(ftok.Segment("bogus").clean, None)
+class TestSegmentName(unittest.TestCase):
+    def test_SegmentName(self):
+        self.assertEqual(ftok.SegmentName("PB2").clean, "PB2")
+        self.assertEqual(ftok.SegmentName("PB1").clean, "PB1")
+        self.assertEqual(ftok.SegmentName("PA").clean, "PA")
+        self.assertEqual(ftok.SegmentName("NP").clean, "NP")
+        self.assertEqual(ftok.SegmentName("M").clean, "M")
+        self.assertEqual(ftok.SegmentName("NS1").clean, "NS1")
+        self.assertEqual(ftok.SegmentName("H1").clean, "H1")
+        self.assertEqual(ftok.SegmentName("HA").clean, "HA")
+        self.assertEqual(ftok.SegmentName("NA").clean, "NA")
+        self.assertEqual(ftok.SegmentName("N1").clean, "N1")
+        self.assertEqual(ftok.SegmentName("bogus").clean, None)
 
 
 class TestSegmentNumber(unittest.TestCase):
@@ -324,6 +324,31 @@ class TestStrain(unittest.TestCase):
         # metadata outside the strain name
         self.assertEqual(ftok.Strain("A/asdf()").clean, None)
         self.assertEqual(ftok.Strain("bogus").clean, None)
+
+    def test_strain_barcode_parsing(self):
+        g = set()
+        ftok.Strain("A/asdf/A01234567/sdf").add_triples(g)
+        expected = sorted([(str(x), str(y), str(z)) for x, y, z in g])
+        self.assertEqual(
+            expected,
+            [
+                (
+                    "https://flu-crew.org/id/a%2Fasdf%2Fa01234567%2Fsdf",
+                    "http://www.w3.org/2002/07/owl#sameAs",
+                    "https://flu-crew.org/id/a01234567",
+                ),
+                (
+                    "https://flu-crew.org/id/a%2Fasdf%2Fa01234567%2Fsdf",
+                    "https://flu-crew.org/term/strain_name",
+                    "A/asdf/A01234567/sdf",
+                ),
+                (
+                    "https://flu-crew.org/id/a01234567",
+                    "https://flu-crew.org/term/barcode",
+                    "A01234567",
+                ),
+            ],
+        )
 
 
 class TestState(unittest.TestCase):
@@ -413,16 +438,32 @@ class TestPhrase(unittest.TestCase):
             showTriple(["A01234567", "H1"]),
             [
                 (
-                    "https://flucrew.org/id/a01234567",
-                    "https://flucrew.org/term/barcode",
+                    "https://flu-crew.org/id/a01234567",
+                    "https://flu-crew.org/term/barcode",
                     "A01234567",
                 ),
                 (
-                    "https://flucrew.org/id/a01234567",
-                    "https://flucrew.org/term/ha",
+                    "https://flu-crew.org/id/a01234567",
+                    "https://flu-crew.org/term/ha",
                     "H1",
                 ),
             ],
+        )
+
+class TestFasta(unittest.TestCase):
+    def test_fasta(self):
+        g = set()
+        x = Ragged(">baz\nATGG\n>foo||z\nATGGG")
+        x.connect(g)
+        s = sorted([(str(s), str(p), str(o)) for s,p,o in g])
+        self.assertEqual(s,
+            [
+                ('https://flu-crew.org/id/4badd1687f27faae29f9b1fe1ea37e78', 'https://flu-crew.org/term/dnaseq',  'ATGGG'),
+                ('https://flu-crew.org/id/4badd1687f27faae29f9b1fe1ea37e78', 'https://flu-crew.org/term/unknown', 'foo'),
+                ('https://flu-crew.org/id/4badd1687f27faae29f9b1fe1ea37e78', 'https://flu-crew.org/term/unknown', 'z'),
+                ('https://flu-crew.org/id/5b2033ab635505389b1acfa0d6eda05c', 'https://flu-crew.org/term/dnaseq',  'ATGG'),
+                ('https://flu-crew.org/id/5b2033ab635505389b1acfa0d6eda05c', 'https://flu-crew.org/term/unknown', 'baz')
+            ]
         )
 
 

@@ -1,8 +1,8 @@
-PREFIX geo: <https://flucrew.org/geo#>
-PREFIX world: <https://flucrew.org/geo/country/>
-PREFIX usa: <https://flucrew.org/geo/country/usa/>
+PREFIX geo: <https://flu-crew.org/geo#>
+PREFIX world: <https://flu-crew.org/geo/country/>
+PREFIX usa: <https://flu-crew.org/geo/country/usa/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX f: <https://flucrew.org/term/>
+PREFIX f: <https://flu-crew.org/term/>
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
 
 f:locatedIn rdf:type owl:TransitiveProperty .

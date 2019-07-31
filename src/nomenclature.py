@@ -8,11 +8,11 @@ import src.domain.date as date
 from rdflib.namespace import RDF, RDFS, OWL, XSD
 from src.util import padDigit
 
-ni = rdflib.Namespace("https://flucrew.org/id/")
-nt = rdflib.Namespace("https://flucrew.org/term/")
-ntag = rdflib.Namespace("https://flucrew.org/tag/")
-nusa = rdflib.Namespace("https://flucrew.org/geo/country/usa/")
-ncountry = rdflib.Namespace("https://flucrew.org/geo/country/")
+ni = rdflib.Namespace("https://flu-crew.org/id/")
+nt = rdflib.Namespace("https://flu-crew.org/term/")
+ntag = rdflib.Namespace("https://flu-crew.org/tag/")
+nusa = rdflib.Namespace("https://flu-crew.org/geo/country/usa/")
+ncountry = rdflib.Namespace("https://flu-crew.org/geo/country/")
 
 manager = rdflib.namespace.NamespaceManager(rdflib.Graph())
 manager.bind("fid", ni)
@@ -41,14 +41,14 @@ def uidgen(base="_", pad=3, start=0):
         yield ni.term(padDigit(base + str(i), pad))
 
 
-def make_uri(x):
+def make_uri(x, namespace=ni):
     if not x:
         return None
     if isinstance(x, rdflib.term.URIRef):
         return x
     else:
         x = re.sub(" +", "_", x.strip()).lower()
-        return ni.term(url.quote_plus(x))
+        return namespace.term(url.quote_plus(x))
 
 
 def make_usa_state_uri(code):
@@ -63,15 +63,12 @@ def make_usa_state_uri(code):
 
 
 def make_country_uri(countryStr):
-    """ Returns a tuple with the URI and an alternative name no code was found """
     code = geo.country_to_code(countryStr)
     if code:
         uri = ncountry.term(code)
-        alt = None
     else:
-        uri = make_uri(countryStr)
-        alt = countryStr
-    return (uri, alt)
+        uri = make_uri(countryStr, namespace=ncountry)
+    return uri
 
 
 def make_date(dateStr):
