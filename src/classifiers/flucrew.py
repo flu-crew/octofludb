@@ -133,7 +133,7 @@ class StrainToken(Token):
                 g.add((uri, P.has_segment, other.as_uri()))
                 if other.typename == "genbank":
                     g.add((uri, P.has_genbank, other.as_literal()))
-            elif (other.typename in STRAIN_FIELDS):
+            elif (other.choose_field_name() in STRAIN_FIELDS):
                 other.object_of(g, uri)
             elif not use_segment:
                 other.object_of(g, uri)
@@ -236,7 +236,7 @@ class SegmentToken(Token):
                 and other.typename != self.typename
             ):
                 g.add(uri, P.sameAs, other.as_uri())
-            elif not other.typename in STRAIN_FIELDS:
+            elif not other.choose_field_name() in STRAIN_FIELDS:
                 other.object_of(g, uri)
 
 
@@ -343,7 +343,7 @@ class Proseq(SequenceToken):
             elif other.group == "strain":
                 if has_segment:
                     log("WARNING: I don't know how to connect a protein to a strain id")
-            elif not other.typename in STRAIN_FIELDS and not has_segment:
+            elif not other.choose_field_name() in STRAIN_FIELDS and not has_segment:
                 other.object_of(g, uri)
 
 
