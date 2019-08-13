@@ -6,21 +6,23 @@ import sys
 
 
 def add_gb_meta_triples(g, gb_meta):
-    gid = make_uri(str(gb_meta["GBSeq_locus"]))
+    accession = str(gb_meta["GBSeq_primary-accession"])
 
-    g.add((gid, P.gb, Literal(gb_meta["GBSeq_locus"])))
+    gid = make_uri(accession)
+    g.add((gid, P.gb, Literal(accession)))
 
     maybe_add = make_maybe_add(g, gb_meta, gid)
+    maybe_add(P.gb_length, "GBSeq_locus")
     maybe_add(P.gb_length, "GBSeq_length")
     maybe_add(P.gb_strandedness, "GBSeq_strandedness")
     maybe_add(P.gb_moltype, "GBSeq_moltype")
     maybe_add(P.gb_topology, "GBSeq_topology")
     maybe_add(P.gb_division, "GBSeq_division")
-    maybe_add(P.gb_update_date, "GBSeq_update_date")
-    maybe_add(P.gb_create_date, "GBSeq_create_date")
+    maybe_add(P.gb_update_date, "GBSeq_update-date")
+    maybe_add(P.gb_create_date, "GBSeq_create-date")
     maybe_add(P.gb_definition, "GBSeq_definition")
     maybe_add(P.gb_primary_accession, "GBSeq_primary_accession")
-    maybe_add(P.gb_accession_version, "GBSeq_accession_version")
+    maybe_add(P.gb_accession_version, "GBSeq_accession-version")
     maybe_add(P.gb_source, "GBSeq_source")
     maybe_add(P.gb_organism, "GBSeq_organism")
     maybe_add(P.gb_taxonomy, "GBSeq_taxonomy")
@@ -29,7 +31,7 @@ def add_gb_meta_triples(g, gb_meta):
     g.add((gid, P.dnaseq, Literal(seq)))
     g.add((gid, P.sameAs, make_uri(chksum(seq))))
 
-    igen = uidgen(base=gb_meta["GBSeq_locus"] + "_feat_")
+    igen = uidgen(base=accession + "_feat_")
     for feat in gb_meta["GBSeq_feature-table"]:
         fid = next(igen)
         g.add((gid, P.has_feature, fid))
