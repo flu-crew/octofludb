@@ -8,7 +8,7 @@ Usage:
   d79 tag [<filename>] [--tag=<tag>]
   d79 load_gbids [<filename>]
   d79 load_blast [<filename>] [--tag=<tag>]
-  d79 load_excel [<filename>] [--tag=<tag>] [--include=<inc>] [--exclude=<exc>] [--levels=<levels>]
+  d79 load_table [<filename>] [--tag=<tag>] [--include=<inc>] [--exclude=<exc>] [--levels=<levels>]
   d79 load_fasta [<filename>] [--tag=<tag>] [--delimiter=<del>] [--include=<inc>] [--exclude=<exc>]
 
 Options:
@@ -75,7 +75,7 @@ if __name__ == "__main__":
         log(f"Retrieving and parsing blast results from '{file_str(filehandle)}'")
         recipe.load_blast(g, filehandle, tag=tagstr)
 
-    if args["load_excel"] or args["load_fasta"]:
+    if args["load_table"] or args["load_fasta"]:
         if not args["--include"]:
             inc = {}
         else:
@@ -89,7 +89,7 @@ if __name__ == "__main__":
         else:
             levels = {s.strip() for s in args["--levels"].split(",")}
 
-        if args["load_excel"]:
+        if args["load_table"]:
             classes.Table(
                 filehandle=filehandle, tag=tagstr, include=inc, exclude=exc, log=True, levels=levels
             ).connect(g)
