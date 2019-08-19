@@ -71,6 +71,10 @@ def make_country_uri(countryStr):
     return uri
 
 
+def make_country_uri_from_code(code):
+    return ncountry.term(code)
+
+
 def make_date(dateStr):
     try:
         # Parse this to a date if it is of the pandas date type

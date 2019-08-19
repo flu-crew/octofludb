@@ -74,6 +74,36 @@ class TestCountry(unittest.TestCase):
         self.assertEqual(ftok.Country("bogus").clean, None)
 
 
+class TestCountryOrState(unittest.TestCase):
+    def test_country(self):
+        self.assertEqual(ftok.CountryOrState("USA").clean, "USA")
+        self.assertEqual(ftok.CountryOrState("united states").clean, "USA")
+        self.assertEqual(ftok.CountryOrState("US").clean, "USA")
+        self.assertEqual(ftok.CountryOrState("indonesia").clean, "IDN")
+        self.assertEqual(
+            ftok.CountryOrState("The Democratic Republic of the Congo").clean, "COD"
+        )
+        self.assertEqual(ftok.CountryOrState("democratic republic congo").clean, "COD")
+
+    def test_misspelled_countries(self):
+        self.assertEqual(ftok.CountryOrState("unitde states").clean, "USA")
+        self.assertEqual(ftok.CountryOrState("indoesia").clean, "IDN")
+        self.assertEqual(ftok.CountryOrState("indonesa").clean, "IDN")
+
+    def test_bad_countries(self):
+        self.assertEqual(ftok.CountryOrState("bogus").clean, None)
+
+    def test_canada(self):
+        self.assertEqual(ftok.CountryOrState("quebec").clean, ftok.Country("canada").clean)
+        self.assertEqual(ftok.CountryOrState("ontario").clean, ftok.Country("canada").clean)
+
+    def test_chinese_provinces(self):
+        self.assertEqual(ftok.CountryOrState("jiangsu").clean, ftok.Country("china").clean)
+
+    def test_usa_states(self):
+        self.assertEqual(ftok.CountryOrState("alabama").clean, ftok.Country("usa").clean)
+
+
 class TestDate(unittest.TestCase):
     def test_date_meta(self):
         d = ftok.Date("May 17, 1986")

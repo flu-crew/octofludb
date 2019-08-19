@@ -407,3 +407,62 @@ def country_to_code(name):
         return COUNTRY_3LETTER_CODES[name]
     else:
         return None
+
+LOCATIONS_IN = {
+    # Canadian territories
+    "ontario": "CAN", 
+    "quebec": "CAN",
+    "nova_scotia": "CAN",
+    "new_brunswick": "CAN",
+    "manitoba": "CAN",
+    "british_columbia": "CAN",
+    "prince_edward_island": "CAN",
+    "saskatchewan": "CAN",
+    "alberta": "CAN",
+    "newfoundland" : "CAN",
+    "newfoundland_and_labrador" : "CAN",
+    # Chinese provinces
+    "anhui" : "CHN",
+    "beijing" : "CHN",
+    "chongqing" : "CHN",
+    "fujian" : "CHN",
+    "guangdong" : "CHN",
+    "gansu" : "CHN" ,
+    "guangxi" : "CHN" ,
+    "guizhou" : "CHN" ,
+    "henan" : "CHN" ,
+    "hubei" : "CHN" ,
+    "hebei" : "CHN" ,
+    "hainan" : "CHN" ,
+    "heilongjiang" : "CHN" ,
+    "hong_kong" : "CHN" ,
+    "hunan" : "CHN" ,
+    "jilin" : "CHN" ,
+    "jiangsu" : "CHN" ,
+    "jiangxi" : "CHN" ,
+    "liaoning" : "CHN" ,
+    "macau" : "CHN" ,
+    "qinghai" : "CHN" ,
+    "sichuan" : "CHN" ,
+    "shandong" : "CHN" ,
+    "shanghai" : "CHN" ,
+    "shaanxi" : "CHN" ,
+    "shanxi" : "CHN" ,
+    "tianjin" : "CHN" ,
+    "tibet" : "CHN" ,
+    "yunnan" : "CHN" ,
+    "zhejiang" : "CHN" ,
+}
+
+def location_to_country_code(name):
+    """ Map locations to countries """
+    code = country_to_code(name)
+    if not code:
+        try:
+            code = LOCATIONS_IN[name.strip().lower()]
+        except:
+            if state_to_code(name):
+                code = "USA"
+            else:
+                code = None
+    return code
