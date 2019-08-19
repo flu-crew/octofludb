@@ -91,12 +91,22 @@ if __name__ == "__main__":
 
         if args["load_table"]:
             classes.Table(
-                filehandle=filehandle, tag=tagstr, include=inc, exclude=exc, log=True, levels=levels
+                filehandle=filehandle,
+                tag=tagstr,
+                include=inc,
+                exclude=exc,
+                log=True,
+                levels=levels,
             ).connect(g)
 
         if args["load_fasta"]:
             classes.Ragged(
-                filehandle, tag=tagstr, include=inc, exclude=exc, log=True, levels=levels
+                filehandle,
+                tag=tagstr,
+                include=inc,
+                exclude=exc,
+                log=True,
+                levels=levels,
             ).connect(g)
 
     g.commit()  # just in case we missed anything

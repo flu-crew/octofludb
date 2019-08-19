@@ -39,7 +39,7 @@ class Interpreter:
         self.tag = tag
         self.levels = levels
         self.classifiers = updateClassifiers(classifiers, include, exclude)
-        self.default_classifier=Unknown,
+        self.default_classifier = (Unknown,)
         if log:
             self.log()
         self.field_name = field_name
@@ -163,7 +163,9 @@ def tabularTyping(data, levels=None):
         hl = HomoList(v, field_name=k).data
         log(f" - '{k}':{colors.good(hl[0].typename)}")
         cols.append(hl)
-    phrases = [Phrase([col[i] for col in cols], levels=levels) for i in range(len(cols[0]))]
+    phrases = [
+        Phrase([col[i] for col in cols], levels=levels) for i in range(len(cols[0]))
+    ]
     return phrases
 
 
@@ -173,7 +175,9 @@ def headlessTabularTyping(data, levels=None):
         hl = HomoList(xs).data
         log(f" - 'X{i}':{colors.good(hl[0].typename)}")
         cols.append(hl)
-    phrases = [Phrase([col[i] for col in cols], levels=levels) for i in range(len(cols[0]))]
+    phrases = [
+        Phrase([col[i] for col in cols], levels=levels) for i in range(len(cols[0]))
+    ]
     return phrases
 
 
@@ -209,7 +213,10 @@ class Table(ParsedPhraseList):
                 exit(1)
             else:
                 cols = [c.cast(d) for c, d in zip(headers, data)]
-                result = [Phrase([col[i] for col in cols], levels=self.levels) for i in range(len(cols[0]))]
+                result = [
+                    Phrase([col[i] for col in cols], levels=self.levels)
+                    for i in range(len(cols[0]))
+                ]
         else:
             result = tabularTyping(data, levels=self.levels)
         return result
@@ -243,7 +250,7 @@ class Table(ParsedPhraseList):
         header = [c.strip() for c in rows[0]]
         indices = range(len(header))
         rows = rows[1:]
-        columns = {header[i]:[strOrNone(r[i].strip()) for r in rows] for i in indices}
+        columns = {header[i]: [strOrNone(r[i].strip()) for r in rows] for i in indices}
         return columns
 
 
@@ -264,7 +271,9 @@ class Ragged(ParsedPhraseList):
             tabular_data = [[row[i] for row in data] for i in range(N)]
             return headlessTabularTyping(tabular_data, levels=self.levels)
         else:
-            return [Phrase([Datum(x).data for x in row], levels=self.levels) for row in data]
+            return [
+                Phrase([Datum(x).data for x in row], levels=self.levels) for row in data
+            ]
 
     def parse(self, filehandle):
         """

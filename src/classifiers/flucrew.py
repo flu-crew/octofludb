@@ -33,13 +33,24 @@ from src.domain.flu import (
 )
 
 from src.domain.date import p_year, p_longyear, p_month, p_day, p_date, p_any_date
-from src.domain.geography import country_to_code, state_to_code, location_to_country_code
+from src.domain.geography import (
+    country_to_code,
+    state_to_code,
+    location_to_country_code,
+)
 from src.domain.animal import p_host
 from src.domain.sequence import p_dnaseq, p_proseq
 
 from src.token import Token, Unknown
 from src.util import rmNone
-from src.nomenclature import make_uri, make_date, make_property, make_usa_state_uri, make_country_uri, P 
+from src.nomenclature import (
+    make_uri,
+    make_date,
+    make_property,
+    make_usa_state_uri,
+    make_country_uri,
+    P,
+)
 
 
 class Country(Token):
@@ -69,6 +80,7 @@ class CountryOrState(Token):
     """
     Maps countries, states, or major cities to the country code
     """
+
     typename = "country"
     class_predicate = P.country
 
@@ -121,7 +133,15 @@ class Host(Token):
         return text.lower()
 
 
-STRAIN_FIELDS = {"date", "country", "state", "host", "global_clade", "subtype", "strain_name"}
+STRAIN_FIELDS = {
+    "date",
+    "country",
+    "state",
+    "host",
+    "global_clade",
+    "subtype",
+    "strain_name",
+}
 
 # --- strain tokens ---
 class StrainToken(Token):
@@ -141,7 +161,9 @@ class StrainToken(Token):
             return
         uri = self.as_uri()
         has_segment = self._has_segment(tokens)
-        use_segment = (levels is None and has_segment) or (levels is not None and "segment" in levels and has_segment)
+        use_segment = (levels is None and has_segment) or (
+            levels is not None and "segment" in levels and has_segment
+        )
         g.add((uri, make_property(self.typename), self.as_literal()))
         for other in tokens:
             if not other.matches or other.clean == self.clean or other.clean is None:
@@ -152,7 +174,7 @@ class StrainToken(Token):
                 g.add((uri, P.has_segment, other.as_uri()))
                 if other.typename == "genbank":
                     g.add((uri, P.has_genbank, other.as_literal()))
-            elif (other.choose_field_name() in STRAIN_FIELDS):
+            elif other.choose_field_name() in STRAIN_FIELDS:
                 other.object_of(g, uri)
             elif not use_segment:
                 other.object_of(g, uri)
@@ -303,7 +325,7 @@ class SegmentNumber(SegmentAttribute):
     def object_of(self, g, uri):
         if uri and self.matches:
             g.add((uri, P.segment_number, Literal(self.clean)))
-            g.add((uri, P.segment_name, Literal(SEGMENT[int(self.clean)-1])))
+            g.add((uri, P.segment_name, Literal(SEGMENT[int(self.clean) - 1])))
 
 
 class SequenceToken(Token):
@@ -317,7 +339,9 @@ class SequenceToken(Token):
 
     @classmethod
     def goodness(cls, items):
-        matches = [bool((cls.testOne(item=x)) and len(str(x)) > 20) for x in rmNone(items)]
+        matches = [
+            bool((cls.testOne(item=x)) and len(str(x)) > 20) for x in rmNone(items)
+        ]
         goodness = sum(matches) / len(matches)
         return goodness
 

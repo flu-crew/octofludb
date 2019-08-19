@@ -94,14 +94,22 @@ class TestCountryOrState(unittest.TestCase):
         self.assertEqual(ftok.CountryOrState("bogus").clean, None)
 
     def test_canada(self):
-        self.assertEqual(ftok.CountryOrState("quebec").clean, ftok.Country("canada").clean)
-        self.assertEqual(ftok.CountryOrState("ontario").clean, ftok.Country("canada").clean)
+        self.assertEqual(
+            ftok.CountryOrState("quebec").clean, ftok.Country("canada").clean
+        )
+        self.assertEqual(
+            ftok.CountryOrState("ontario").clean, ftok.Country("canada").clean
+        )
 
     def test_chinese_provinces(self):
-        self.assertEqual(ftok.CountryOrState("jiangsu").clean, ftok.Country("china").clean)
+        self.assertEqual(
+            ftok.CountryOrState("jiangsu").clean, ftok.Country("china").clean
+        )
 
     def test_usa_states(self):
-        self.assertEqual(ftok.CountryOrState("alabama").clean, ftok.Country("usa").clean)
+        self.assertEqual(
+            ftok.CountryOrState("alabama").clean, ftok.Country("usa").clean
+        )
 
 
 class TestDate(unittest.TestCase):
@@ -482,20 +490,42 @@ class TestPhrase(unittest.TestCase):
             ],
         )
 
+
 class TestFasta(unittest.TestCase):
     def test_fasta(self):
         g = set()
         x = Ragged(">baz\nATGG\n>foo||z\nATGGG")
         x.connect(g)
-        s = sorted([(str(s), str(p), str(o)) for s,p,o in g])
-        self.assertEqual(s,
+        s = sorted([(str(s), str(p), str(o)) for s, p, o in g])
+        self.assertEqual(
+            s,
             [
-                ('https://flu-crew.org/id/4badd1687f27faae29f9b1fe1ea37e78', 'https://flu-crew.org/term/dnaseq',  'ATGGG'),
-                ('https://flu-crew.org/id/4badd1687f27faae29f9b1fe1ea37e78', 'https://flu-crew.org/term/unknown', 'foo'),
-                ('https://flu-crew.org/id/4badd1687f27faae29f9b1fe1ea37e78', 'https://flu-crew.org/term/unknown', 'z'),
-                ('https://flu-crew.org/id/5b2033ab635505389b1acfa0d6eda05c', 'https://flu-crew.org/term/dnaseq',  'ATGG'),
-                ('https://flu-crew.org/id/5b2033ab635505389b1acfa0d6eda05c', 'https://flu-crew.org/term/unknown', 'baz')
-            ]
+                (
+                    "https://flu-crew.org/id/4badd1687f27faae29f9b1fe1ea37e78",
+                    "https://flu-crew.org/term/dnaseq",
+                    "ATGGG",
+                ),
+                (
+                    "https://flu-crew.org/id/4badd1687f27faae29f9b1fe1ea37e78",
+                    "https://flu-crew.org/term/unknown",
+                    "foo",
+                ),
+                (
+                    "https://flu-crew.org/id/4badd1687f27faae29f9b1fe1ea37e78",
+                    "https://flu-crew.org/term/unknown",
+                    "z",
+                ),
+                (
+                    "https://flu-crew.org/id/5b2033ab635505389b1acfa0d6eda05c",
+                    "https://flu-crew.org/term/dnaseq",
+                    "ATGG",
+                ),
+                (
+                    "https://flu-crew.org/id/5b2033ab635505389b1acfa0d6eda05c",
+                    "https://flu-crew.org/term/unknown",
+                    "baz",
+                ),
+            ],
         )
 
 
