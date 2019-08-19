@@ -1,0 +1,10 @@
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX f: <https://flu-crew.org/term/>
+
+SELECT ?strain ?date
+WHERE {
+    ?sid f:tag/f:name "fair" .
+    ?sid f:strain_name ?strain .
+    ?sid f:date ?date .
+    FILTER(YEAR(?date) >= 2018) .
+}

@@ -1,0 +1,17 @@
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX f: <https://flu-crew.org/term/>
+
+# to make a fasta file:
+# $ q79 --fasta 03-fair-strains.rq
+
+select DISTINCT ?strain ?gb ?constellation ?date ?seq {
+    ?sid f:strain_name ?strain .
+    ?sid f:tag/f:name "fair" .
+    ?sid f:constellation ?constellation .
+    ?sid f:date ?date .
+
+    ?sid f:has_segment ?gid .
+    ?gid f:genbank_id ?gb .
+    ?gid f:segment_name "HA" .
+    ?gid f:dnaseq ?seq .
+}

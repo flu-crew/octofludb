@@ -1,0 +1,15 @@
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX f: <https://flu-crew.org/term/>
+
+SELECT ?strain ?gb ?pid ?date ?seq
+WHERE {
+    ?sid f:strain_name ?strain .
+    ?sid f:host "swine" .
+    ?sid f:date ?date .
+    ?sid f:has_segment ?gid .
+    ?gid f:genbank_id ?gb .
+    ?gid f:segment_name "PB1" .
+    ?gid f:has_feature/f:proseq ?seq .
+    ?gid f:has_feature/f:protein_id ?pid .
+}
+LIMIT 10

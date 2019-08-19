@@ -1,5 +1,5 @@
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX f: <https://flucrew.org/term/>
+PREFIX f: <https://flu-crew.org/term/>
 
 # build.py does not download all the genbank files for all the strains (that
 # would be a lot of work) so it is necessary to retrive the genbank ids of
@@ -7,7 +7,6 @@ PREFIX f: <https://flucrew.org/term/>
 # the genbank ids for all strains tagged as swine references.
 SELECT DISTINCT ?gb
 WHERE {
-    ?strain a f:strain_id .
-    ?strain f:tag "swine-reference" .
-    ?strain f:has_segment ?gb .
+    ?sid f:has_genbank ?gb
+    ?sid f:tag/f:name "swine-reference" .
 }

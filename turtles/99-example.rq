@@ -1,0 +1,11 @@
+PREFIX onto: <http://www.ontotext.com/>
+PREFIX f: <https://flu-crew.org/term/>
+PREFIX fid: <https://flu-crew.org/id/>
+PREFIX world: <https://flu-crew.org/geo/country/>
+PREFIX usa: <https://flu-crew.org/geo/country/usa/>
+
+SELECT DISTINCT ?strain
+FROM onto:disable-sameAs
+WHERE {
+    ?sid f:strain_name ?strain .    
+} LIMIT 10

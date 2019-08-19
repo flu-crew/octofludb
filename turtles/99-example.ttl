@@ -1,9 +1,0 @@
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX f: <https://flucrew.org/term/>
-
-SELECT ?strain_name
-WHERE {
-    ?strain a f:strain_id .
-    ?strain rdfs:label ?strain_name .
-}
-LIMIT 10

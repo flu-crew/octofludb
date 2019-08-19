@@ -1,0 +1,10 @@
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX f: <https://flu-crew.org/term/>
+
+# find strains that are tagged as both antiserum and cdc_cvv
+SELECT ?strain
+WHERE {
+    ?sid f:tag/f:name "antiserum" .
+    ?sid f:tag/f:name "cdc_cvv" .
+    ?sid f:strain_name ?strain .
+}

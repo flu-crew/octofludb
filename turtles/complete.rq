@@ -1,0 +1,21 @@
+PREFIX onto: <http://www.ontotext.com/>
+PREFIX f: <https://flu-crew.org/term/>
+PREFIX fid: <https://flu-crew.org/id/>
+PREFIX world: <https://flu-crew.org/geo/country/>
+PREFIX usa: <https://flu-crew.org/geo/country/usa/>
+
+# get strains that have complete sequences
+
+SELECT DISTINCT ?strain
+FROM onto:disable-sameAs
+WHERE {
+    ?sid f:strain_name ?strain .
+    FILTER EXISTS { ?sid f:has_segment/f:segment_name "PB2" . }
+    FILTER EXISTS { ?sid f:has_segment/f:segment_name "PB1" . }
+    FILTER EXISTS { ?sid f:has_segment/f:segment_name "PA"  . }
+    FILTER EXISTS { ?sid f:has_segment/f:segment_name "HA"  . }
+    FILTER EXISTS { ?sid f:has_segment/f:segment_name "NP"  . }
+    FILTER EXISTS { ?sid f:has_segment/f:segment_name "M"   . }
+    FILTER EXISTS { ?sid f:has_segment/f:segment_name "NA"  . }
+    FILTER EXISTS { ?sid f:has_segment/f:segment_name "NS1" . }
+}

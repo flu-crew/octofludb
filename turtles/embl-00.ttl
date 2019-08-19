@@ -14,15 +14,15 @@ PREFIX faldo: <http://biohackathon.org/resource/faldo#>
 PREFIX ensembl: <http://rdf.ebi.ac.uk/resource/ensembl/>
 
 SELECT DISTINCT ?transcript ?id ?typeLabel ?reference ?begin ?end ?location {
-    ?transcript obo:SO_transcribed_from ensembl:ENSG00000139618 ;
-    a ?type;
-    dc:identifier ?id .
+    ?transcript
+        obo:SO_transcribed_from ensembl:ENSG00000139618 ;
+        a ?type;
+        dc:identifier ?id .
     OPTIONAL {
         ?transcript faldo:location ?location .
         ?location faldo:begin [faldo:position ?begin] .
-        ?location faldo:end [faldo:position ?end ] .
+        ?location faldo:end [faldo:position ?end] .
         ?location faldo:reference ?reference .
     }
     OPTIONAL {?type rdfs:label ?typeLabel}
-
 }

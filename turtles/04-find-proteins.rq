@@ -1,0 +1,28 @@
+PREFIX onto: <http://www.ontotext.com/>
+PREFIX f: <https://flu-crew.org/term/>
+PREFIX fid: <https://flu-crew.org/id/>
+PREFIX world: <https://flu-crew.org/geo/country/>
+PREFIX usa: <https://flu-crew.org/geo/country/usa/>
+
+# this currently doesn't work since I don't have the clades loaded
+
+SELECT DISTINCT ?strain ?gb ?date ?seq
+FROM onto:disable-sameAs
+WHERE {
+
+    ?sid f:has_segment ?gid .
+    ?sid f:strain_name ?strain .
+    ?sid f:date ?date .
+
+    # identify the NA clade
+    ?sid f:has_segment ?gidNA .
+    ?gidNA f:clade ?na_clade .
+    FILTER REGEX(?na_clade, "02B.") .
+
+    # identify the HA clade and protein sequence
+    ?gid f:genbank_id ?gb .
+    ?gid f:clade "2010.1" .
+    ?gid f:has_feature ?feat .
+    ?feat f:gene "HA" .
+    ?feat f:proseq ?seq .
+}

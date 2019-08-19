@@ -1,0 +1,9 @@
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX f: <https://flu-crew.org/term/>
+
+# list all uniqu tag names
+SELECT DISTINCT ?tag
+WHERE {
+    ?sid f:strain_name ?strain .
+    ?sid f:tag/f:name ?tag .
+}

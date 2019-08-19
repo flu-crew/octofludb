@@ -1,0 +1,28 @@
+PREFIX onto: <http://www.ontotext.com/>
+PREFIX f: <https://flu-crew.org/term/>
+PREFIX fid: <https://flu-crew.org/id/>
+PREFIX world: <https://flu-crew.org/geo/country/>
+PREFIX usa: <https://flu-crew.org/geo/country/usa/>
+
+# Retrieve all the sequences and metadata needed for the glycosylation study
+SELECT ?prot_id ?strain ?host ?date ?source ?glyc ?motif ?prot_id ?seq ## to get the protein sequence
+# SELECT ?id ?strain ?host ?date ?source ?glyc ?motif ?nt_seq
+FROM onto:disable-sameAs
+WHERE {
+    ?sid f:tag/f:name "glyco-project" .
+    # get the glycosylation project data
+    ?sid f:strain_name ?strain .
+    ?sid f:p162_motif ?motif .
+    ?sid f:glyc_possible ?glyc .
+
+    # get strain info
+    ?sid f:has_segment ?gid .
+    ?sid f:host ?host .
+    ?sid f:date ?date .
+
+    # get genbank data
+    ?gid f:dnaseq ?seq .
+    ?gid f:has_feature/f:proseq ?seq .
+    ?gid f:has_feature/f:protein_id ?prot_id .
+    OPTIONAL{ ?gid f:feature/f:isolation_source ?source . }
+}
