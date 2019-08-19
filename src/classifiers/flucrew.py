@@ -376,11 +376,11 @@ allClassifiers = OrderedDict(
     [
         (c.typename, c)
         for c in [
+            Genbank,
             Barcode,
             Constellation,
             Country,
             Date,
-            Genbank,
             GisaidSeqid,
             GlobalClade,
             Subtype,

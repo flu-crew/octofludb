@@ -44,6 +44,7 @@ class TestBarcode(unittest.TestCase):
     def test_Barcode(self):
         self.assertEqual(ftok.Barcode("A01234567").clean, "A01234567")
         self.assertEqual(ftok.Barcode("bogus").clean, None)
+        self.assertEqual(ftok.Barcode("K00869").clean, None)
 
 
 class TestConstellation(unittest.TestCase):
@@ -185,6 +186,7 @@ class TestGenbank(unittest.TestCase):
         self.assertEqual(ftok.Genbank("A1234567").clean, "A1234567")
         self.assertEqual(ftok.Genbank("A123456").clean, "A123456")
         self.assertEqual(ftok.Genbank("A12345").clean, "A12345")
+        self.assertEqual(ftok.Genbank("K00869").clean, "K00869")
         # capitalization is required for now
         self.assertEqual(ftok.Genbank("a12345").clean, None)
         self.assertEqual(ftok.Genbank("ab12345").clean, None)
