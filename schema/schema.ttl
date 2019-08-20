@@ -130,6 +130,9 @@ f:dnaseq rdfs:domain f:NucleotideSequence .
 f:genbank_id rdfs:range f:Sequence .
 f:gisaid_seqid rdfs:range f:Sequence .
 
+f:genbank_id rdfs:subPropertyOf f:seqid .
+f:gisaid_seqid rdfs:subPropertyOf f:seqid .
+
 f:has_feature rdfs:range f:Feature .
 f:has_segment rdfs:subPropertyOf f:has_part .
 
