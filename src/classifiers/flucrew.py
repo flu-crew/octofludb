@@ -140,6 +140,7 @@ STRAIN_FIELDS = {
     "host",
     "global_clade",
     "subtype",
+    "barcode",
     "strain_name",
 }
 
