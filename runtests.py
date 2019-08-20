@@ -335,6 +335,9 @@ class TestSegmentName(unittest.TestCase):
         self.assertEqual(ftok.SegmentName("N1").clean, "N1")
         self.assertEqual(ftok.SegmentName("bogus").clean, None)
 
+    def test_AlternativeSegmentNames(self):
+        self.assertEqual(ftok.SegmentName("MP").clean, "M")
+
 
 class TestSegmentNumber(unittest.TestCase):
     def test_SegmentNumber(self):
