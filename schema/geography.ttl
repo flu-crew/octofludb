@@ -7,10 +7,10 @@ PREFIX owl: <http://www.w3.org/2002/07/owl#>
 
 f:locatedIn rdf:type owl:TransitiveProperty .
 
-usa:state rdfs:subPropertyOf f:locatedIn .
-world:country rdfs:subPropertyOf f:locatedIn .
+f:state rdfs:subPropertyOf f:locatedIn .
+f:country rdfs:subPropertyOf f:locatedIn .
 
-usa:state rdfs:range usa:State .
+f:state rdfs:range usa:State .
 
 # state links
 usa:AK f:name "Alaska" .
@@ -179,7 +179,7 @@ usa:Region5 f:locatedIn world:USA .
 
 # list all the countries
 f:name rdfs:domain world:Country .
-world:code rdfs:domain world:Country .
+f:code rdfs:domain world:Country .
 
 # none of these are really countries, but I include them since they can show up
 world:czechoslovakia f:name "Czechoslovakia" .
@@ -189,503 +189,503 @@ world:northern_cyprus f:name "Northern Cyprus" .
 world:west_bank f:name "West Bank" .
 
 # countries indexed by 3-letter code
-world:ABW world:code "ABW" .
+world:ABW f:code "ABW" .
 world:ABW f:name "Aruba" .
-world:AFG world:code "AFG" .
+world:AFG f:code "AFG" .
 world:AFG f:name "Afghanistan" .
-world:AGO world:code "AGO" .
+world:AGO f:code "AGO" .
 world:AGO f:name "Angola" .
-world:AIA world:code "AIA" .
+world:AIA f:code "AIA" .
 world:AIA f:name "Anguilla" .
-world:ALA world:code "ALA" .
+world:ALA f:code "ALA" .
 world:ALA f:name "Aland Islands" .
-world:ALB world:code "ALB" .
+world:ALB f:code "ALB" .
 world:ALB f:name "Albania" .
-world:AND world:code "AND" .
+world:AND f:code "AND" .
 world:AND f:name "Andorra" .
-world:ARE world:code "ARE" .
+world:ARE f:code "ARE" .
 world:ARE f:name "United Arab Emirates" .
-world:ARG world:code "ARG" .
+world:ARG f:code "ARG" .
 world:ARG f:name "Argentina" .
-world:ARM world:code "ARM" .
+world:ARM f:code "ARM" .
 world:ARM f:name "Armenia" .
-world:ASM world:code "ASM" .
+world:ASM f:code "ASM" .
 world:ASM f:name "American Samoa" .
-world:ATA world:code "ATA" .
+world:ATA f:code "ATA" .
 world:ATA f:name "Antarctica" .
-world:ATF world:code "ATF" .
+world:ATF f:code "ATF" .
 world:ATF f:name "French Southern Territories" .
-world:ATG world:code "ATG" .
+world:ATG f:code "ATG" .
 world:ATG f:name "Antigua and Barbuda" .
-world:AUS world:code "AUS" .
+world:AUS f:code "AUS" .
 world:AUS f:name "Australia" .
-world:AUT world:code "AUT" .
+world:AUT f:code "AUT" .
 world:AUT f:name "Austria" .
-world:AZE world:code "AZE" .
+world:AZE f:code "AZE" .
 world:AZE f:name "Azerbaijan" .
-world:BDI world:code "BDI" .
+world:BDI f:code "BDI" .
 world:BDI f:name "Burundi" .
-world:BEL world:code "BEL" .
+world:BEL f:code "BEL" .
 world:BEL f:name "Belgium" .
-world:BEN world:code "BEN" .
+world:BEN f:code "BEN" .
 world:BEN f:name "Benin" .
-world:BES world:code "BES" .
+world:BES f:code "BES" .
 world:BES f:name "Bonaire" .
-world:BFA world:code "BFA" .
+world:BFA f:code "BFA" .
 world:BFA f:name "Burkina Faso" .
-world:BGD world:code "BGD" .
+world:BGD f:code "BGD" .
 world:BGD f:name "Bangladesh" .
-world:BGR world:code "BGR" .
+world:BGR f:code "BGR" .
 world:BGR f:name "Bulgaria" .
-world:BHR world:code "BHR" .
+world:BHR f:code "BHR" .
 world:BHR f:name "Bahrain" .
-world:BHS world:code "BHS" .
+world:BHS f:code "BHS" .
 world:BHS f:name "Bahamas" .
-world:BIH world:code "BIH" .
+world:BIH f:code "BIH" .
 world:BIH f:name "Bosnia and Herzegovina" .
-world:BLM world:code "BLM" .
+world:BLM f:code "BLM" .
 world:BLM f:name "Saint Barthélemy" .
-world:BLR world:code "BLR" .
+world:BLR f:code "BLR" .
 world:BLR f:name "Belarus" .
-world:BLZ world:code "BLZ" .
+world:BLZ f:code "BLZ" .
 world:BLZ f:name "Belize" .
-world:BMU world:code "BMU" .
+world:BMU f:code "BMU" .
 world:BMU f:name "Bermuda" .
-world:BOL world:code "BOL" .
+world:BOL f:code "BOL" .
 world:BOL f:name "Bolivia" .
-world:BRA world:code "BRA" .
+world:BRA f:code "BRA" .
 world:BRA f:name "Brazil" .
-world:BRB world:code "BRB" .
+world:BRB f:code "BRB" .
 world:BRB f:name "Barbados" .
-world:BRN world:code "BRN" .
+world:BRN f:code "BRN" .
 world:BRN f:name "Brunei Darussalam" .
-world:BTN world:code "BTN" .
+world:BTN f:code "BTN" .
 world:BTN f:name "Bhutan" .
-world:BVT world:code "BVT" .
+world:BVT f:code "BVT" .
 world:BVT f:name "Bouvet Island" .
-world:BWA world:code "BWA" .
+world:BWA f:code "BWA" .
 world:BWA f:name "Botswana" .
-world:CAF world:code "CAF" .
+world:CAF f:code "CAF" .
 world:CAF f:name "Central African Republic" .
-world:CAN world:code "CAN" .
+world:CAN f:code "CAN" .
 world:CAN f:name "Canada" .
-world:CCK world:code "CCK" .
+world:CCK f:code "CCK" .
 world:CCK f:name "Cocos (Keeling) Islands" .
-world:CHE world:code "CHE" .
+world:CHE f:code "CHE" .
 world:CHE f:name "Switzerland" .
-world:CHL world:code "CHL" .
+world:CHL f:code "CHL" .
 world:CHL f:name "Chile" .
-world:CHN world:code "CHN" .
+world:CHN f:code "CHN" .
 world:CHN f:name "China" .
-world:CIV world:code "CIV" .
+world:CIV f:code "CIV" .
 world:CIV f:name "Cote d'Ivoire" .
-world:CMR world:code "CMR" .
+world:CMR f:code "CMR" .
 world:CMR f:name "Cameroon" .
-world:COD world:code "COD" .
+world:COD f:code "COD" .
 world:COD f:name "Democratic Republic of Congo" .
-world:COG world:code "COG" .
+world:COG f:code "COG" .
 world:COG f:name "Republic of Congo" .
-world:COK world:code "COK" .
+world:COK f:code "COK" .
 world:COK f:name "Cook Islands" .
-world:COL world:code "COL" .
+world:COL f:code "COL" .
 world:COL f:name "Colombia" .
-world:COM world:code "COM" .
+world:COM f:code "COM" .
 world:COM f:name "Comoros" .
-world:CPV world:code "CPV" .
+world:CPV f:code "CPV" .
 world:CPV f:name "Cape Verde" .
-world:CRI world:code "CRI" .
+world:CRI f:code "CRI" .
 world:CRI f:name "Costa Rica" .
-world:CUB world:code "CUB" .
+world:CUB f:code "CUB" .
 world:CUB f:name "Cuba" .
-world:CUW world:code "CUW" .
+world:CUW f:code "CUW" .
 world:CUW f:name "Curaçao" .
-world:CXR world:code "CXR" .
+world:CXR f:code "CXR" .
 world:CXR f:name "Christmas Island" .
-world:CYM world:code "CYM" .
+world:CYM f:code "CYM" .
 world:CYM f:name "Cayman Islands" .
-world:CYP world:code "CYP" .
+world:CYP f:code "CYP" .
 world:CYP f:name "Cyprus" .
-world:CZE world:code "CZE" .
+world:CZE f:code "CZE" .
 world:CZE f:name "Czech Republic" .
-world:DEU world:code "DEU" .
+world:DEU f:code "DEU" .
 world:DEU f:name "Germany" .
-world:DJI world:code "DJI" .
+world:DJI f:code "DJI" .
 world:DJI f:name "Djibouti" .
-world:DMA world:code "DMA" .
+world:DMA f:code "DMA" .
 world:DMA f:name "Dominica" .
-world:DNK world:code "DNK" .
+world:DNK f:code "DNK" .
 world:DNK f:name "Denmark" .
-world:DOM world:code "DOM" .
+world:DOM f:code "DOM" .
 world:DOM f:name "Dominican Republic" .
-world:DZA world:code "DZA" .
+world:DZA f:code "DZA" .
 world:DZA f:name "Algeria" .
-world:ECU world:code "ECU" .
+world:ECU f:code "ECU" .
 world:ECU f:name "Ecuador" .
-world:EGY world:code "EGY" .
+world:EGY f:code "EGY" .
 world:EGY f:name "Egypt" .
-world:ERI world:code "ERI" .
+world:ERI f:code "ERI" .
 world:ERI f:name "Eritrea" .
-world:ESH world:code "ESH" .
+world:ESH f:code "ESH" .
 world:ESH f:name "Western Sahara" .
-world:ESP world:code "ESP" .
+world:ESP f:code "ESP" .
 world:ESP f:name "Spain" .
-world:EST world:code "EST" .
+world:EST f:code "EST" .
 world:EST f:name "Estonia" .
-world:ETH world:code "ETH" .
+world:ETH f:code "ETH" .
 world:ETH f:name "Ethiopia" .
-world:FIN world:code "FIN" .
+world:FIN f:code "FIN" .
 world:FIN f:name "Finland" .
-world:FJI world:code "FJI" .
+world:FJI f:code "FJI" .
 world:FJI f:name "Fiji" .
-world:FLK world:code "FLK" .
+world:FLK f:code "FLK" .
 world:FLK f:name "Falkland Islands" .
-world:FRA world:code "FRA" .
+world:FRA f:code "FRA" .
 world:FRA f:name "France" .
-world:FRO world:code "FRO" .
+world:FRO f:code "FRO" .
 world:FRO f:name "Faroe Islands" .
-world:FSM world:code "FSM" .
+world:FSM f:code "FSM" .
 world:FSM f:name "Federated States of Micronesia" .
-world:GAB world:code "GAB" .
+world:GAB f:code "GAB" .
 world:GAB f:name "Gabon" .
-world:GBR world:code "GBR" .
+world:GBR f:code "GBR" .
 world:GBR f:name "United Kingdom" .
-world:GEO world:code "GEO" .
+world:GEO f:code "GEO" .
 world:GEO f:name "Georgia" .
-world:GGY world:code "GGY" .
+world:GGY f:code "GGY" .
 world:GGY f:name "Guernsey" .
-world:GHA world:code "GHA" .
+world:GHA f:code "GHA" .
 world:GHA f:name "Ghana" .
-world:GIB world:code "GIB" .
+world:GIB f:code "GIB" .
 world:GIB f:name "Gibraltar" .
-world:GIN world:code "GIN" .
+world:GIN f:code "GIN" .
 world:GIN f:name "Guinea" .
-world:GLP world:code "GLP" .
+world:GLP f:code "GLP" .
 world:GLP f:name "Guadeloupe" .
-world:GMB world:code "GMB" .
+world:GMB f:code "GMB" .
 world:GMB f:name "Gambia" .
-world:GNB world:code "GNB" .
+world:GNB f:code "GNB" .
 world:GNB f:name "Guinea-Bissau" .
-world:GNQ world:code "GNQ" .
+world:GNQ f:code "GNQ" .
 world:GNQ f:name "Equatorial Guinea" .
-world:GRC world:code "GRC" .
+world:GRC f:code "GRC" .
 world:GRC f:name "Greece" .
-world:GRD world:code "GRD" .
+world:GRD f:code "GRD" .
 world:GRD f:name "Grenada" .
-world:GRL world:code "GRL" .
+world:GRL f:code "GRL" .
 world:GRL f:name "Greenland" .
-world:GTM world:code "GTM" .
+world:GTM f:code "GTM" .
 world:GTM f:name "Guatemala" .
-world:GUF world:code "GUF" .
+world:GUF f:code "GUF" .
 world:GUF f:name "French Guiana" .
-world:GUM world:code "GUM" .
+world:GUM f:code "GUM" .
 world:GUM f:name "Guam" .
-world:GUY world:code "GUY" .
+world:GUY f:code "GUY" .
 world:GUY f:name "Guyana" .
-world:HKG world:code "HKG" .
+world:HKG f:code "HKG" .
 world:HKG f:name "Hong Kong" .
-world:HMD world:code "HMD" .
+world:HMD f:code "HMD" .
 world:HMD f:name "Heard and Mc Donald Islands" .
-world:HND world:code "HND" .
+world:HND f:code "HND" .
 world:HND f:name "Honduras" .
-world:HRV world:code "HRV" .
+world:HRV f:code "HRV" .
 world:HRV f:name "Croatia" .
-world:HTI world:code "HTI" .
+world:HTI f:code "HTI" .
 world:HTI f:name "Haiti" .
-world:HUN world:code "HUN" .
+world:HUN f:code "HUN" .
 world:HUN f:name "Hungary" .
-world:IDN world:code "IDN" .
+world:IDN f:code "IDN" .
 world:IDN f:name "Indonesia" .
-world:IMN world:code "IMN" .
+world:IMN f:code "IMN" .
 world:IMN f:name "Isle of Man" .
-world:IND world:code "IND" .
+world:IND f:code "IND" .
 world:IND f:name "India" .
-world:IOT world:code "IOT" .
+world:IOT f:code "IOT" .
 world:IOT f:name "British Indian Ocean Territory" .
-world:IRL world:code "IRL" .
+world:IRL f:code "IRL" .
 world:IRL f:name "Ireland" .
-world:IRN world:code "IRN" .
+world:IRN f:code "IRN" .
 world:IRN f:name "Iran" .
-world:IRQ world:code "IRQ" .
+world:IRQ f:code "IRQ" .
 world:IRQ f:name "Iraq" .
-world:ISL world:code "ISL" .
+world:ISL f:code "ISL" .
 world:ISL f:name "Iceland" .
-world:ISR world:code "ISR" .
+world:ISR f:code "ISR" .
 world:ISR f:name "Israel" .
-world:ITA world:code "ITA" .
+world:ITA f:code "ITA" .
 world:ITA f:name "Italy" .
-world:JAM world:code "JAM" .
+world:JAM f:code "JAM" .
 world:JAM f:name "Jamaica" .
-world:JEY world:code "JEY" .
+world:JEY f:code "JEY" .
 world:JEY f:name "Jersey" .
-world:JOR world:code "JOR" .
+world:JOR f:code "JOR" .
 world:JOR f:name "Jordan" .
-world:JPN world:code "JPN" .
+world:JPN f:code "JPN" .
 world:JPN f:name "Japan" .
-world:KAZ world:code "KAZ" .
+world:KAZ f:code "KAZ" .
 world:KAZ f:name "Kazakhstan" .
-world:KEN world:code "KEN" .
+world:KEN f:code "KEN" .
 world:KEN f:name "Kenya" .
-world:KGZ world:code "KGZ" .
+world:KGZ f:code "KGZ" .
 world:KGZ f:name "Kyrgyzstan" .
-world:KHM world:code "KHM" .
+world:KHM f:code "KHM" .
 world:KHM f:name "Cambodia" .
-world:KIR world:code "KIR" .
+world:KIR f:code "KIR" .
 world:KIR f:name "Kiribati" .
-world:KNA world:code "KNA" .
+world:KNA f:code "KNA" .
 world:KNA f:name "Saint Kitts and Nevis" .
-world:KOR world:code "KOR" .
+world:KOR f:code "KOR" .
 world:KOR f:name "South Korea" .
-world:KWT world:code "KWT" .
+world:KWT f:code "KWT" .
 world:KWT f:name "Kuwait" .
-world:LAO world:code "LAO" .
+world:LAO f:code "LAO" .
 world:LAO f:name "Laos" .
-world:LBN world:code "LBN" .
+world:LBN f:code "LBN" .
 world:LBN f:name "Lebanon" .
-world:LBR world:code "LBR" .
+world:LBR f:code "LBR" .
 world:LBR f:name "Liberia" .
-world:LBY world:code "LBY" .
+world:LBY f:code "LBY" .
 world:LBY f:name "Libya" .
-world:LCA world:code "LCA" .
+world:LCA f:code "LCA" .
 world:LCA f:name "Saint Lucia" .
-world:LIE world:code "LIE" .
+world:LIE f:code "LIE" .
 world:LIE f:name "Liechtenstein" .
-world:LKA world:code "LKA" .
+world:LKA f:code "LKA" .
 world:LKA f:name "Sri Lanka" .
-world:LSO world:code "LSO" .
+world:LSO f:code "LSO" .
 world:LSO f:name "Lesotho" .
-world:LTU world:code "LTU" .
+world:LTU f:code "LTU" .
 world:LTU f:name "Lithuania" .
-world:LUX world:code "LUX" .
+world:LUX f:code "LUX" .
 world:LUX f:name "Luxembourg" .
-world:LVA world:code "LVA" .
+world:LVA f:code "LVA" .
 world:LVA f:name "Latvia" .
-world:MAC world:code "MAC" .
+world:MAC f:code "MAC" .
 world:MAC f:name "Macao" .
-world:MAF world:code "MAF" .
+world:MAF f:code "MAF" .
 world:MAF f:name "Saint Martin" .
-world:MAR world:code "MAR" .
+world:MAR f:code "MAR" .
 world:MAR f:name "Morocco" .
-world:MCO world:code "MCO" .
+world:MCO f:code "MCO" .
 world:MCO f:name "Monaco" .
-world:MDA world:code "MDA" .
+world:MDA f:code "MDA" .
 world:MDA f:name "Moldova" .
 world:MDA f:name "Republic of Moldova" .
-world:MDG world:code "MDG" .
+world:MDG f:code "MDG" .
 world:MDG f:name "Madagascar" .
-world:MDV world:code "MDV" .
+world:MDV f:code "MDV" .
 world:MDV f:name "Maldives" .
-world:MEX world:code "MEX" .
+world:MEX f:code "MEX" .
 world:MEX f:name "Mexico" .
-world:MHL world:code "MHL" .
+world:MHL f:code "MHL" .
 world:MHL f:name "Marshall Islands" .
-world:MKD world:code "MKD" . # as of Feb 2019 through the ratification of the Prespa agreement
+world:MKD f:code "MKD" . # as of Feb 2019 through the ratification of the Prespa agreement
 world:MKD f:name "North Macedonia" .
-world:MLI world:code "MLI" .
+world:MLI f:code "MLI" .
 world:MLI f:name "Mali" .
-world:MLT world:code "MLT" .
+world:MLT f:code "MLT" .
 world:MLT f:name "Malta" .
-world:MMR world:code "MMR" .
+world:MMR f:code "MMR" .
 world:MMR f:name "Myanmar" .
-world:MNE world:code "MNE" .
+world:MNE f:code "MNE" .
 world:MNE f:name "Montenegro" .
-world:MNG world:code "MNG" .
+world:MNG f:code "MNG" .
 world:MNG f:name "Mongolia" .
-world:MNP world:code "MNP" .
+world:MNP f:code "MNP" .
 world:MNP f:name "Northern Mariana Islands" .
-world:MOZ world:code "MOZ" .
+world:MOZ f:code "MOZ" .
 world:MOZ f:name "Mozambique" .
-world:MRT world:code "MRT" .
+world:MRT f:code "MRT" .
 world:MRT f:name "Mauritania" .
-world:MSR world:code "MSR" .
+world:MSR f:code "MSR" .
 world:MSR f:name "Montserrat" .
-world:MTQ world:code "MTQ" .
+world:MTQ f:code "MTQ" .
 world:MTQ f:name "Martinique" .
-world:MUS world:code "MUS" .
+world:MUS f:code "MUS" .
 world:MUS f:name "Mauritius" .
-world:MWI world:code "MWI" .
+world:MWI f:code "MWI" .
 world:MWI f:name "Malawi" .
-world:MYS world:code "MYS" .
+world:MYS f:code "MYS" .
 world:MYS f:name "Malaysia" .
-world:MYT world:code "MYT" .
+world:MYT f:code "MYT" .
 world:MYT f:name "Mayotte" .
-world:NAM world:code "NAM" .
+world:NAM f:code "NAM" .
 world:NAM f:name "Namibia" .
-world:NCL world:code "NCL" .
+world:NCL f:code "NCL" .
 world:NCL f:name "New Caledonia" .
-world:NER world:code "NER" .
+world:NER f:code "NER" .
 world:NER f:name "Niger" .
-world:NFK world:code "NFK" .
+world:NFK f:code "NFK" .
 world:NFK f:name "Norfolk Island" .
-world:NGA world:code "NGA" .
+world:NGA f:code "NGA" .
 world:NGA f:name "Nigeria" .
-world:NIC world:code "NIC" .
+world:NIC f:code "NIC" .
 world:NIC f:name "Nicaragua" .
-world:NIU world:code "NIU" .
+world:NIU f:code "NIU" .
 world:NIU f:name "Niue" .
-world:NLD world:code "NLD" .
+world:NLD f:code "NLD" .
 world:NLD f:name "Netherlands" .
-world:NOR world:code "NOR" .
+world:NOR f:code "NOR" .
 world:NOR f:name "Norway" .
-world:NPL world:code "NPL" .
+world:NPL f:code "NPL" .
 world:NPL f:name "Nepal" .
-world:NRU world:code "NRU" .
+world:NRU f:code "NRU" .
 world:NRU f:name "Nauru" .
-world:NZL world:code "NZL" .
+world:NZL f:code "NZL" .
 world:NZL f:name "New Zealand" .
-world:OMN world:code "OMN" .
+world:OMN f:code "OMN" .
 world:OMN f:name "Oman" .
-world:PAK world:code "PAK" .
+world:PAK f:code "PAK" .
 world:PAK f:name "Pakistan" .
-world:PAN world:code "PAN" .
+world:PAN f:code "PAN" .
 world:PAN f:name "Panama" .
-world:PCN world:code "PCN" .
+world:PCN f:code "PCN" .
 world:PCN f:name "Pitcairn" .
-world:PER world:code "PER" .
+world:PER f:code "PER" .
 world:PER f:name "Peru" .
-world:PHL world:code "PHL" .
+world:PHL f:code "PHL" .
 world:PHL f:name "Philippines" .
-world:PLW world:code "PLW" .
+world:PLW f:code "PLW" .
 world:PLW f:name "Palau" .
-world:PNG world:code "PNG" .
+world:PNG f:code "PNG" .
 world:PNG f:name "Papua New Guinea" .
-world:POL world:code "POL" .
+world:POL f:code "POL" .
 world:POL f:name "Poland" .
-world:PRI world:code "PRI" .
+world:PRI f:code "PRI" .
 world:PRI f:name "Puerto Rico" .
 world:PRK f:name "North Korea" .
-world:PRT world:code "PRT" .
+world:PRT f:code "PRT" .
 world:PRT f:name "Portugal" .
-world:PRY world:code "PRY" .
+world:PRY f:code "PRY" .
 world:PRY f:name "Paraguay" .
-world:PSE world:code "PSE" .
+world:PSE f:code "PSE" .
 world:PSE f:name "State of Palestine" .
-world:PYF world:code "PYF" .
+world:PYF f:code "PYF" .
 world:PYF f:name "French Polynesia" .
-world:QAT world:code "QAT" .
+world:QAT f:code "QAT" .
 world:QAT f:name "Qatar" .
-world:REU world:code "REU" .
+world:REU f:code "REU" .
 world:REU f:name "Reunion" .
-world:ROU world:code "ROU" .
+world:ROU f:code "ROU" .
 world:ROU f:name "Romania" .
-world:RUS world:code "RUS" . # give or take a few countries
+world:RUS f:code "RUS" . # give or take a few countries
 world:RUS f:name "Russia" .
-world:RWA world:code "RWA" .
+world:RWA f:code "RWA" .
 world:RWA f:name "Rwanda" .
-world:SAU world:code "SAU" .
+world:SAU f:code "SAU" .
 world:SAU f:name "Saudi Arabia" .
-world:SDN world:code "SDN" .
+world:SDN f:code "SDN" .
 world:SDN f:name "Sudan" .
-world:SEN world:code "SEN" .
+world:SEN f:code "SEN" .
 world:SEN f:name "Senegal" .
-world:SGP world:code "SGP" .
+world:SGP f:code "SGP" .
 world:SGP f:name "Singapore" .
-world:SGS world:code "SGS" .
+world:SGS f:code "SGS" .
 world:SGS f:name "South Georgia and the South Sandwich Islands" .
-world:SHN world:code "SHN" .
+world:SHN f:code "SHN" .
 world:SHN f:name "Saint Helena" .
-world:SJM world:code "SJM" .
+world:SJM f:code "SJM" .
 world:SJM f:name "Svalbard and Jan Mayen" .
-world:SLB world:code "SLB" .
+world:SLB f:code "SLB" .
 world:SLB f:name "Solomon Islands" .
-world:SLE world:code "SLE" .
+world:SLE f:code "SLE" .
 world:SLE f:name "Sierra Leone" .
-world:SLV world:code "SLV" .
+world:SLV f:code "SLV" .
 world:SLV f:name "El Salvador" .
-world:SMR world:code "SMR" .
+world:SMR f:code "SMR" .
 world:SMR f:name "San Marino" .
-world:SOM world:code "SOM" .
+world:SOM f:code "SOM" .
 world:SOM f:name "Somalia" .
-world:SPM world:code "SPM" .
+world:SPM f:code "SPM" .
 world:SPM f:name "Saint Pierre and Miquelon" .
-world:SRB world:code "SRB" .
+world:SRB f:code "SRB" .
 world:SRB f:name "Serbia" .
-world:SSD world:code "SSD" .
+world:SSD f:code "SSD" .
 world:SSD f:name "South Sudan" .
-world:STP world:code "STP" .
+world:STP f:code "STP" .
 world:STP f:name "Sao Tome and Principe" .
-world:SUR world:code "SUR" .
+world:SUR f:code "SUR" .
 world:SUR f:name "Suriname" .
-world:SVK world:code "SVK" .
+world:SVK f:code "SVK" .
 world:SVK f:name "Slovakia" .
-world:SVN world:code "SVN" .
+world:SVN f:code "SVN" .
 world:SVN f:name "Slovenia" .
-world:SWE world:code "SWE" .
+world:SWE f:code "SWE" .
 world:SWE f:name "Sweden" .
-world:SWZ world:code "SWZ" .
+world:SWZ f:code "SWZ" .
 world:SWZ f:name "Swaziland" .
-world:SXM world:code "SXM" .
+world:SXM f:code "SXM" .
 world:SXM f:name "Sint Maarten" .
-world:SYC world:code "SYC" .
+world:SYC f:code "SYC" .
 world:SYC f:name "Seychelles" .
-world:SYR world:code "SYR" .
+world:SYR f:code "SYR" .
 world:SYR f:name "Syria" .
-world:TCA world:code "TCA" .
+world:TCA f:code "TCA" .
 world:TCA f:name "Turks and Caicos Islands" .
-world:TCD world:code "TCD" .
+world:TCD f:code "TCD" .
 world:TCD f:name "Chad" .
-world:TGO world:code "TGO" .
+world:TGO f:code "TGO" .
 world:TGO f:name "Togo" .
-world:THA world:code "THA" .
+world:THA f:code "THA" .
 world:THA f:name "Thailand" .
-world:TJK world:code "TJK" .
+world:TJK f:code "TJK" .
 world:TJK f:name "Tajikistan" .
-world:TKL world:code "TKL" .
+world:TKL f:code "TKL" .
 world:TKL f:name "Tokelau" .
-world:TKM world:code "TKM" .
+world:TKM f:code "TKM" .
 world:TKM f:name "Turkmenistan" .
-world:TLS world:code "TLS" .
+world:TLS f:code "TLS" .
 world:TLS f:name "Timor-Leste" .
-world:TON world:code "TON" .
+world:TON f:code "TON" .
 world:TON f:name "Tonga" .
-world:TTO world:code "TTO" .
+world:TTO f:code "TTO" .
 world:TTO f:name "Trinidad and Tobago" .
-world:TUN world:code "TUN" .
+world:TUN f:code "TUN" .
 world:TUN f:name "Tunisia" .
-world:TUR world:code "TUR" .
+world:TUR f:code "TUR" .
 world:TUR f:name "Turkey" .
-world:TUV world:code "TUV" .
+world:TUV f:code "TUV" .
 world:TUV f:name "Tuvalu" .
-world:TWN world:code "TWN" .
+world:TWN f:code "TWN" .
 world:TWN f:name "Taiwan" .
-world:TZA world:code "TZA" .
+world:TZA f:code "TZA" .
 world:TZA f:name "Tanzania, United Republic of" .
-world:UGA world:code "UGA" .
+world:UGA f:code "UGA" .
 world:UGA f:name "Uganda" .
-world:UKR world:code "UKR" .
+world:UKR f:code "UKR" .
 world:UKR f:name "Ukraine" .
-world:UMI world:code "UMI" .
+world:UMI f:code "UMI" .
 world:UMI f:name "United States Minor Outlying Islands" .
-world:URY world:code "URY" .
+world:URY f:code "URY" .
 world:URY f:name "Uruguay" .
-world:USA world:code "USA" .
+world:USA f:code "USA" .
 world:USA f:name "United States" .
-world:UZB world:code "UZB" .
+world:UZB f:code "UZB" .
 world:UZB f:name "Uzbekistan" .
-world:VAT world:code "VAT" .
+world:VAT f:code "VAT" .
 world:VAT f:name "Vatican City" .
-world:VCT world:code "VCT" .
+world:VCT f:code "VCT" .
 world:VCT f:name "Saint Vincent and the Grenadines" .
-world:VEN world:code "VEN" .
+world:VEN f:code "VEN" .
 world:VEN f:name "Venezuela" .
-world:VGB world:code "VGB" .
+world:VGB f:code "VGB" .
 world:VGB f:name "British Virgin Islands" .
-world:VIR world:code "VIR" .
+world:VIR f:code "VIR" .
 world:VIR f:name "American Virgin Islands" .
-world:VNM world:code "VNM" .
+world:VNM f:code "VNM" .
 world:VNM f:name "Vietnam" .
-world:VUT world:code "VUT" .
+world:VUT f:code "VUT" .
 world:VUT f:name "Vanuatu" .
-world:WLF world:code "WLF" .
+world:WLF f:code "WLF" .
 world:WLF f:name "Wallis and Futuna" .
-world:WSM world:code "WSM" .
+world:WSM f:code "WSM" .
 world:WSM f:name "Samoa" .
-world:YEM world:code "YEM" .
+world:YEM f:code "YEM" .
 world:YEM f:name "Yemen" .
-world:ZAF world:code "ZAF" .
+world:ZAF f:code "ZAF" .
 world:ZAF f:name "South Africa" .
-world:ZMB world:code "ZMB" .
+world:ZMB f:code "ZMB" .
 world:ZMB f:name "Zambia" .
-world:ZWE world:code "ZWE" .
+world:ZWE f:code "ZWE" .
 world:ZWE f:name "Zimbabwe" .
 
 world:middle_east f:name "Middle East" .

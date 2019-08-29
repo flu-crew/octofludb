@@ -152,7 +152,7 @@ class P:
     ref_reason = nt.ref_reason
     country = nt.country
     country_name = nt.country_name
-    state = nusa.state
+    state = nt.state
     subtype = nt.subtype
     ha_clade = nt.ha_clade
     na_clade = nt.na_clade
