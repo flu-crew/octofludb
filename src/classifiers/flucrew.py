@@ -298,8 +298,11 @@ class GisaidSeqid(SegmentToken):
     typename = "gisaid_seqid"
     parser = p_gisaid_seqid
 
+    def as_uri(self):
+        return make_uri(self.clean)
+
     def munge(self, text):
-        return text.upper()
+        return text.upper().replace("_", "")
 
     def add_triples(self, g):
         if self.clean:
