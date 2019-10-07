@@ -47,7 +47,7 @@ def make_uri(x, namespace=ni):
     if isinstance(x, rdflib.term.URIRef):
         return x
     else:
-        x = re.sub(" +", "_", x.strip()).lower()
+        x = re.sub("[ -]+", "_", x.strip()).lower()
         return namespace.term(url.quote_plus(x))
 
 
@@ -206,7 +206,6 @@ class P:
     gb_organism = nt.organism
     gb_product = nt.product
     gb_protein_id = nt.protein_id
-    gb_segment = nt.segment
     gb_serotype = nt.serotype
     gb_strain = nt.strain
     gb_transl_table = nt.transl_table
