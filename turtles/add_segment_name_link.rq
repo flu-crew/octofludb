@@ -1,0 +1,14 @@
+PREFIX onto: <http://www.ontotext.com/>
+PREFIX f: <https://flu-crew.org/term/>
+PREFIX fid: <https://flu-crew.org/id/>
+PREFIX world: <https://flu-crew.org/geo/country/>
+PREFIX usa: <https://flu-crew.org/geo/country/usa/>
+
+CONSTRUCT {
+    ?sid f:ha_clade ?gid .
+}
+FROM onto:disable-sameAs
+WHERE {
+    ?sid f:has_segment ?gid .    
+    ?gid f:segment_name "HA" .
+}
