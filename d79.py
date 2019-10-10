@@ -7,6 +7,7 @@ Usage:
   d79 load_strains [<filename>]
   d79 tag [<filename>] [--tag=<tag>]
   d79 load_gbids [<filename>]
+  d79 load_gbank [<filename>]
   d79 load_blast [<filename>] [--tag=<tag>]
   d79 load_table [<filename>] [--tag=<tag>] [--include=<inc>] [--exclude=<exc>] [--levels=<levels>]
   d79 load_fasta [<filename>] [--tag=<tag>] [--delimiter=<del>] [--include=<inc>] [--exclude=<exc>]
@@ -20,18 +21,8 @@ Options:
 """
 
 import os
-import sys
-from docopt import docopt
-from rdflib import Graph, Literal
-import src.recipes as recipe
-import src.entrez as entrez
-import src.genbank as gb
-import src.classes as classes
-import datetime as datetime
-from src.nomenclature import manager, make_uri, make_tag_uri, P
 import signal
-from tqdm import tqdm
-from src.util import log, file_str
+from docopt import docopt
 
 if __name__ == "__main__":
 
@@ -40,6 +31,20 @@ if __name__ == "__main__":
 
     args = docopt(__doc__, version="build.sh 0.0.1")
     tagstr = args["--tag"]
+
+    # Place imports here so they only load after successful parsing of the arguments.
+    # If the imports are all before main, then `d79 -h` can take a few seconds to run. 
+    import sys
+    from Bio import SeqIO
+    from rdflib import Graph, Literal
+    import src.recipes as recipe
+    import src.entrez as entrez
+    import src.genbank as gb
+    import src.classes as classes
+    import datetime as datetime
+    from src.nomenclature import manager, make_uri, make_tag_uri, P
+    from tqdm import tqdm
+    from src.util import log, file_str
 
     if args["<filename>"]:
         filehandle = open(args["<filename>"], "r")
@@ -70,6 +75,13 @@ if __name__ == "__main__":
                 gb.add_gb_meta_triples(g, gb_meta)
             # commit the current batch (say of 1000 entries)
             g.commit()
+
+    if args["load_gbank"]:
+        print("load_gbank is not yet supported", file=sys.stderr)
+        sys.exit(1)
+        #  for gb_meta in SeqIO.parse(filehandle, "genbank"):
+        #      gb.add_gb_meta_triples(g, gb_meta)
+        #  g.commit()
 
     if args["load_blast"]:
         log(f"Retrieving and parsing blast results from '{file_str(filehandle)}'")
