@@ -343,7 +343,7 @@ class SequenceToken(Token):
 
     def add_triples(self, g):
         if self.clean:
-            g.add((self.as_uri(), P.chksum, chksum(self.clean)))
+            g.add((self.as_uri(), P.chksum, make_uri(chksum(self.clean))))
 
     @classmethod
     def goodness(cls, items):
