@@ -29,7 +29,7 @@ def add_gb_meta_triples(g, gb_meta):
 
     seq = gb_meta["GBSeq_sequence"].upper()
     g.add((gid, P.dnaseq, Literal(seq)))
-    g.add((gid, P.chksum, Literal(chksum(seq))
+    g.add((gid, P.chksum, Literal(chksum(seq))))
 
     igen = uidgen(base=accession + "_feat_")
     for feat in gb_meta["GBSeq_feature-table"]:
@@ -46,7 +46,7 @@ def add_gb_meta_triples(g, gb_meta):
                 if qual["GBQualifier_name"] == "translation":
                     aaseq = qual["GBQualifier_value"]
                     g.add((fid, P.proseq, Literal(aaseq)))
-                    g.add((fid, P.chksum, Literal(chksum(aaseq)))
+                    g.add((fid, P.chksum, Literal(chksum(aaseq))))
                 elif "GBQualifier_name" in qual and "GBQualifier_value" in qual:
                     g.add(
                         (
