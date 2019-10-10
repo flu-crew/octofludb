@@ -446,7 +446,7 @@ class TestDnaseq(unittest.TestCase):
         self.assertEqual(
             ftok.Dnaseq("ATAGAGAGGGGTCCGCGCT").clean, "ATAGAGAGGGGTCCGCGCT"
         )
-        self.assertEqual(ftok.Dnaseq("A_TR_YATTNN").clean, "A_TR_YATTNN")
+        self.assertEqual(ftok.Dnaseq("A_TR_YATTNN").clean, "ATRYATTNN")
 
 
 class TestProseq(unittest.TestCase):
@@ -454,7 +454,7 @@ class TestProseq(unittest.TestCase):
         # is valid protein sequence too
         self.assertEqual(ftok.Proseq("ATGAGAGA").clean, "ATGAGAGA")
         self.assertEqual(ftok.Proseq("GANDALF").clean, "GANDALF")
-        self.assertEqual(ftok.Proseq("_PIC*K*L*E*").clean, "_PIC*K*L*E*")
+        self.assertEqual(ftok.Proseq("_PIC*K*L*E*").clean, "PIC*K*L*E*")
 
 
 class TestUnknown(unittest.TestCase):
@@ -505,6 +505,11 @@ class TestFasta(unittest.TestCase):
             [
                 (
                     "https://flu-crew.org/id/4badd1687f27faae29f9b1fe1ea37e78",
+                    "https://flu-crew.org/term/chksum",
+                    "4badd1687f27faae29f9b1fe1ea37e78",
+                ),
+                (
+                    "https://flu-crew.org/id/4badd1687f27faae29f9b1fe1ea37e78",
                     "https://flu-crew.org/term/dnaseq",
                     "ATGGG",
                 ),
@@ -517,6 +522,11 @@ class TestFasta(unittest.TestCase):
                     "https://flu-crew.org/id/4badd1687f27faae29f9b1fe1ea37e78",
                     "https://flu-crew.org/term/unknown",
                     "z",
+                ),
+                (
+                    "https://flu-crew.org/id/5b2033ab635505389b1acfa0d6eda05c",
+                    "https://flu-crew.org/term/chksum",
+                    "5b2033ab635505389b1acfa0d6eda05c",
                 ),
                 (
                     "https://flu-crew.org/id/5b2033ab635505389b1acfa0d6eda05c",

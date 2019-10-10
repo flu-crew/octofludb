@@ -336,10 +336,14 @@ class SequenceToken(Token):
     group = "sequence"
 
     def munge(self, text):
-        return text.upper().replace(" ", "")
+        return re.sub("[^A-Z*]", "", text.upper())
 
     def as_uri(self):
         return make_uri(chksum(self.clean))
+
+    def add_triples(self, g):
+        if self.clean:
+            g.add((self.as_uri(), P.chksum, chksum(self.clean)))
 
     @classmethod
     def goodness(cls, items):
