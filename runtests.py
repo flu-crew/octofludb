@@ -235,12 +235,12 @@ class TestGisaidSeqid(unittest.TestCase):
     def test_GisaidSeqid(self):
         # no upper bound on integers
         self.assertEqual(
-            ftok.GisaidSeqid("EPI_1234567890123").clean, "EPI_1234567890123"
+            ftok.GisaidSeqid("EPI_1234567890123").clean, "EPI1234567890123"
         )
         # underscore optional
         self.assertEqual(ftok.GisaidSeqid("EPI1234567890123").clean, "EPI1234567890123")
         # but at least 3
-        self.assertEqual(ftok.GisaidSeqid("EPI_123").clean, "EPI_123")
+        self.assertEqual(ftok.GisaidSeqid("EPI_123").clean, "EPI123")
         # currently I don't allow fewer than 2 numbers
         self.assertEqual(ftok.GisaidSeqid("EPI_12").clean, None)
         self.assertEqual(ftok.GisaidSeqid("bogus").clean, None)
