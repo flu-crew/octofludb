@@ -10,4 +10,8 @@ p_gb = p.regex("[A-Z][A-Z]?\d{5,7}")
 p_gisaid_seqid = p.regex("EPI_?\d\d\d+")
 p_seqid = p_gb ^ p_gisaid_seqid
 
-p_global_clade = p.regex("\d[ABC]([\._-]\d+){1,4}([_-]?like)?") ^ p.regex("Other-Human[0-9.ABC-]*") ^ p.regex("3\.[12][09]\d0\.[0-9.ABC-]+")
+p_global_clade = (
+    p.regex("\d[ABC]([\._-]\d+){1,4}([_-]?like)?")
+    ^ p.regex("Other-Human[0-9.ABC-]*")
+    ^ p.regex("3\.[12][09]\d0\.[0-9.ABC-]+")
+)

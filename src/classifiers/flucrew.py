@@ -341,9 +341,11 @@ class SequenceToken(Token):
     def as_uri(self):
         return make_uri(chksum(self.clean))
 
-    def add_triples(self, g):
-        if self.clean:
-            g.add((self.as_uri(), P.chksum, make_uri(chksum(self.clean))))
+    def _has_segment(self, tokens):
+        for token in tokens:
+            if token.group == "segment":
+                return True
+        return None
 
     @classmethod
     def goodness(cls, items):
@@ -358,29 +360,25 @@ class Dnaseq(SequenceToken):
     typename = "dnaseq"
     parser = p_dnaseq
 
+    def object_of(self, g, uri):
+        if uri and self.matches:
+            g.add((uri, P.chksum, Literal(chksum(self.clean))))
+            g.add((uri, P.dnaseq, Literal(self.clean)))
+
     def relate(self, tokens, g, levels=None):
         uri = self.as_uri()
-        g.add((uri, P.dnaseq, Literal(self.clean)))
         for other in tokens:
             if other.clean is None:
                 continue
-            if other.group == "segment":
-                g.add((other.as_uri(), P.sameAs, uri))
             elif other.group == "strain":
                 g.add((other.as_uri(), P.has_segment, uri))
-            elif not other.typename in STRAIN_FIELDS:
+            elif not self._has_segment(tokens) and not other.typename in STRAIN_FIELDS:
                 other.object_of(g, uri)
 
 
 class Proseq(SequenceToken):
     typename = "proseq"
     parser = p_proseq
-
-    def _has_segment(self, tokens):
-        for token in tokens:
-            if token.group == "segment":
-                return True
-        return None
 
     def relate(self, tokens, g, levels=None):
         uri = self.as_uri()
