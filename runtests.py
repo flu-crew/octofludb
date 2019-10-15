@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import src.classifiers.flucrew as ftok
-from src.nomenclature import make_uri, make_usa_state_uri, make_country_uri
+from src.nomenclature import make_uri, make_usa_state_uri, make_country_uri, make_property
 from src.classes import HomoList, Phrase, Datum, Ragged
 from src.graph import showTriple
 import unittest
@@ -23,6 +23,9 @@ class TestMakeUri(unittest.TestCase):
         # special variables should be quoted
         x = "!@#$%^&*()/:;'\",.<>yolo!"
         self.assertTrue(url.quote_plus(x) in make_uri(x))
+
+    def test_make_property(self):
+        self.assertEqual(make_property("foo baR Baz"), make_property("Foo_bar Baz"))
 
     def test_make_state_uri(self):
         self.assertEqual(make_usa_state_uri("wyoming"), make_usa_state_uri("WY"))

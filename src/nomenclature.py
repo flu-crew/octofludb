@@ -90,7 +90,7 @@ def make_date(dateStr):
 
 
 def make_property(x):
-    return nt.term(x)
+    return nt.term(x.lower().replace(" ", "_"))
 
 
 def make_literal(x, infer=True):

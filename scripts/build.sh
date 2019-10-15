@@ -11,24 +11,24 @@ log() {
 
 mkdir ttl || log "Overwriting files in ttl/"
 
-# file="${DATADIR}/IRD-results.tsv"
-# log "Loading global clade data from IRD"
-# cut -f12,15 $file | awk 'NR == 1 {print "strain\tglobal_clade"} NR != 1 {print}' > ${file}~
-# time d79 load_table ${file}~ > ttl/h1_global_clades.ttl
-#
-# file="${DATADIR}/A0_all.xlsx"
-# log "Loading swine surveillance data from $file"
-# time d79 load_table --exclude="proseq,dnaseq" --levels="strain" $file > ttl/A0.ttl
-#
-# file="${DATADIR}/antiserum/antiserum_ids"
-# tag="antiserum"
-# log "Loading antisera strains from '$file' as tag '$tag'"
-# time d79 tag "$file" --tag="$tag" > ttl/$tag.ttl
-#
-# file="${DATADIR}/antiserum/antigen_ids"
-# tag="antigen"
-# log "Loading antigen strains from '$file' as tag '$tag'"
-# time d79 tag "$file" --tag="$tag" > ttl/$tag.ttl
+file="${DATADIR}/IRD-results.tsv"
+log "Loading global clade data from IRD"
+cut -f12,15 $file | awk 'NR == 1 {print "strain\tglobal_clade"} NR != 1 {print}' > ${file}~
+time d79 load_table ${file}~ > ttl/h1_global_clades.ttl
+
+file="${DATADIR}/A0_all.xlsx"
+log "Loading swine surveillance data from $file"
+time d79 load_table --exclude="proseq,dnaseq" --levels="strain" $file > ttl/A0.ttl
+
+file="${DATADIR}/antiserum/antiserum_ids"
+tag="antiserum"
+log "Loading antisera strains from '$file' as tag '$tag'"
+time d79 tag "$file" --tag="$tag" > ttl/$tag.ttl
+
+file="${DATADIR}/antiserum/antigen_ids"
+tag="antigen"
+log "Loading antigen strains from '$file' as tag '$tag'"
+time d79 tag "$file" --tag="$tag" > ttl/$tag.ttl
 
 file="STATIC/CDC_CVV/CVV.fasta"
 tag="cdc_cvv"
@@ -62,8 +62,8 @@ time d79 load_strains "$file" > ttl/influenza_na.ttl
 log "Retrieving all swine Genbank IDs and selected human IDs (saved in gb-id.txt)"
 time q79 ~/src/git/d79/turtles/fetch-swine-gids.rq > gb.ids
 
-# log "Compiling Genbank records for each of these IDs"
-# time d79 load_gbids gb.ids > ttl/genbank.ttl~ && mv ttl/genbank.ttl~ ttl/genbank.ttl
+log "Compiling Genbank records for each of these IDs"
+time d79 load_gbids gb.ids > ttl/genbank.ttl~ && mv ttl/genbank.ttl~ ttl/genbank.ttl
 
 log $(date)
 log "done"

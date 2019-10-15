@@ -36,7 +36,7 @@ class Token:
         return None  # default tokens cannot be URIs
 
     def as_predicate(self):
-        return make_property(self.choose_field_name().lower())
+        return make_property(self.choose_field_name())
 
     def as_object(self):
         return self.as_literal()
