@@ -52,6 +52,7 @@ from src.nomenclature import (
     P,
 )
 
+BARCODE_PAT = re.compile("A0\d{7}|\d+TOSU\d+|EPI_ISL_\d+")
 
 class Country(Token):
     typename = "country"
@@ -192,11 +193,9 @@ class Barcode(StrainToken):
         if self.clean:
             g.add((self.as_uri(), P.barcode, self.as_literal()))
 
-
 class Strain(StrainToken):
     typename = "strain_name"
     parser = p_strain
-    BARCODE_PAT = re.compile("A0\d{7}|\d+TOSU\d+|EPI_ISL_\d+")
 
     def munge(self, text):
         return text.replace(" ", "_")
@@ -205,13 +204,18 @@ class Strain(StrainToken):
         if self.clean:
             uri = self.as_uri()
             g.add((uri, P.strain_name, self.as_literal()))
-            # some strain names contain a barcode, which is also a unique id
-            barcode_match = re.search(self.BARCODE_PAT, self.clean)
-            if barcode_match:
-                barcode_name = barcode_match.group(0)
-                barcode = Barcode(barcode_name)
-                barcode.add_triples(g)
-                g.add((uri, P.sameAs, barcode.as_uri()))
+            for el in self.clean.split("/"):
+                barcode_match = re.fullmatch(BARCODE_PAT, el)
+                state_str = StateUSA.parser(el)
+
+                # some strain names contain a barcode, which is also a unique id
+                if barcode_match is not None:
+                    barcode = Barcode(barcode_match.group())
+                    barcode.add_triples(g)
+                    g.add((uri, P.sameAs, barcode.as_uri()))
+                elif state_str is not None:
+                    state = StateUSA(state_str)
+                    state.object_of(g, uri)
 
 
 # --- strain attributes ---

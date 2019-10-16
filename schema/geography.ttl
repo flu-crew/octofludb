@@ -1,4 +1,3 @@
-PREFIX geo: <https://flu-crew.org/geo#>
 PREFIX world: <https://flu-crew.org/geo/country/>
 PREFIX usa: <https://flu-crew.org/geo/country/usa/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
