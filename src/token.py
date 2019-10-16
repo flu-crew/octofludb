@@ -11,8 +11,8 @@ class Token:
     typename = "auto"
     class_predicate = None
 
-    def __init__(self, text, field_name=None):
-        self.matches = self.testOne(text)
+    def __init__(self, text, field_name=None, na_str=[None]):
+        self.matches = self.testOne(text, na_str=na_str)
         self.dirty = text
         self.field_name = field_name
         if self.matches is not None:
@@ -76,24 +76,25 @@ class Token:
         return self.matches is not None and self.matches != ""
 
     @classmethod
-    def testOne(cls, item):
+    def testOne(cls, item, na_str=[None]):
         """
         The item is a member of this type. In the base case anything
         that can be turned into a string is a member.
         """
-        if item is None:
+        if item in na_str:
             return None
         try:
-            result = cls.parser.parse_strict(item)
-            return result
+            return cls.parser.parse_strict(item)
         except p.ParseError:
             return None
 
     @classmethod
-    def goodness(cls, items):
-        matches = [(cls.testOne(item=x) != None) for x in rmNone(items)]
-        goodness = sum(matches) / len(matches)
-        return goodness
+    def goodness(cls, items, na_str=[None]):
+        matches = [(cls.testOne(item=x, na_str=[None]) != None) for x in items if x not in na_str]
+        if len(matches) > 0:
+            return sum(matches) / len(matches)
+        else:
+            return 0
 
 
 class Missing(Token):
@@ -101,7 +102,7 @@ class Missing(Token):
     typename = "missing"
 
     @classmethod
-    def testOne(cls, item):
+    def testOne(cls, item, na_str=[None]):
         return None
 
 
@@ -110,7 +111,7 @@ class Unknown(Token):
     parser = lambda x: x
 
     @classmethod
-    def testOne(cls, item):
+    def testOne(cls, item, na_str=[None]):
         return item
 
 
@@ -119,7 +120,7 @@ class Ignore(Token):
     parser = lambda x: None
 
     @classmethod
-    def testOne(cls, item):
+    def testOne(cls, item, na_str=[None]):
         return None
 
 

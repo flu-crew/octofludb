@@ -502,7 +502,7 @@ class TestPhrase(unittest.TestCase):
 class TestFasta(unittest.TestCase):
     def test_fasta(self):
         g = set()
-        x = Ragged(">baz\nATGG\n>foo||z\nATGGG")
+        x = Ragged(">baz\nATGG\n>foo||z\nATGGG", na_str=[None])
         x.connect(g)
         s = sorted([(str(s), str(p), str(o)) for s, p, o in g])
         self.assertEqual(

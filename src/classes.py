@@ -34,12 +34,14 @@ class Interpreter:
         include={},
         exclude={},
         levels=None,
+        na_str=[None],
         log=False,
     ):
         self.tag = tag
         self.levels = levels
+        self.na_str = na_str
         self.classifiers = updateClassifiers(classifiers, include, exclude)
-        self.default_classifier = (Unknown,)
+        self.default_classifier = Unknown
         if log:
             self.log()
         self.field_name = field_name
@@ -71,17 +73,19 @@ class Datum(Interpreter):
 
     def cast(self, data):
         if data == "":
-            return Missing(data)
-        for classifer in self.classifiers:
+            return Missing(data, na_str=self.na_str)
+        for classifier in self.classifiers:
             try:
-                token = classifer(data, field_name=self.field_name)
+                token = classifier(data, field_name=self.field_name, na_str=self.na_str)
             except TypeError:
                 log(data)
                 log(token)
                 sys.exit(1)
             if token:
                 return token
-        return self.default_classifier(data, field_name=self.field_name)
+        return self.default_classifier(
+            data, field_name=self.field_name, na_str=self.na_str
+        )
 
     def summarize(self):
         log(f"typename: {self.data.typename}")
@@ -100,12 +104,12 @@ class HomoList(Interpreter):
 
     def cast(self, data):
         for classifier in self.classifiers:
-            if classifier.goodness(data) > 0.8:
+            if classifier.goodness(data, na_str=self.na_str) > 0.8:
                 c = classifier
                 break
         else:
             c = self.default_classifier
-        return [c(x, field_name=self.field_name) for x in data]
+        return [c(x, field_name=self.field_name, na_str=self.na_str) for x in data]
 
     def connect(self, g):
         for token in self.data:
@@ -128,11 +132,13 @@ class ParsedPhraseList(Interpreter):
         include={},
         exclude={},
         levels=None,
+        na_str=[None],
         log=False,
     ):
         self.classifiers = updateClassifiers(classifiers, include, exclude)
         self.tag = tag
         self.levels = levels
+        self.na_str = na_str
         if log:
             self.log()
         self.filehandle = filehandle
@@ -157,10 +163,10 @@ class ParsedPhraseList(Interpreter):
             phrase.connect(g, taguri=taguri)
 
 
-def tabularTyping(data, levels=None):
+def tabularTyping(data, levels=None, na_str=[None]):
     cols = []
     for k, v in data.items():
-        hl = HomoList(v, field_name=k).data
+        hl = HomoList(v, field_name=k, na_str=na_str).data
         log(f" - '{k}':{colors.good(hl[0].typename)}")
         cols.append(hl)
     phrases = [
@@ -169,10 +175,10 @@ def tabularTyping(data, levels=None):
     return phrases
 
 
-def headlessTabularTyping(data, levels=None):
+def headlessTabularTyping(data, levels=None, na_str=[None]):
     cols = []
     for (i, xs) in enumerate(data):
-        hl = HomoList(xs).data
+        hl = HomoList(xs, na_str=na_str).data
         log(f" - 'X{i}':{colors.good(hl[0].typename)}")
         cols.append(hl)
     phrases = [
@@ -181,28 +187,10 @@ def headlessTabularTyping(data, levels=None):
     return phrases
 
 
-class Column:
-    def __init__(self, field_name, classifier=Unknown, extractWith=None):
-        self.classifier = classifier
-        self.field_name = field_name
-        self.unwrap = lambda x: x
-        if extractWith:
-
-            def unwrap(self, x):
-                try:
-                    match = re.search(extractWith, x).group(0)
-                except AttributeError:
-                    match = ""
-                return match
-
-    def cast(self, xs):
-        return [self.classifier(self.unwrap(x), field_name=field_name) for x in xs]
-
-
 class Table(ParsedPhraseList):
-    def __init__(self, headers=[], **kwargs):
+    def __init__(self, headers=[], *args, **kwargs):
         self.headers = headers
-        super().__init__(**kwargs)
+        super().__init__(*args, **kwargs)
 
     def cast(self, data):
         if self.headers:
@@ -212,13 +200,13 @@ class Table(ParsedPhraseList):
                 )
                 exit(1)
             else:
-                cols = [c.cast(d) for c, d in zip(headers, data)]
+                cols = [c.cast(d) for c, d in zip(self.headers, data)]
                 result = [
                     Phrase([col[i] for col in cols], levels=self.levels)
                     for i in range(len(cols[0]))
                 ]
         else:
-            result = tabularTyping(data, levels=self.levels)
+            result = tabularTyping(data, levels=self.levels, na_str=self.na_str)
         return result
 
     def parse(self, filehandle):
@@ -262,17 +250,19 @@ class Ragged(ParsedPhraseList):
     """
 
     def cast(self, data):
-
         # If all entries have the same number of entries, I treat them as a
         # table. Then I can use column-based type inference.
         if len({len(xs) for xs in data}) == 1:
             N = len(data[0])
             log(f"Applying column type inference (all headers have {N-1} fields)")
             tabular_data = [[row[i] for row in data] for i in range(N)]
-            return headlessTabularTyping(tabular_data, levels=self.levels)
+            return headlessTabularTyping(tabular_data, levels=self.levels, na_str=self.na_str)
         else:
             return [
-                Phrase([Datum(x).data for x in row], levels=self.levels) for row in data
+                Phrase(
+                    [Datum(x, na_str=self.na_str).data for x in row], levels=self.levels
+                )
+                for row in data
             ]
 
     def parse(self, filehandle):
@@ -294,7 +284,6 @@ class Ragged(ParsedPhraseList):
         )
         p_entry = p_header + p_seq
         p_fasta = parsec.many1(p_entry)
-
         log(f"Reading {file_str(filehandle)} as a fasta file:")
         try:
             entries = p_fasta.parse(filehandle.read())

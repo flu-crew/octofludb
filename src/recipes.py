@@ -79,6 +79,8 @@ def load_influenza_na(g, filehandle) -> None:
                     flu.Date(els[5]),
                     # skip 6
                     flu.Strain(extract_strain(els[7])),
+                    # skip 8
+                    # skip 9
                     tok.Unknown(els[10].strip(), field_name="genome_status"),
                 ]
             ).connect(g)

@@ -9,8 +9,8 @@ Usage:
   d79 load_gbids [<filename>]
   d79 load_gbank [<filename>]
   d79 load_blast [<filename>] [--tag=<tag>]
-  d79 load_table [<filename>] [--tag=<tag>] [--include=<inc>] [--exclude=<exc>] [--levels=<levels>]
-  d79 load_fasta [<filename>] [--tag=<tag>] [--delimiter=<del>] [--include=<inc>] [--exclude=<exc>]
+  d79 load_table [<filename>] [--tag=<tag>] [--include=<inc>] [--exclude=<exc>] [--levels=<levels>] [--na=<na_str>]
+  d79 load_fasta [<filename>] [--tag=<tag>] [--delimiter=<del>] [--include=<inc>] [--exclude=<exc>] [--na=<na_str>]
 
 Options:
   -h --help               Show this screen.
@@ -50,6 +50,15 @@ if __name__ == "__main__":
         filehandle = open(args["<filename>"], "r")
     else:
         filehandle = sys.stdin
+
+    if args["--na"]:
+        na_str = args["--na"].split(",")
+        if (isinstance(na_str, list)):
+            na_str = [None] + na_str
+        else:
+            na_str = [None, na_str]
+    else:
+        na_str = [None]
 
     g = Graph(namespace_manager=manager)
 
@@ -108,6 +117,7 @@ if __name__ == "__main__":
                 include=inc,
                 exclude=exc,
                 log=True,
+                na_str=na_str,
                 levels=levels,
             ).connect(g)
 
@@ -119,6 +129,7 @@ if __name__ == "__main__":
                 exclude=exc,
                 log=True,
                 levels=levels,
+                na_str=na_str,
             ).connect(g)
 
     g.commit()  # just in case we missed anything

@@ -54,6 +54,7 @@ from src.nomenclature import (
 
 BARCODE_PAT = re.compile("A0\d{7}|\d+TOSU\d+|EPI_ISL_\d+")
 
+
 class Country(Token):
     typename = "country"
     class_predicate = P.country
@@ -62,7 +63,9 @@ class Country(Token):
         return country_to_code(text)
 
     @classmethod
-    def testOne(cls, item):
+    def testOne(cls, item, na_str=[None]):
+        if item in na_str:
+            return None
         return country_to_code(item)
 
     def as_uri(self):
@@ -89,7 +92,9 @@ class CountryOrState(Token):
         return location_to_country_code(text)
 
     @classmethod
-    def testOne(cls, item):
+    def testOne(cls, item, na_str=[None]):
+        if item in na_str:
+            return None
         return location_to_country_code(item)
 
     def as_uri(self):
@@ -106,7 +111,9 @@ class StateUSA(Token):
     parser = state_to_code
 
     @classmethod
-    def testOne(cls, item):
+    def testOne(cls, item, na_str=[None]):
+        if item in na_str:
+            return None
         return state_to_code(item)
 
     def object_of(self, g, uri):
@@ -192,6 +199,7 @@ class Barcode(StrainToken):
     def add_triples(self, g):
         if self.clean:
             g.add((self.as_uri(), P.barcode, self.as_literal()))
+
 
 class Strain(StrainToken):
     typename = "strain_name"
@@ -352,11 +360,13 @@ class SequenceToken(Token):
         return None
 
     @classmethod
-    def goodness(cls, items):
+    def goodness(cls, items, na_str=[None]):
         matches = [
-            bool((cls.testOne(item=x)) and len(str(x)) > 20) for x in rmNone(items)
+            bool(cls.testOne(item=x, na_str=na_str)) and len(str(x)) > 20
+            for x in items
+            if x in na_str
         ]
-        goodness = sum(matches) / len(matches)
+        goodness = sum(matches) / len(items)
         return goodness
 
 
