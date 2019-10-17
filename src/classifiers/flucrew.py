@@ -420,6 +420,11 @@ class H3Clade(Token):
     parser = p_h3_clade
 
 
+class US_Clade(Token):
+    typename = "us_clade"
+    parser = p_h1_clade ^ p_h3_clade
+
+
 class N1Clade(Token):
     typename = "n1_clade"
     parser = p_n1_clade
@@ -458,6 +463,7 @@ allClassifiers = OrderedDict(
             InternalGeneClade,
             H1Clade,
             H3Clade,
+            US_Clade,
             N1Clade,
             N2Clade,
             Dnaseq,
