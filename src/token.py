@@ -2,7 +2,9 @@ import parsec as p
 from src.nomenclature import make_property, make_literal, define_subproperty
 import rdflib
 import sys
+import re
 from src.util import rmNone
+from rdflib.namespace import XSD
 
 
 class Token:
@@ -114,6 +116,32 @@ class Unknown(Token):
     def testOne(cls, item, na_str=[None]):
         return item
 
+class Integer(Token):
+    typename = "integer"
+    parser = p.regex("[1-9]\\d*") ^ p.string("0")
+
+    def as_literal(self):
+        return rdflib.Literal(self.clean, datatype=XSD.integer)
+
+class Double(Token):
+    typename = "double"
+    parser = p.regex("0\\.\\d+") ^ p.regex("[1-9]\\d*\\.\\d+") ^ p.regex("[1-9]\\d*") ^ p.string("0")
+
+    def as_literal(self):
+        return rdflib.Literal(self.clean, XSD.double)
+
+class Boolean(Token):
+    typename = "float"
+    parser = p.regex("0|1|yes|no|true|false|y|n|t|f", flags=re.I)
+
+    def munge(self, text):
+        if text.lower() in ["1", "t", "true", "yes", "y"]:
+            return "true"
+        else:
+            return "false"
+
+    def as_literal(self):
+        return rdflib.Literal(self.clean, XSD.boolean)
 
 class Ignore(Token):
     typename = "ignore_me"

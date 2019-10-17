@@ -77,7 +77,7 @@ def load_influenza_na(g, filehandle) -> None:
                     flu.Subtype(els[3]),
                     flu.Country(els[4]),
                     flu.Date(els[5]),
-                    # skip 6
+                    tok.Integer(els[6].lower(), field_name="length"),
                     flu.Strain(extract_strain(els[7])),
                     # skip 8
                     # skip 9

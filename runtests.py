@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import src.classifiers.flucrew as ftok
+import src.token as tok
 from src.nomenclature import make_uri, make_usa_state_uri, make_country_uri, make_property
 from src.classes import HomoList, Phrase, Datum, Ragged
 from src.graph import showTriple
@@ -42,6 +43,34 @@ class TestMakeUri(unittest.TestCase):
         )
         self.assertEqual(make_country_uri("britain"), make_country_uri("UK"))
 
+class TestInteger(unittest.TestCase):
+    def test_Integer(self):
+        self.assertEqual(tok.Integer("1").clean, "1")
+        self.assertEqual(tok.Integer("0").clean, "0")
+        self.assertEqual(tok.Integer("12345678").clean, "12345678")
+        self.assertEqual(tok.Integer("12345678.0").clean, None)
+        self.assertEqual(tok.Integer("bogus").clean, None)
+
+class TestDouble(unittest.TestCase):
+    def test_Double(self):
+        self.assertEqual(tok.Double("1").clean, "1")
+        self.assertEqual(tok.Double("0").clean, "0")
+        self.assertEqual(tok.Double("12345678").clean, "12345678")
+        self.assertEqual(tok.Double("12345678.0").clean, "12345678.0")
+        self.assertEqual(tok.Double("bogus").clean, None)
+
+class TestBoolean(unittest.TestCase):
+    def test_Boolean(self):
+        self.assertEqual(tok.Boolean("1").clean, "true")
+        self.assertEqual(tok.Boolean("y").clean, "true")
+        self.assertEqual(tok.Boolean("t").clean, "true")
+        self.assertEqual(tok.Boolean("yeS").clean, "true")
+        self.assertEqual(tok.Boolean("tRuE").clean, "true")
+        self.assertEqual(tok.Boolean("0").clean, "false")
+        self.assertEqual(tok.Boolean("n").clean, "false")
+        self.assertEqual(tok.Boolean("nO").clean, "false")
+        self.assertEqual(tok.Boolean("faLse").clean, "false")
+        self.assertEqual(tok.Boolean("bogus").clean, None)
 
 class TestBarcode(unittest.TestCase):
     def test_Barcode(self):
