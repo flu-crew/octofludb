@@ -4,7 +4,7 @@
 Build a local SPARQL database.
 
 Usage:
-  d79 load_strains [<filename>]
+  d79 load_ivr [<filename>]
   d79 load_ird [<filename>]
   d79 tag [<filename>] [--tag=<tag>]
   d79 load_gbids [<filename>]
@@ -63,7 +63,7 @@ if __name__ == "__main__":
 
     g = Graph(namespace_manager=manager)
 
-    if args["load_strains"]:
+    if args["load_ivr"]:
         # load big table from IVR, with roughly the following format:
         # (gb | host | ? | subtype | date | ? | "Influenza A virus (<strain>(<subtype>))" | ...)
         recipe.load_influenza_na(g, filehandle)
