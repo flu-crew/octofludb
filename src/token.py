@@ -114,7 +114,10 @@ class Unknown(Token):
 
     @classmethod
     def testOne(cls, item, na_str=[None]):
-        return item
+        if item in na_str:
+            return None
+        else:
+            return item
 
 class Integer(Token):
     typename = "integer"

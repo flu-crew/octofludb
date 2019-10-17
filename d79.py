@@ -5,6 +5,7 @@ Build a local SPARQL database.
 
 Usage:
   d79 load_strains [<filename>]
+  d79 load_ird [<filename>]
   d79 tag [<filename>] [--tag=<tag>]
   d79 load_gbids [<filename>]
   d79 load_gbank [<filename>]
@@ -66,6 +67,9 @@ if __name__ == "__main__":
         # load big table from IVR, with roughly the following format:
         # (gb | host | ? | subtype | date | ? | "Influenza A virus (<strain>(<subtype>))" | ...)
         recipe.load_influenza_na(g, filehandle)
+
+    if args["load_ird"]:
+        recipe.load_ird(g, filehandle)
 
     if args["tag"]:
         taguri = make_tag_uri(tagstr)

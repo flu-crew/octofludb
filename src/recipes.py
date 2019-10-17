@@ -87,3 +87,31 @@ def load_influenza_na(g, filehandle) -> None:
         except IndexError:
             log(line)
             sys.exit(1)
+
+def load_ird(g, filehandle) -> None:
+    na_str = "-N/A-"
+    for line in tqdm(filehandle.readlines()):
+        els = line.split("\t")
+        try:
+            classes.Phrase(
+                [
+                    flu.SegmentNumber(els[0], na_str=na_str),
+                    # skip protein name
+                    flu.Genbank(els[2], field_name="genbank_id", na_str=na_str),
+                    # skip complete genome
+                    tok.Integer(els[4], field_name="length", na_str=na_str),
+                    flu.Subtype(els[5], na_str=na_str),
+                    flu.Date(els[6], na_str=na_str),
+                    flu.Unknown(els[7].replace("IRD:", "").lower(), field_name="host", na_str=na_str),
+                    flu.Country(els[8]),
+                    # ignore state - can parse it from strain name
+                    tok.Unknown(els[10], field_name="flu_season", na_str=na_str),
+                    flu.Strain(els[11], field_name="strain_name", na_str=na_str),
+                    # curation report - hard pass
+                    flu.US_Clade(els[13], field_name="us_clade", na_str=na_str),
+                    flu.GlobalClade(els[14], field_name="gl_clade", na_str=na_str),
+                ]
+            ).connect(g)
+        except IndexError:
+            log(line)
+            sys.exit(1)
