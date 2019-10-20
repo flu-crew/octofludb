@@ -3,6 +3,7 @@
 .mypy_cache/
 __pycache__/
 z.*
+z
 zz.*
 *.fna
 *.db/

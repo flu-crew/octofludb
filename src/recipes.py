@@ -1,5 +1,6 @@
 import sys
 from rdflib import Literal
+import pandas as pd
 import src.classes as classes
 import src.classifiers.flucrew as flu
 import src.token as tok
@@ -114,4 +115,49 @@ def load_ird(g, filehandle) -> None:
             ).connect(g)
         except IndexError:
             log(line)
+            sys.exit(1)
+
+def load_gis(g, filehandle) -> None:
+    fh = pd.read_excel(filehandle.name, sheet_name=0)
+    d = {c: [x for x in fh[c]] for c in fh}
+    epipat = re.compile(" |.*")
+    for i in range(len(d["Isolate_Id"])):
+        try:
+            epi_isl_id_tok = flu.Barcode(d["Isolate_Id"][i])
+            strain_tok = flu.Strain(d["Isolate_Name"][i])
+            host_tok = flu.Unknown(d["Host"][i].lower(), field_name="host")
+            try:
+                country_tok = flu.Country(d["Location"][i].split(" / ")[1])
+            except:
+                country_tok = flu.Country(None)
+            date_tok = flu.Date(d["Collection_Date"][i])
+            for segment in ("PB2", "PB1", "PA", "HA", "NP", "NA", "MP", "NS"):
+                segment_tok = flu.SegmentName(segment)
+                try:
+                    epi_ids = [re.sub(epipat, "", x) for x in d[segment + " Segment_Id"][i].split(",")]
+                except:
+                    continue
+                try:
+                    gbk_ids = d[segment + " INSDC_Upload"][i].split(",")
+                except:
+                    gbk_ids = [None]
+                for (epi_id, gbk_id) in zip(epi_ids, gbk_ids):
+                    classes.Phrase(
+                        [
+                            epi_isl_id_tok,
+                            flu.GisaidSeqid(epi_id),
+                            flu.Genbank(epi_id),
+                            strain_tok,
+                            segment_tok,
+                            host_tok,
+                            country_tok,
+                            date_tok,
+                        ]
+                    ).connect(g)
+        except IndexError:
+            log(line)
+            sys.exit(1)
+        except KeyError as e:
+            log("This does not appear to be a valid gisaid metadata file")
+            log(str(e))
             sys.exit(1)

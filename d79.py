@@ -6,6 +6,7 @@ Build a local SPARQL database.
 Usage:
   d79 load_ivr [<filename>]
   d79 load_ird [<filename>]
+  d79 load_gis [<filename>]
   d79 tag [<filename>] [--tag=<tag>]
   d79 load_gbids [<filename>]
   d79 load_gbank [<filename>]
@@ -70,6 +71,9 @@ if __name__ == "__main__":
 
     if args["load_ird"]:
         recipe.load_ird(g, filehandle)
+
+    if args["load_gis"]:
+        recipe.load_gis(g, filehandle)
 
     if args["tag"]:
         taguri = make_tag_uri(tagstr)
