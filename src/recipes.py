@@ -121,7 +121,7 @@ def load_gis(g, filehandle) -> None:
     fh = pd.read_excel(filehandle.name, sheet_name=0)
     d = {c: [x for x in fh[c]] for c in fh}
     epipat = re.compile(" |.*")
-    for i in range(len(d["Isolate_Id"])):
+    for i in tqdm(range(len(d["Isolate_Id"]))):
         try:
             epi_isl_id_tok = flu.Barcode(d["Isolate_Id"][i])
             strain_tok = flu.Strain(d["Isolate_Name"][i])
