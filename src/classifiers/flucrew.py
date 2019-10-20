@@ -181,8 +181,6 @@ class StrainToken(Token):
                 g.add((uri, P.sameAs, other.as_uri()))
             elif other.group == "segment":
                 g.add((uri, P.has_segment, other.as_uri()))
-                if other.typename == "genbank":
-                    g.add((uri, P.has_genbank, other.as_literal()))
             elif other.choose_field_name() in STRAIN_FIELDS:
                 other.object_of(g, uri)
             elif not use_segment:
@@ -289,7 +287,7 @@ class SegmentToken(Token):
                 and other.group == "segment"
                 and other.typename != self.typename
             ):
-                g.add(uri, P.sameAs, other.as_uri())
+                g.add((uri, P.sameAs, other.as_uri()))
             elif not other.choose_field_name() in STRAIN_FIELDS:
                 other.object_of(g, uri)
 
@@ -297,6 +295,9 @@ class SegmentToken(Token):
 class Genbank(SegmentToken):
     typename = "genbank"
     parser = p_gb
+
+    def choose_field_name(self):
+        return "genbank_id"
 
     def munge(self, text):
         return text.upper()
@@ -309,6 +310,9 @@ class Genbank(SegmentToken):
 class GisaidSeqid(SegmentToken):
     typename = "gisaid_seqid"
     parser = p_gisaid_seqid
+
+    def choose_field_name(self):
+        return "epi_id"
 
     def as_uri(self):
         return make_uri(self.clean)
