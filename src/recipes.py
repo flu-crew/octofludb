@@ -120,7 +120,7 @@ def load_ird(g, filehandle) -> None:
 def load_gis(g, filehandle) -> None:
     fh = pd.read_excel(filehandle.name, sheet_name=0)
     d = {c: [x for x in fh[c]] for c in fh}
-    epipat = re.compile(" |.*")
+    epipat = re.compile(" \|.*")
     for i in tqdm(range(len(d["Isolate_Id"]))):
         try:
             epi_isl_id_tok = flu.Barcode(d["Isolate_Id"][i])
@@ -146,7 +146,7 @@ def load_gis(g, filehandle) -> None:
                         [
                             epi_isl_id_tok,
                             flu.GisaidSeqid(epi_id),
-                            flu.Genbank(epi_id),
+                            flu.Genbank(gbk_id),
                             strain_tok,
                             segment_tok,
                             host_tok,
