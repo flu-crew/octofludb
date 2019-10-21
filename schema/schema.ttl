@@ -49,7 +49,7 @@ f:ns1 rdfs:subPropertyOf f:internalGene .
 # having strain as a domain, since they could be used in other contexts.
 f:strain_name    rdfs:domain f:Strain .
 f:barcode        rdfs:domain f:Strain .
-f:gisaid_isolate rdfs:domain f:Strain .
+f:epi_isolate rdfs:domain f:Strain .
 f:subtype        rdfs:domain f:Strain .
 f:constellation  rdfs:domain f:Strain .
 
@@ -83,10 +83,10 @@ f:proseq rdfs:domain f:ProteinSequence .
 f:dnaseq rdfs:domain f:NucleotideSequence .
 # IDs used uniquely to identify sequences
 f:genbank_id rdfs:range f:Sequence .
-f:gisaid_seqid rdfs:range f:Sequence .
+f:epi_id rdfs:range f:Sequence .
 
 f:genbank_id rdfs:subPropertyOf f:seqid .
-f:gisaid_seqid rdfs:subPropertyOf f:seqid .
+f:epi_id rdfs:subPropertyOf f:seqid .
 
 f:has_feature rdfs:range f:Feature .
 f:has_segment rdfs:subPropertyOf f:has_part .
@@ -99,7 +99,7 @@ f:world          rdfs:comment "(property) a world" .
 f:date           rdfs:comment "(property) a date" .
 f:dna_sequence   rdfs:comment "(property) link to DNA sequence" .
 f:gene           rdfs:comment "(property) the name of the primary gene on a segment" .
-f:gisaid_isolate rdfs:comment "(property) the GISAID isolate id for a strain" .
+f:epi_isolate    rdfs:comment "(property) the epi flu id for a strain" .
 f:global_clade   rdfs:comment "(property) the global clade for a strain" .
 f:ha_clade       rdfs:comment "(property) the HA clade for a strain" .
 f:has_segment    rdfs:comment "(property) link from a strain to a segment" .

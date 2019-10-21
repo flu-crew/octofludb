@@ -263,19 +263,19 @@ class TestGenbank(unittest.TestCase):
         self.assertEqual(ftok.Genbank("bogus").clean, None)
 
 
-class TestGisaidSeqid(unittest.TestCase):
-    def test_GisaidSeqid(self):
+class TestEpiSeqid(unittest.TestCase):
+    def test_EpiSeqid(self):
         # no upper bound on integers
         self.assertEqual(
-            ftok.GisaidSeqid("EPI_1234567890123").clean, "EPI1234567890123"
+            ftok.EpiSeqid("EPI_1234567890123").clean, "EPI1234567890123"
         )
         # underscore optional
-        self.assertEqual(ftok.GisaidSeqid("EPI1234567890123").clean, "EPI1234567890123")
+        self.assertEqual(ftok.EpiSeqid("EPI1234567890123").clean, "EPI1234567890123")
         # but at least 3
-        self.assertEqual(ftok.GisaidSeqid("EPI_123").clean, "EPI123")
+        self.assertEqual(ftok.EpiSeqid("EPI_123").clean, "EPI123")
         # currently I don't allow fewer than 2 numbers
-        self.assertEqual(ftok.GisaidSeqid("EPI_12").clean, None)
-        self.assertEqual(ftok.GisaidSeqid("bogus").clean, None)
+        self.assertEqual(ftok.EpiSeqid("EPI_12").clean, None)
+        self.assertEqual(ftok.EpiSeqid("bogus").clean, None)
 
 
 class TestGlobalClade(unittest.TestCase):

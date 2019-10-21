@@ -126,6 +126,7 @@ def load_gis(g, filehandle) -> None:
             epi_isl_id_tok = flu.Barcode(d["Isolate_Id"][i])
             strain_tok = flu.Strain(d["Isolate_Name"][i])
             host_tok = flu.Unknown(d["Host"][i].lower(), field_name="host")
+            lineage_tok = tok.Unknown(d["Lineage"][i], field_name="lineage")
             try:
                 country_tok = flu.Country(d["Location"][i].split(" / ")[1])
             except:
@@ -145,10 +146,11 @@ def load_gis(g, filehandle) -> None:
                     classes.Phrase(
                         [
                             epi_isl_id_tok,
-                            flu.GisaidSeqid(epi_id),
+                            flu.EpiSeqid(epi_id),
                             flu.Genbank(gbk_id),
                             strain_tok,
                             segment_tok,
+                            lineage_tok,
                             host_tok,
                             country_tok,
                             date_tok,

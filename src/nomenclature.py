@@ -141,11 +141,11 @@ class P:
     bitscore = nt.bitscore
     # labels for sequences
     gb = nt.genbank_id
-    gisaid_seqid = nt.gisaid_seqid
+    epi_id = nt.epi_id
     # labels for strains
     strain_name = nt.strain_name
     barcode = nt.barcode
-    gisaid_isolate = nt.gisaid_isolate
+    epi_isolate = nt.epi_isolate
     has_segment = nt.has_segment
     # the local curated data
     ref_reason = nt.ref_reason

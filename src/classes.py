@@ -211,7 +211,8 @@ class Table(ParsedPhraseList):
 
     def parse(self, filehandle):
         """
-        Make a dictionary with column name as key and list of strings as value. Currently only Excel is supported.
+        Make a dictionary with column name as key and list of strings as value.
+        Currently only Excel is supported.
         """
         try:
             data = self._parse_excel(filehandle)
@@ -273,7 +274,8 @@ class Ragged(ParsedPhraseList):
 
     def _parse_fasta(self, filehandle, sep="|"):
         """
-        Parse a fasta file. The header is split into fields on 'sep'. The sequence is added as a final field.
+        Parse a fasta file. The header is split into fields on 'sep'. The
+        sequence is added as a final field.
         """
         p_header = parsec.string(">") >> parsec.regex(".*") << parsec.spaces()
         p_seq = (

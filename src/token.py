@@ -92,7 +92,7 @@ class Token:
 
     @classmethod
     def goodness(cls, items, na_str=[None]):
-        matches = [(cls.testOne(item=x, na_str=[None]) != None) for x in items if x not in na_str]
+        matches = [(cls.testOne(item=x, na_str=na_str) != None) for x in items if x not in na_str]
         if len(matches) > 0:
             return sum(matches) / len(matches)
         else:

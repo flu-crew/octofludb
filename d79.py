@@ -131,7 +131,7 @@ if __name__ == "__main__":
 
         if args["load_fasta"]:
             classes.Ragged(
-                filehandle,
+                filehandle=filehandle,
                 tag=tagstr,
                 include=inc,
                 exclude=exc,

@@ -10,10 +10,10 @@ from src.domain.identifier import (
     p_global_clade,
     p_A0,
     p_tosu,
-    p_gisaid_isolate,
+    p_epi_isolate,
     p_strain,
     p_gb,
-    p_gisaid_seqid,
+    p_epi_id,
 )
 
 from src.domain.flu import (
@@ -189,7 +189,7 @@ class StrainToken(Token):
 
 class Barcode(StrainToken):
     typename = "barcode"
-    parser = p_tosu ^ p_A0 ^ p_gisaid_isolate
+    parser = p_tosu ^ p_A0 ^ p_epi_isolate
 
     def munge(self, text):
         return text.upper()
@@ -293,11 +293,8 @@ class SegmentToken(Token):
 
 
 class Genbank(SegmentToken):
-    typename = "genbank"
+    typename = "genbank_id"
     parser = p_gb
-
-    def choose_field_name(self):
-        return "genbank_id"
 
     def munge(self, text):
         return text.upper()
@@ -307,12 +304,9 @@ class Genbank(SegmentToken):
             g.add((self.as_uri(), P.gb, self.as_literal()))
 
 
-class GisaidSeqid(SegmentToken):
-    typename = "gisaid_seqid"
-    parser = p_gisaid_seqid
-
-    def choose_field_name(self):
-        return "epi_id"
+class EpiSeqid(SegmentToken):
+    typename = "epi_id"
+    parser = p_epi_id
 
     def as_uri(self):
         return make_uri(self.clean)
@@ -322,7 +316,7 @@ class GisaidSeqid(SegmentToken):
 
     def add_triples(self, g):
         if self.clean:
-            g.add((self.as_uri(), P.gisaid_seqid, self.as_literal()))
+            g.add((self.as_uri(), P.epi_id, self.as_literal()))
 
 
 # --- segment attributes ---
@@ -368,7 +362,7 @@ class SequenceToken(Token):
         matches = [
             bool(cls.testOne(item=x, na_str=na_str)) and len(str(x)) > 20
             for x in items
-            if x in na_str
+            if x not in na_str
         ]
         goodness = sum(matches) / len(items)
         return goodness
@@ -453,7 +447,7 @@ allClassifiers = OrderedDict(
             Constellation,
             Country,
             Date,
-            GisaidSeqid,
+            EpiSeqid,
             GlobalClade,
             Subtype,
             HA,
