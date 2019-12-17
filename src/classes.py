@@ -277,10 +277,10 @@ class Ragged(ParsedPhraseList):
         Parse a fasta file. The header is split into fields on 'sep'. The
         sequence is added as a final field.
         """
-        p_header = parsec.string(">") >> parsec.regex(".*") << parsec.spaces()
+        p_header = parsec.string(">") >> parsec.regex("[^\n\r]*") << parsec.spaces()
         p_seq = (
             parsec.sepBy1(
-                parsec.regex("[^>\n]*"), sep=parsec.regex("[\r\n\t ]+")
+                parsec.regex("[^>\n\r]*"), sep=parsec.regex("[\r\n\t ]+")
             ).parsecmap(concat)
             << parsec.spaces()
         )

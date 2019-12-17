@@ -575,6 +575,16 @@ class TestFasta(unittest.TestCase):
             ],
         )
 
+    def test_fasta_carriage(self):
+        g1 = set()
+        x1 = Ragged(">baz\nATGG\n>foo||z\nATGGG", na_str=[None])
+        x1.connect(g1)
+        s1 = sorted([(str(s), str(p), str(o)) for s, p, o in g1])
+        g2 = set()
+        x2 = Ragged(">baz\nATGG\n>foo||z\nATGGG", na_str=[None])
+        x2.connect(g2)
+        s2 = sorted([(str(s), str(p), str(o)) for s, p, o in g2])
+        self.assertEqual(s1, s2)
 
 if __name__ == "__main__":
     unittest.main()
