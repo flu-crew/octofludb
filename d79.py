@@ -31,7 +31,7 @@ if __name__ == "__main__":
     if os.name is "posix":
         signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 
-    args = docopt(__doc__, version="build.sh 0.0.1")
+    args = docopt(__doc__, version="d79 0.2.0")
     tagstr = args["--tag"]
 
     # Place imports here so they only load after successful parsing of the arguments.
