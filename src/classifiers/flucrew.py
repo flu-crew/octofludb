@@ -364,7 +364,10 @@ class SequenceToken(Token):
             for x in items
             if x not in na_str
         ]
-        goodness = sum(matches) / len(items)
+        if len(items) > 0:
+            goodness = sum(matches) / len(items)
+        else:
+            goodness = 0
         return goodness
 
 
