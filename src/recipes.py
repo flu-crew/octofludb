@@ -89,6 +89,7 @@ def load_influenza_na(g, filehandle) -> None:
             log(line)
             sys.exit(1)
 
+
 def load_ird(g, filehandle) -> None:
     na_str = "-N/A-"
     for line in tqdm(filehandle.readlines()):
@@ -103,7 +104,11 @@ def load_ird(g, filehandle) -> None:
                     tok.Integer(els[4], field_name="length", na_str=na_str),
                     flu.Subtype(els[5], na_str=na_str),
                     flu.Date(els[6], na_str=na_str),
-                    flu.Unknown(els[7].replace("IRD:", "").lower(), field_name="host", na_str=na_str),
+                    flu.Unknown(
+                        els[7].replace("IRD:", "").lower(),
+                        field_name="host",
+                        na_str=na_str,
+                    ),
                     flu.Country(els[8]),
                     # ignore state - can parse it from strain name
                     tok.Unknown(els[10], field_name="flu_season", na_str=na_str),
@@ -117,25 +122,35 @@ def load_ird(g, filehandle) -> None:
             log(line)
             sys.exit(1)
 
+
 def load_gis(g, filehandle) -> None:
     fh = pd.read_excel(filehandle.name, sheet_name=0)
     d = {c: [x for x in fh[c]] for c in fh}
-    epipat = re.compile(" \|.*")
+    epipat = re.compile(" *\|.*")
     for i in tqdm(range(len(d["Isolate_Id"]))):
         try:
             epi_isl_id_tok = flu.Barcode(d["Isolate_Id"][i])
             strain_tok = flu.Strain(d["Isolate_Name"][i])
             host_tok = flu.Unknown(d["Host"][i].lower(), field_name="host")
-            lineage_tok = tok.Unknown(d["Lineage"][i], field_name="lineage")
+            subtype_tok = flu.Subtype(d["Subtype"][i])
+            lineage_tok = tok.Unknown(
+                d["Lineage"][i], field_name="lineage", na_str=["", None]
+            )
             try:
                 country_tok = flu.Country(d["Location"][i].split(" / ")[1])
             except:
                 country_tok = flu.Country(None)
             date_tok = flu.Date(d["Collection_Date"][i])
+            submission_date_tok = flu.Date(
+                d["Collection_Date"][i], field_name="submission_date"
+            )
             for segment in ("PB2", "PB1", "PA", "HA", "NP", "NA", "MP", "NS"):
                 segment_tok = flu.SegmentName(segment)
                 try:
-                    epi_ids = [re.sub(epipat, "", x) for x in d[segment + " Segment_Id"][i].split(",")]
+                    epi_ids = [
+                        re.sub(epipat, "", x)
+                        for x in d[segment + " Segment_Id"][i].split(",")
+                    ]
                 except:
                     continue
                 try:
@@ -150,10 +165,12 @@ def load_gis(g, filehandle) -> None:
                             flu.Genbank(gbk_id),
                             strain_tok,
                             segment_tok,
+                            subtype_tok,
                             lineage_tok,
                             host_tok,
                             country_tok,
                             date_tok,
+                            submission_date_tok,
                         ]
                     ).connect(g)
         except IndexError:

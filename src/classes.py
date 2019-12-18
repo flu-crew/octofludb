@@ -97,6 +97,20 @@ class Datum(Interpreter):
         return str(self.data.clean)
 
 
+def addTag(g, tag, filehandle):
+    """
+    Add tag info to the triple set and return the tag URI
+    """
+    if tag:
+        taguri = make_tag_uri(tag)
+        g.add((taguri, P.name, Literal(tag)))
+        g.add((taguri, P.time, Literal(datetime.datetime.now())))
+        g.add((taguri, P.file, Literal(file_str(filehandle))))
+    else:
+        taguri = None
+    return taguri
+
+
 class HomoList(Interpreter):
     """
     Interpret a list of items assumed to be of the same type
@@ -112,6 +126,7 @@ class HomoList(Interpreter):
         return [c(x, field_name=self.field_name, na_str=self.na_str) for x in data]
 
     def connect(self, g):
+        addTag(g, tag=self.tag, filehandle=filehandle)
         for token in self.data:
             if token.clean is None:
                 continue
@@ -149,16 +164,8 @@ class ParsedPhraseList(Interpreter):
         raise NotImplementedError
 
     def connect(self, g):
-        log("Building ontology")
-
-        if self.tag:
-            taguri = make_tag_uri(self.tag)
-            g.add((taguri, P.name, Literal(self.tag)))
-            g.add((taguri, P.time, Literal(datetime.datetime.now())))
-            g.add((taguri, P.file, Literal(file_str(self.filehandle))))
-        else:
-            taguri = None
-
+        log("Making triples")
+        taguri = addTag(g, tag=self.tag, filehandle=self.filehandle)
         for (i, phrase) in enumerate(tqdm(self.data)):
             phrase.connect(g, taguri=taguri)
 
@@ -257,7 +264,9 @@ class Ragged(ParsedPhraseList):
             N = len(data[0])
             log(f"Applying column type inference (all headers have {N-1} fields)")
             tabular_data = [[row[i] for row in data] for i in range(N)]
-            return headlessTabularTyping(tabular_data, levels=self.levels, na_str=self.na_str)
+            return headlessTabularTyping(
+                tabular_data, levels=self.levels, na_str=self.na_str
+            )
         else:
             return [
                 Phrase(

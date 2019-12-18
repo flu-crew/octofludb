@@ -3,7 +3,8 @@ from src.nomenclature import make_property, make_literal, define_subproperty
 import rdflib
 import sys
 import re
-from src.util import rmNone
+import math
+from src.util import rmNone, log
 from rdflib.namespace import XSD
 
 
@@ -92,7 +93,11 @@ class Token:
 
     @classmethod
     def goodness(cls, items, na_str=[None]):
-        matches = [(cls.testOne(item=x, na_str=na_str) != None) for x in items if x not in na_str]
+        matches = [
+            (cls.testOne(item=x, na_str=na_str) != None)
+            for x in items
+            if x not in na_str
+        ]
         if len(matches) > 0:
             return sum(matches) / len(matches)
         else:
@@ -114,10 +119,16 @@ class Unknown(Token):
 
     @classmethod
     def testOne(cls, item, na_str=[None]):
+        try:
+            if math.isnan(item):
+                return None
+        except TypeError:
+            pass
         if item in na_str:
             return None
         else:
             return item
+
 
 class Integer(Token):
     typename = "integer"
@@ -126,12 +137,19 @@ class Integer(Token):
     def as_literal(self):
         return rdflib.Literal(self.clean, datatype=XSD.integer)
 
+
 class Double(Token):
     typename = "double"
-    parser = p.regex("0\\.\\d+") ^ p.regex("[1-9]\\d*\\.\\d+") ^ p.regex("[1-9]\\d*") ^ p.string("0")
+    parser = (
+        p.regex("0\\.\\d+")
+        ^ p.regex("[1-9]\\d*\\.\\d+")
+        ^ p.regex("[1-9]\\d*")
+        ^ p.string("0")
+    )
 
     def as_literal(self):
         return rdflib.Literal(self.clean, XSD.double)
+
 
 class Boolean(Token):
     typename = "float"
@@ -145,6 +163,7 @@ class Boolean(Token):
 
     def as_literal(self):
         return rdflib.Literal(self.clean, XSD.boolean)
+
 
 class Ignore(Token):
     typename = "ignore_me"
