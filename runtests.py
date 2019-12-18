@@ -304,6 +304,10 @@ class TestSubtype(unittest.TestCase):
         self.assertEqual(ftok.Subtype("H1N1v").clean, "H1N1v")
         # no lower
         self.assertEqual(ftok.Subtype("h1n1").clean, None)
+        # allow type
+        self.assertEqual(ftok.Subtype("A / H1N1").clean, "H1N1")
+        self.assertEqual(ftok.Subtype("A/H1N1").clean, "H1N1")
+        # die correctly on bad input
         self.assertEqual(ftok.Subtype("bogus").clean, None)
 
 

@@ -15,7 +15,7 @@ p_m = p.regex("MP?").parsecmap(lambda x: mapreplace(x, "MP", "M"))
 p_internal_gene = p.regex("PB2|PB1|PA|NP") ^ p_ns ^ p_m
 
 p_segment = p_internal_gene ^ p_HA ^ p_NA ^ p.string("HA") ^ p.string("NA")
-p_subtype = p.regex("H\d+N\d+(v)?")
+p_subtype = p.regex("(A *\/ *)?") >> p.regex("H\d+N\d+(v)?")
 p_constellation = p.regex("[TPVH-]{6}")
 p_segment_number = p.regex("[1-8]")
 
