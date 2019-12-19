@@ -142,7 +142,7 @@ def load_gis(g, filehandle) -> None:
                 country_tok = flu.Country(None)
             date_tok = flu.Date(d["Collection_Date"][i])
             submission_date_tok = flu.Date(
-                d["Collection_Date"][i], field_name="submission_date"
+                d["Submission_Date"][i], field_name="submission_date"
             )
             for segment in ("PB2", "PB1", "PA", "HA", "NP", "NA", "MP", "NS"):
                 segment_tok = flu.SegmentName(segment)

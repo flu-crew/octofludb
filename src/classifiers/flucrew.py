@@ -143,6 +143,7 @@ class Host(Token):
 
 STRAIN_FIELDS = {
     "date",
+    "submission_date",
     "country",
     "state",
     "host",

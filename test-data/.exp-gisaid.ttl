@@ -23,6 +23,7 @@ f:submission_date rdfs:subPropertyOf f:date .
         fid:epi744029 ;
     f:host "swine" ;
     f:strain_name "A/swine/Bac_Ninh/12-01-3/2015" ;
+    f:submission_date "2016-04-26"^^xsd:date ;
     f:subtype "H1N1" .
 
 <https://flu-crew.org/id/a%2Fswine%2Fiowa%2Fa02478617%2F2019> ns1:sameAs fid:a02478617,
@@ -36,6 +37,7 @@ f:submission_date rdfs:subPropertyOf f:date .
     f:host "swine" ;
     f:state usa:IA ;
     f:strain_name "A/swine/Iowa/A02478617/2019" ;
+    f:submission_date "2019-09-11"^^xsd:date ;
     f:subtype "H3N2" .
 
 <https://flu-crew.org/id/a%2Fswine%2Fminnesota%2Fa02245227%2F2019> ns1:sameAs fid:a02245227,
@@ -49,6 +51,7 @@ f:submission_date rdfs:subPropertyOf f:date .
     f:host "swine" ;
     f:state usa:MN ;
     f:strain_name "A/swine/Minnesota/A02245227/2019" ;
+    f:submission_date "2019-09-12"^^xsd:date ;
     f:subtype "H1N1" .
 
 <https://flu-crew.org/id/a%2Fswine%2Fvirginia%2Fa02478581%2F2019> ns1:sameAs fid:a02478581,
@@ -74,6 +77,7 @@ f:submission_date rdfs:subPropertyOf f:date .
     f:host "swine" ;
     f:state usa:VA ;
     f:strain_name "A/swine/Virginia/A02478581/2019" ;
+    f:submission_date "2019-09-11"^^xsd:date ;
     f:subtype "H3N2" .
 
 fid:a02245227 f:barcode "A02245227" .
@@ -95,6 +99,7 @@ fid:epi_isl_218508 ns1:sameAs <https://flu-crew.org/id/a%2Fswine%2Fbac_ninh%2F12
         fid:epi744028,
         fid:epi744029 ;
     f:host "swine" ;
+    f:submission_date "2016-04-26"^^xsd:date ;
     f:subtype "H1N1" .
 
 fid:epi_isl_393493 ns1:sameAs <https://flu-crew.org/id/a%2Fswine%2Fiowa%2Fa02478617%2F2019> ;
@@ -106,6 +111,7 @@ fid:epi_isl_393493 ns1:sameAs <https://flu-crew.org/id/a%2Fswine%2Fiowa%2Fa02478
         fid:mn436834,
         fid:mn436835 ;
     f:host "swine" ;
+    f:submission_date "2019-09-11"^^xsd:date ;
     f:subtype "H3N2" .
 
 fid:epi_isl_393494 ns1:sameAs <https://flu-crew.org/id/a%2Fswine%2Fvirginia%2Fa02478581%2F2019> ;
@@ -129,6 +135,7 @@ fid:epi_isl_393494 ns1:sameAs <https://flu-crew.org/id/a%2Fswine%2Fvirginia%2Fa0
         fid:mn436842,
         fid:mn436843 ;
     f:host "swine" ;
+    f:submission_date "2019-09-11"^^xsd:date ;
     f:subtype "H3N2" .
 
 fid:epi_isl_393495 ns1:sameAs <https://flu-crew.org/id/a%2Fswine%2Fminnesota%2Fa02245227%2F2019> ;
@@ -140,165 +147,134 @@ fid:epi_isl_393495 ns1:sameAs <https://flu-crew.org/id/a%2Fswine%2Fminnesota%2Fa
         fid:mn447202,
         fid:mn447203 ;
     f:host "swine" ;
+    f:submission_date "2019-09-12"^^xsd:date ;
     f:subtype "H1N1" .
 
 fid:epi744022 f:epi_id "EPI744022" ;
     f:lineage "pdm09" ;
-    f:segment_name "NP" ;
-    f:submission_date "2015-12-07"^^xsd:date .
+    f:segment_name "NP" .
 
 fid:epi744023 f:epi_id "EPI744023" ;
     f:lineage "pdm09" ;
-    f:segment_name "NS" ;
-    f:submission_date "2015-12-07"^^xsd:date .
+    f:segment_name "NS" .
 
 fid:epi744024 f:epi_id "EPI744024" ;
     f:lineage "pdm09" ;
-    f:segment_name "M" ;
-    f:submission_date "2015-12-07"^^xsd:date .
+    f:segment_name "M" .
 
 fid:epi744025 f:epi_id "EPI744025" ;
     f:lineage "pdm09" ;
-    f:segment_name "PA" ;
-    f:submission_date "2015-12-07"^^xsd:date .
+    f:segment_name "PA" .
 
 fid:epi744026 f:epi_id "EPI744026" ;
     f:lineage "pdm09" ;
-    f:segment_name "PB2" ;
-    f:submission_date "2015-12-07"^^xsd:date .
+    f:segment_name "PB2" .
 
 fid:epi744027 f:epi_id "EPI744027" ;
     f:lineage "pdm09" ;
-    f:segment_name "PB1" ;
-    f:submission_date "2015-12-07"^^xsd:date .
+    f:segment_name "PB1" .
 
 fid:epi744028 f:epi_id "EPI744028" ;
     f:lineage "pdm09" ;
-    f:segment_name "NA" ;
-    f:submission_date "2015-12-07"^^xsd:date .
+    f:segment_name "NA" .
 
 fid:epi744029 f:epi_id "EPI744029" ;
     f:lineage "pdm09" ;
-    f:segment_name "HA" ;
-    f:submission_date "2015-12-07"^^xsd:date .
+    f:segment_name "HA" .
 
 fid:epi1601841 ns1:sameAs fid:mn436834 ;
     f:epi_id "EPI1601841" ;
-    f:segment_name "HA" ;
-    f:submission_date "2019-08-19"^^xsd:date .
+    f:segment_name "HA" .
 
 fid:epi1601842 ns1:sameAs fid:mn436835 ;
     f:epi_id "EPI1601842" ;
-    f:segment_name "NA" ;
-    f:submission_date "2019-08-19"^^xsd:date .
+    f:segment_name "NA" .
 
 fid:epi1601843 ns1:sameAs fid:mn436836 ;
     f:epi_id "EPI1601843" ;
-    f:segment_name "PB2" ;
-    f:submission_date "2019-04-22"^^xsd:date .
+    f:segment_name "PB2" .
 
 fid:epi1601844 ns1:sameAs fid:mn436837 ;
     f:epi_id "EPI1601844" ;
-    f:segment_name "PB1" ;
-    f:submission_date "2019-04-22"^^xsd:date .
+    f:segment_name "PB1" .
 
 fid:epi1601845 ns1:sameAs fid:mn436838 ;
     f:epi_id "EPI1601845" ;
-    f:segment_name "PA" ;
-    f:submission_date "2019-04-22"^^xsd:date .
+    f:segment_name "PA" .
 
 fid:epi1601846 ns1:sameAs fid:mn436839 ;
     f:epi_id "EPI1601846" ;
-    f:segment_name "HA" ;
-    f:submission_date "2019-04-22"^^xsd:date .
+    f:segment_name "HA" .
 
 fid:epi1601847 ns1:sameAs fid:mn436840 ;
     f:epi_id "EPI1601847" ;
-    f:segment_name "NP" ;
-    f:submission_date "2019-04-22"^^xsd:date .
+    f:segment_name "NP" .
 
 fid:epi1601848 ns1:sameAs fid:mn436841 ;
     f:epi_id "EPI1601848" ;
-    f:segment_name "NA" ;
-    f:submission_date "2019-04-22"^^xsd:date .
+    f:segment_name "NA" .
 
 fid:epi1601849 ns1:sameAs fid:mn436842 ;
     f:epi_id "EPI1601849" ;
-    f:segment_name "M" ;
-    f:submission_date "2019-04-22"^^xsd:date .
+    f:segment_name "M" .
 
 fid:epi1601850 ns1:sameAs fid:mn436843 ;
     f:epi_id "EPI1601850" ;
-    f:segment_name "NS" ;
-    f:submission_date "2019-04-22"^^xsd:date .
+    f:segment_name "NS" .
 
 fid:epi1601851 ns1:sameAs fid:mn447202 ;
     f:epi_id "EPI1601851" ;
-    f:segment_name "HA" ;
-    f:submission_date "2019-08-28"^^xsd:date .
+    f:segment_name "HA" .
 
 fid:epi1601852 ns1:sameAs fid:mn447203 ;
     f:epi_id "EPI1601852" ;
-    f:segment_name "NA" ;
-    f:submission_date "2019-08-28"^^xsd:date .
+    f:segment_name "NA" .
 
 fid:mn436834 ns1:sameAs fid:epi1601841 ;
     f:genbank_id "MN436834" ;
-    f:segment_name "HA" ;
-    f:submission_date "2019-08-19"^^xsd:date .
+    f:segment_name "HA" .
 
 fid:mn436835 ns1:sameAs fid:epi1601842 ;
     f:genbank_id "MN436835" ;
-    f:segment_name "NA" ;
-    f:submission_date "2019-08-19"^^xsd:date .
+    f:segment_name "NA" .
 
 fid:mn436836 ns1:sameAs fid:epi1601843 ;
     f:genbank_id "MN436836" ;
-    f:segment_name "PB2" ;
-    f:submission_date "2019-04-22"^^xsd:date .
+    f:segment_name "PB2" .
 
 fid:mn436837 ns1:sameAs fid:epi1601844 ;
     f:genbank_id "MN436837" ;
-    f:segment_name "PB1" ;
-    f:submission_date "2019-04-22"^^xsd:date .
+    f:segment_name "PB1" .
 
 fid:mn436838 ns1:sameAs fid:epi1601845 ;
     f:genbank_id "MN436838" ;
-    f:segment_name "PA" ;
-    f:submission_date "2019-04-22"^^xsd:date .
+    f:segment_name "PA" .
 
 fid:mn436839 ns1:sameAs fid:epi1601846 ;
     f:genbank_id "MN436839" ;
-    f:segment_name "HA" ;
-    f:submission_date "2019-04-22"^^xsd:date .
+    f:segment_name "HA" .
 
 fid:mn436840 ns1:sameAs fid:epi1601847 ;
     f:genbank_id "MN436840" ;
-    f:segment_name "NP" ;
-    f:submission_date "2019-04-22"^^xsd:date .
+    f:segment_name "NP" .
 
 fid:mn436841 ns1:sameAs fid:epi1601848 ;
     f:genbank_id "MN436841" ;
-    f:segment_name "NA" ;
-    f:submission_date "2019-04-22"^^xsd:date .
+    f:segment_name "NA" .
 
 fid:mn436842 ns1:sameAs fid:epi1601849 ;
     f:genbank_id "MN436842" ;
-    f:segment_name "M" ;
-    f:submission_date "2019-04-22"^^xsd:date .
+    f:segment_name "M" .
 
 fid:mn436843 ns1:sameAs fid:epi1601850 ;
     f:genbank_id "MN436843" ;
-    f:segment_name "NS" ;
-    f:submission_date "2019-04-22"^^xsd:date .
+    f:segment_name "NS" .
 
 fid:mn447202 ns1:sameAs fid:epi1601851 ;
     f:genbank_id "MN447202" ;
-    f:segment_name "HA" ;
-    f:submission_date "2019-08-28"^^xsd:date .
+    f:segment_name "HA" .
 
 fid:mn447203 ns1:sameAs fid:epi1601852 ;
     f:genbank_id "MN447203" ;
-    f:segment_name "NA" ;
-    f:submission_date "2019-08-28"^^xsd:date .
+    f:segment_name "NA" .
 
