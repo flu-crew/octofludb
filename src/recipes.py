@@ -4,6 +4,8 @@ import pandas as pd
 import src.classes as classes
 import src.classifiers.flucrew as flu
 import src.token as tok
+import src.domain.identifier as identifier
+import parsec
 from src.nomenclature import P, O, make_uri, make_tag_uri
 from src.util import log, file_str
 import re
@@ -130,8 +132,14 @@ def load_gis(g, filehandle) -> None:
     for i in tqdm(range(len(d["Isolate_Id"]))):
         try:
             epi_isl_id_tok = flu.Barcode(d["Isolate_Id"][i])
-            strain_tok = flu.Strain(d["Isolate_Name"][i])
-            host_tok = flu.Unknown(d["Host"][i].lower(), field_name="host")
+
+            # remove the parenthesized garbage following the strain name
+            strain_clean = identifier.p_strain.parse(d["Isolate_Name"][i])
+            strain_tok = flu.Strain(strain_clean)
+            # and keep the full strain name, even if ugly
+            full_strain_name_tok = flu.Unknown(d["Isolate_Name"][i], field_name="gisaid_strain_name")
+
+            host_tok = flu.Host(d["Host"][i], field_name="host")
             subtype_tok = flu.Subtype(d["Subtype"][i])
             lineage_tok = tok.Unknown(
                 d["Lineage"][i], field_name="lineage", na_str=["", None]
@@ -140,10 +148,13 @@ def load_gis(g, filehandle) -> None:
                 country_tok = flu.Country(d["Location"][i].split(" / ")[1])
             except:
                 country_tok = flu.Country(None)
-            date_tok = flu.Date(d["Collection_Date"][i])
-            submission_date_tok = flu.Date(
-                d["Submission_Date"][i], field_name="submission_date"
-            )
+            date_tok = flu.Date(d["Collection_Date"][i], field_name="collection_date")
+            try:
+                submission_date_tok = flu.Date(
+                    d["Submission_Date"][i], field_name="submission_date"
+                )
+            except:
+                submission_date_tok = flu.Date(None, field_name="submission_date")
             for segment in ("PB2", "PB1", "PA", "HA", "NP", "NA", "MP", "NS"):
                 segment_tok = flu.SegmentName(segment)
                 try:
@@ -164,6 +175,7 @@ def load_gis(g, filehandle) -> None:
                             flu.EpiSeqid(epi_id),
                             flu.Genbank(gbk_id),
                             strain_tok,
+                            full_strain_name_tok,
                             segment_tok,
                             subtype_tok,
                             lineage_tok,
@@ -174,9 +186,15 @@ def load_gis(g, filehandle) -> None:
                         ]
                     ).connect(g)
         except IndexError:
-            log(line)
+            log("Bad line - index error")
+            for name,col in d.items(): 
+              log(name + " : " + str(col[i]))
             sys.exit(1)
         except KeyError as e:
             log("This does not appear to be a valid gisaid metadata file")
             log(str(e))
             sys.exit(1)
+        except:
+            log("Bad line - other error")
+            for name,col in d.items(): 
+              log(name + " : " + str(col[i]))

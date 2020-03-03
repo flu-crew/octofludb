@@ -292,6 +292,30 @@ class TestGlobalClade(unittest.TestCase):
         self.assertEqual(ftok.GlobalClade("1A.1.2.34.234").clean, "1A.1.2.34.234")
         # but not 5
         self.assertEqual(ftok.GlobalClade("1A.1.2.34.234.3").clean, None)
+        # current octoflu strain names
+        self.assertEqual(ftok.GlobalClade("1A.1").clean, "1A.1")
+        self.assertEqual(ftok.GlobalClade("1A.1.1").clean, "1A.1.1")
+        self.assertEqual(ftok.GlobalClade("1A.2").clean, "1A.2")
+        self.assertEqual(ftok.GlobalClade("1A.2-3-like").clean, "1A.2-3-like")
+        self.assertEqual(ftok.GlobalClade("1A.3.1").clean, "1A.3.1")
+        self.assertEqual(ftok.GlobalClade("1A.3.3.2").clean, "1A.3.3.2")
+        self.assertEqual(ftok.GlobalClade("1A.3.3.2-vaccine").clean, "1A.3.3.2-vaccine")
+        self.assertEqual(ftok.GlobalClade("1A.3.3.3").clean, "1A.3.3.3")
+        self.assertEqual(ftok.GlobalClade("1B.2.1").clean, "1B.2.1")
+        self.assertEqual(ftok.GlobalClade("1B.2.2").clean, "1B.2.2")
+        self.assertEqual(ftok.GlobalClade("1B.2.2.1").clean, "1B.2.2.1")
+        self.assertEqual(ftok.GlobalClade("1B.2.2.2").clean, "1B.2.2.2")
+        self.assertEqual(ftok.GlobalClade("1C.2").clean, "1C.2")
+        self.assertEqual(ftok.GlobalClade("3.1990.1").clean, "3.1990.1")
+        self.assertEqual(ftok.GlobalClade("3.1990.4").clean, "3.1990.4")
+        self.assertEqual(ftok.GlobalClade("3.1990.4.1").clean, "3.1990.4.1")
+        self.assertEqual(ftok.GlobalClade("3.1990.4.2-3").clean, "3.1990.4.2-3")
+        self.assertEqual(ftok.GlobalClade("3.1990.4.4").clean, "3.1990.4.4")
+        self.assertEqual(ftok.GlobalClade("3.1990.4.6").clean, "3.1990.4.6")
+        self.assertEqual(ftok.GlobalClade("3.2010.1").clean, "3.2010.1")
+        self.assertEqual(ftok.GlobalClade("3.2010.2").clean, "3.2010.2")
+        self.assertEqual(ftok.GlobalClade("humanVaccine").clean, "humanVaccine")
+        # test bad data
         self.assertEqual(ftok.GlobalClade("bogus").clean, None)
 
 

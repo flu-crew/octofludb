@@ -144,6 +144,7 @@ class Host(Token):
 STRAIN_FIELDS = {
     "date",
     "submission_date",
+    "collection_date",
     "country",
     "state",
     "host",
@@ -151,6 +152,7 @@ STRAIN_FIELDS = {
     "subtype",
     "barcode",
     "strain_name",
+    "gisaid_strain_name",
 }
 
 # --- strain tokens ---

@@ -15,9 +15,17 @@ file="${DATADIR}/IRD-results.tsv"
 log "Loading global clade data from IRD"
 time d79 load_ird ${file} > ttl/ird.ttl
 
+# TODO: remove this, it is currently needed only for constellations, but I should infer those outside
 file="${DATADIR}/A0_all.xlsx"
 log "Loading swine surveillance data from $file"
 time d79 load_table --exclude="proseq,dnaseq" --levels="strain" $file > ttl/A0.ttl
+
+for a0file in ${DATADIR}/a0/*
+do
+    echo "Loading $a0file"
+    base=$(echo $a0file | sed 's/.tab//' | sed 's;.*/;;')
+    d79 load_table $a0file > ttl/a0_${base}.ttl
+done
 
 file="${DATADIR}/antiserum/antiserum_ids"
 tag="antiserum"
@@ -39,23 +47,31 @@ tag="vaccine"
 log "Loading strain recommended by WHO for vaccines from '$file' as tag '$tag'"
 time d79 tag "$file" --tag="$tag" > ttl/$tag.ttl
 
+file="${DATADIR}/variants/strain_ids.txt"
+tag="variants"
+log "Loading variants from '$file' as tag '$tag'"
+time d79 tag "$file" --tag="$tag" > ttl/$tag.ttl
+
 file="${DATADIR}/global-reference/strain_ids.txt"
 tag="global-reference"
 log "Loading global reference strains from '$file' as tag '$tag'"
 time d79 tag "$file" --tag="$tag" > ttl/$tag.ttl
 
 file="${DATADIR}/swine-reference/strain_ids.txt"
-tag="swine-reference"
-log "Loading segment references from '$file' as tag '$tag'"
+tag="octoflu-reference"
+log "Loading octoflu references from '$file' as tag '$tag'"
 time d79 tag "$file" --tag="$tag" > ttl/$tag.ttl
 
 file="${DATADIR}/influenza_na.dat"
 log "Loading IVR data dump from '$file'"
 time d79 load_ivr "$file" > ttl/influenza_na.ttl
 
-# TODO: push all files to the GraphDB database before running the fetch step
-# Currently I have to manually stop here, go to the GraphDB browser, and
-# upload the influenza_na dataset (at least).
+TODO: push all files to the GraphDB database before running the fetch step
+Currently I have to manually stop here, go to the GraphDB browser, and
+upload the influenza_na dataset (at least).
+
+# clean cache
+rm .gb*
 
 # For now just use the existing swine-ids.txt, it is quite good enough
 log "Retrieving all swine Genbank IDs and selected human IDs (saved in gb-id.txt)"

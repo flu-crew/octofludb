@@ -45,7 +45,6 @@ p_h1_clade = wordset(
         "human-delta",
         "huVac",
         "predelta",
-        "1B.2.2.2",
     ],
     label="h1_clade",
 )
