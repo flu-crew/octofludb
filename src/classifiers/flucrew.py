@@ -180,9 +180,7 @@ class StrainToken(Token):
         for other in tokens:
             if not other.matches or other.clean == self.clean or other.clean is None:
                 continue
-            if other.group == "strain":
-                g.add((uri, P.sameAs, other.as_uri()))
-            elif other.group == "segment":
+            if other.group == "segment":
                 g.add((uri, P.has_segment, other.as_uri()))
             elif other.choose_field_name() in STRAIN_FIELDS:
                 other.object_of(g, uri)
