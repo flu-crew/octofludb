@@ -131,11 +131,12 @@ def load_gis(g, filehandle) -> None:
     epipat = re.compile(" *\|.*")
     for i in tqdm(range(len(d["Isolate_Id"]))):
         try:
-            epi_isl_id_tok = flu.Barcode(d["Isolate_Id"][i])
+            epi_isl_id_tok = flu.Isolate(d["Isolate_Id"][i])
 
             # remove the parenthesized garbage following the strain name
             strain_clean = identifier.p_strain.parse(d["Isolate_Name"][i])
-            strain_tok = flu.Strain(strain_clean)
+            # don't use Strain token here, to avoid double linking
+            strain_tok = flu.Unknown(strain_clean, field_name="strain_name")
             # and keep the full strain name, even if ugly
             full_strain_name_tok = flu.Unknown(d["Isolate_Name"][i], field_name="gisaid_strain_name")
 

@@ -52,7 +52,7 @@ from src.nomenclature import (
     P,
 )
 
-BARCODE_PAT = re.compile("A0\d{7}|\d+TOSU\d+|EPI_ISL_\d+")
+BARCODE_PAT = re.compile("A0\d{7}|\d+TOSU\d+")
 
 
 class Country(Token):
@@ -188,9 +188,17 @@ class StrainToken(Token):
                 other.object_of(g, uri)
 
 
+class Isolate(StrainToken):
+    typename = "isolate_id"
+    parser = p_epi_isolate
+
+    def munge(self, text):
+        return text.upper()
+
+
 class Barcode(StrainToken):
     typename = "barcode"
-    parser = p_tosu ^ p_A0 ^ p_epi_isolate
+    parser = p_tosu ^ p_A0
 
     def munge(self, text):
         return text.upper()
@@ -446,6 +454,7 @@ allClassifiers = OrderedDict(
     [
         (c.typename, c)
         for c in [
+            Isolate,
             Genbank,
             Barcode,
             Constellation,
