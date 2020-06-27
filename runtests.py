@@ -416,6 +416,7 @@ class TestSegmentNumber(unittest.TestCase):
 class TestStrain(unittest.TestCase):
     def test_Strain(self):
         self.assertEqual(ftok.Strain("A/asdf/er").clean, "A/asdf/er")
+        self.assertEqual(ftok.Strain("A/asdf/er  	").clean, "A/asdf/er")
         # support influenza A-D but not E (since there isn't one yet, and even
         # if there were, being pig people, we wouldn't care about it)
         self.assertEqual(ftok.Strain("A/asdf").clean, "A/asdf")
