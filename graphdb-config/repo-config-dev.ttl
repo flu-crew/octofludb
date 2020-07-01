@@ -12,7 +12,7 @@
 @prefix owlim: <http://www.ontotext.com/trree/owlim#>.
 
 [] a rep:Repository ;
-    rep:repositoryID "flu-dev" ;
+    rep:repositoryID "dev" ;
     rdfs:label "Development database" ;
     rep:repositoryImpl [
         rep:repositoryType "graphdb:FreeSailRepository" ;
@@ -24,7 +24,7 @@
             owlim:base-URL "http://example.org/graphdb#" ;
             owlim:defaultNS "" ;
             owlim:entity-index-size "200000" ;
-            owlim:entity-id-size  "40" ;
+            owlim:entity-id-size  "32" ;
             owlim:imports "" ;
             owlim:repository-type "file-repository" ;
             owlim:ruleset "owl-horst-optimized" ;
@@ -34,7 +34,7 @@
             owlim:cache-memory "80m" ;
             owlim:tuple-index-memory "80m" ;
 
-            owlim:enablePredicateList "true" ;
+            owlim:enablePredicateList "false" ;
             owlim:predicate-memory "0%" ;
 
             owlim:fts-memory "0%" ;
