@@ -6,15 +6,16 @@ Build a local SPARQL database.
 
 Usage:
   octofludb query [<sparql_filename>] [--header] [--fasta] [--url=<url>] [--repo=<repo>]
-  octofludb load_ivr [<filename>]
-  octofludb load_ird [<filename>]
-  octofludb load_gis [<filename>]
+  octofludb upload [<turtle_filenames>...] [--url=<url>] [--repo=<repo>]
+  octofludb mk_ivr [<filename>]
+  octofludb mk_ird [<filename>]
+  octofludb mk_gis [<filename>]
   octofludb tag [<filename>] [--tag=<tag>]
-  octofludb load_gbids [<filename>]
-  octofludb load_gbank [<filename>]
-  octofludb load_blast [<filename>] [--tag=<tag>]
-  octofludb load_table [<filename>] [--tag=<tag>] [--include=<inc>] [--exclude=<exc>] [--levels=<levels>] [--na=<na_str>]
-  octofludb load_fasta [<filename>] [--tag=<tag>] [--delimiter=<del>] [--include=<inc>] [--exclude=<exc>] [--na=<na_str>]
+  octofludb mk_gbids [<filename>]
+  octofludb mk_gbank [<filename>]
+  octofludb mk_blast [<filename>] [--tag=<tag>]
+  octofludb mk_table [<filename>] [--tag=<tag>] [--include=<inc>] [--exclude=<exc>] [--levels=<levels>] [--na=<na_str>]
+  octofludb mk_fasta [<filename>] [--tag=<tag>] [--delimiter=<del>] [--include=<inc>] [--exclude=<exc>] [--na=<na_str>]
 
 Options:
   -h --help               Show this screen.
@@ -43,6 +44,7 @@ if __name__ == "__main__":
     # Place imports here so they only load after successful parsing of the arguments.
     # If the imports are all before main, then `octofludb -h` can take a few seconds to run.
     import sys
+    import shutil
     from Bio import SeqIO
     from rdflib import Graph, Literal
     import src.recipes as recipe
@@ -68,6 +70,30 @@ if __name__ == "__main__":
 
         sys.exit(0)
 
+    if args["upload"]:
+        for filename in args["<turtle_filenames>"]:
+            new_filename = os.path.join(
+                os.path.expanduser("~"), "graphdb-import", os.path.basename(filename)
+            )
+            if filename == new_filename:
+                continue
+            else:
+                try:
+                    shutil.copyfile(filename, new_filename)
+                except AttributeError as e:
+                    print(
+                        f"Could not move {filename} to {new_filename}: {str(e)}",
+                        file=sys.stderr,
+                    )
+                    sys.exit(1)
+
+        server_files = [os.path.basename(f) for f in args["<turtle_filenames>"]]
+
+        db.load_data(
+            url=args["--url"], repo_name=args["--repo"], turtle_files=server_files
+        )
+        sys.exit(0)
+
     tagstr = args["--tag"]
 
     if args["<filename>"]:
@@ -86,16 +112,16 @@ if __name__ == "__main__":
 
     g = Graph(namespace_manager=manager)
 
-    if args["load_ivr"]:
+    if args["mk_ivr"]:
         # load big table from IVR, with roughly the following format:
         # (gb | host | ? | subtype | date | ? | "Influenza A virus (<strain>(<subtype>))" | ...)
-        recipe.load_influenza_na(g, filehandle)
+        recipe.mk_influenza_na(g, filehandle)
 
-    if args["load_ird"]:
-        recipe.load_ird(g, filehandle)
+    if args["mk_ird"]:
+        recipe.mk_ird(g, filehandle)
 
-    if args["load_gis"]:
-        recipe.load_gis(g, filehandle)
+    if args["mk_gis"]:
+        recipe.mk_gis(g, filehandle)
 
     if args["tag"]:
         taguri = make_tag_uri(tagstr)
@@ -106,7 +132,7 @@ if __name__ == "__main__":
             g.add((make_uri(identifier), P.tag, taguri))
         g.commit()
 
-    if args["load_gbids"]:
+    if args["mk_gbids"]:
         log(f"Retrieving and parsing genbank ids from '{file_str(filehandle)}'")
         gbids = [g.strip() for g in filehandle.readlines()]
         for gb_metas in entrez.get_gbs(gbids):
@@ -115,18 +141,18 @@ if __name__ == "__main__":
             # commit the current batch (say of 1000 entries)
             g.commit()
 
-    if args["load_gbank"]:
-        print("load_gbank is not yet supported", file=sys.stderr)
+    if args["mk_gbank"]:
+        print("mk_gbank is not yet supported", file=sys.stderr)
         sys.exit(1)
         #  for gb_meta in SeqIO.parse(filehandle, "genbank"):
         #      gb.add_gb_meta_triples(g, gb_meta)
         #  g.commit()
 
-    if args["load_blast"]:
+    if args["mk_blast"]:
         log(f"Retrieving and parsing blast results from '{file_str(filehandle)}'")
-        recipe.load_blast(g, filehandle, tag=tagstr)
+        recipe.mk_blast(g, filehandle, tag=tagstr)
 
-    if args["load_table"] or args["load_fasta"]:
+    if args["mk_table"] or args["mk_fasta"]:
         if not args["--include"]:
             inc = {}
         else:
@@ -140,7 +166,7 @@ if __name__ == "__main__":
         else:
             levels = {s.strip() for s in args["--levels"].split(",")}
 
-        if args["load_table"]:
+        if args["mk_table"]:
             classes.Table(
                 filehandle=filehandle,
                 tag=tagstr,
@@ -151,7 +177,7 @@ if __name__ == "__main__":
                 levels=levels,
             ).connect(g)
 
-        if args["load_fasta"]:
+        if args["mk_fasta"]:
             classes.Ragged(
                 filehandle=filehandle,
                 tag=tagstr,

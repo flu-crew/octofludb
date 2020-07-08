@@ -13,7 +13,7 @@ from tqdm import tqdm
 import datetime as datetime
 
 
-def load_blast(g, filehandle, tag=None):
+def mk_blast(g, filehandle, tag=None):
     timestr = datetime.datetime.now()
     for row in tqdm(filehandle.readlines()):
         try:
@@ -60,7 +60,7 @@ def load_blast(g, filehandle, tag=None):
     g.commit()
 
 
-def load_influenza_na(g, filehandle) -> None:
+def mk_influenza_na(g, filehandle) -> None:
     def extract_strain(x):
         strain_pat = re.compile("[ABCD]/[^()\[\]]+")
         m = re.search(strain_pat, x)
@@ -92,7 +92,7 @@ def load_influenza_na(g, filehandle) -> None:
             sys.exit(1)
 
 
-def load_ird(g, filehandle) -> None:
+def mk_ird(g, filehandle) -> None:
     na_str = "-N/A-"
     for line in tqdm(filehandle.readlines()):
         els = line.split("\t")
@@ -125,7 +125,7 @@ def load_ird(g, filehandle) -> None:
             sys.exit(1)
 
 
-def load_gis(g, filehandle) -> None:
+def mk_gis(g, filehandle) -> None:
     fh = pd.read_excel(filehandle.name, sheet_name=0)
     d = {c: [x for x in fh[c]] for c in fh}
     epipat = re.compile(" *\|.*")
