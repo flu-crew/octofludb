@@ -138,7 +138,9 @@ def load_gis(g, filehandle) -> None:
             # don't use Strain token here, to avoid double linking
             strain_tok = flu.Unknown(strain_clean, field_name="strain_name")
             # and keep the full strain name, even if ugly
-            full_strain_name_tok = flu.Unknown(d["Isolate_Name"][i], field_name="gisaid_strain_name")
+            full_strain_name_tok = flu.Unknown(
+                d["Isolate_Name"][i], field_name="gisaid_strain_name"
+            )
 
             host_tok = flu.Host(d["Host"][i], field_name="host")
             subtype_tok = flu.Subtype(d["Subtype"][i])
@@ -188,8 +190,8 @@ def load_gis(g, filehandle) -> None:
                     ).connect(g)
         except IndexError:
             log("Bad line - index error")
-            for name,col in d.items(): 
-              log(name + " : " + str(col[i]))
+            for name, col in d.items():
+                log(name + " : " + str(col[i]))
             sys.exit(1)
         except KeyError as e:
             log("This does not appear to be a valid gisaid metadata file")
@@ -197,5 +199,5 @@ def load_gis(g, filehandle) -> None:
             sys.exit(1)
         except:
             log("Bad line - other error")
-            for name,col in d.items(): 
-              log(name + " : " + str(col[i]))
+            for name, col in d.items():
+                log(name + " : " + str(col[i]))

@@ -1,29 +1,36 @@
 #!/usr/bin/env python3
 
+
 """
 Build a local SPARQL database.
 
 Usage:
-  d79 load_ivr [<filename>]
-  d79 load_ird [<filename>]
-  d79 load_gis [<filename>]
-  d79 tag [<filename>] [--tag=<tag>]
-  d79 load_gbids [<filename>]
-  d79 load_gbank [<filename>]
-  d79 load_blast [<filename>] [--tag=<tag>]
-  d79 load_table [<filename>] [--tag=<tag>] [--include=<inc>] [--exclude=<exc>] [--levels=<levels>] [--na=<na_str>]
-  d79 load_fasta [<filename>] [--tag=<tag>] [--delimiter=<del>] [--include=<inc>] [--exclude=<exc>] [--na=<na_str>]
+  octofludb query [<sparql_filename>] [--header] [--fasta] [--url=<url>] [--repo=<repo>]
+  octofludb load_ivr [<filename>]
+  octofludb load_ird [<filename>]
+  octofludb load_gis [<filename>]
+  octofludb tag [<filename>] [--tag=<tag>]
+  octofludb load_gbids [<filename>]
+  octofludb load_gbank [<filename>]
+  octofludb load_blast [<filename>] [--tag=<tag>]
+  octofludb load_table [<filename>] [--tag=<tag>] [--include=<inc>] [--exclude=<exc>] [--levels=<levels>] [--na=<na_str>]
+  octofludb load_fasta [<filename>] [--tag=<tag>] [--delimiter=<del>] [--include=<inc>] [--exclude=<exc>] [--na=<na_str>]
 
 Options:
   -h --help               Show this screen.
-  -k --key-type <key>     The subject type to merge on [default:"strain"]
-  --delimiter <del>       Field delimiter for FASTA headers [default:"|"]
-  --include <inc>         Only parse using these tokens (comma-delimited list) [default:""]
-  --exclude <exc>         Remove these tokens (comma-delimited list) [default:""]
+  -k --key-type <key>     The subject type to merge on [default: "strain"]
+  --delimiter <del>       Field delimiter for FASTA headers [default: "|"]
+  --include <inc>         Only parse using these tokens (comma-delimited list) [default: ""]
+  --exclude <exc>         Remove these tokens (comma-delimited list) [default: ""]
+  --header                Include a header of column names indata returned from query
+  --fasta                 Return query as a fasta file where last column is sequence
+  --url <url>             GraphDB url [default: http://localhost:7200]
+  --repo <repo>           GraphDB repo name [default: flu]
 """
 
 import os
 import signal
+import pgraphdb as db
 from docopt import docopt
 
 if __name__ == "__main__":
@@ -31,15 +38,15 @@ if __name__ == "__main__":
     if os.name is "posix":
         signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 
-    args = docopt(__doc__, version="d79 0.2.0")
-    tagstr = args["--tag"]
+    args = docopt(__doc__, version="octofludb 0.2.0")
 
     # Place imports here so they only load after successful parsing of the arguments.
-    # If the imports are all before main, then `d79 -h` can take a few seconds to run. 
+    # If the imports are all before main, then `octofludb -h` can take a few seconds to run.
     import sys
     from Bio import SeqIO
     from rdflib import Graph, Literal
     import src.recipes as recipe
+    import src.formatting as formatting
     import src.entrez as entrez
     import src.genbank as gb
     import src.classes as classes
@@ -48,6 +55,21 @@ if __name__ == "__main__":
     from tqdm import tqdm
     from src.util import log, file_str
 
+    if args["query"]:
+        results = db.sparql_query(
+            sparql_file=args["<sparql_filename>"],
+            url=args["--url"],
+            repo_name=args["--repo"],
+        )
+        if args["--fasta"]:
+            formatting.write_as_fasta(results)
+        else:
+            formatting.write_as_table(results, header=args["--header"])
+
+        sys.exit(0)
+
+    tagstr = args["--tag"]
+
     if args["<filename>"]:
         filehandle = open(args["<filename>"], "r")
     else:
@@ -55,7 +77,7 @@ if __name__ == "__main__":
 
     if args["--na"]:
         na_str = args["--na"].split(",")
-        if (isinstance(na_str, list)):
+        if isinstance(na_str, list):
             na_str = [None] + na_str
         else:
             na_str = [None, na_str]
