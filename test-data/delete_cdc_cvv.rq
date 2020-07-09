@@ -1,0 +1,5 @@
+PREFIX f: <https://flu-crew.org/term/>
+
+DELETE WHERE {
+    ?s f:tag/f:name "cdc_cvv" .
+}

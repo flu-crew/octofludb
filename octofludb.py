@@ -6,6 +6,7 @@ Build a local SPARQL database.
 
 Usage:
   octofludb query [<sparql_filename>] [--header] [--fasta] [--url=<url>] [--repo=<repo>]
+  octofludb update [<sparql_filename>] [--url=<url>] [--repo=<repo>]
   octofludb upload [<turtle_filenames>...] [--url=<url>] [--repo=<repo>]
   octofludb mk_ivr [<filename>]
   octofludb mk_ird [<filename>]
@@ -69,6 +70,13 @@ if __name__ == "__main__":
             formatting.write_as_table(results, header=args["--header"])
 
         sys.exit(0)
+
+    if args["update"]:
+        results = db.update(
+            sparql_file=args["<sparql_filename>"],
+            url=args["--url"],
+            repo_name=args["--repo"],
+        )
 
     if args["upload"]:
         for filename in args["<turtle_filenames>"]:
