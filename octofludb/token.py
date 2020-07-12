@@ -1,10 +1,10 @@
 import parsec as p
-from src.nomenclature import make_property, make_literal, define_subproperty
+from octofludb.nomenclature import make_property, make_literal, define_subproperty
 import rdflib
 import sys
 import re
 import math
-from src.util import rmNone, log
+from octofludb.util import rmNone, log
 from rdflib.namespace import XSD
 
 

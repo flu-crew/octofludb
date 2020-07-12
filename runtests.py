@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
 
-import src.classifiers.flucrew as ftok
-import src.token as tok
-from src.nomenclature import make_uri, make_usa_state_uri, make_country_uri, make_property
-from src.classes import HomoList, Phrase, Datum, Ragged
-from src.graph import showTriple
+import octofludb.classifiers.flucrew as ftok
+import octofludb.token as tok
+from octofludb.nomenclature import (
+    make_uri,
+    make_usa_state_uri,
+    make_country_uri,
+    make_property,
+)
+from octofludb.classes import HomoList, Phrase, Datum, Ragged
+from octofludb.graph import showTriple
 import unittest
 import rdflib
 import urllib.parse as url
@@ -43,6 +48,7 @@ class TestMakeUri(unittest.TestCase):
         )
         self.assertEqual(make_country_uri("britain"), make_country_uri("UK"))
 
+
 class TestInteger(unittest.TestCase):
     def test_Integer(self):
         self.assertEqual(tok.Integer("1").clean, "1")
@@ -51,6 +57,7 @@ class TestInteger(unittest.TestCase):
         self.assertEqual(tok.Integer("12345678.0").clean, None)
         self.assertEqual(tok.Integer("bogus").clean, None)
 
+
 class TestDouble(unittest.TestCase):
     def test_Double(self):
         self.assertEqual(tok.Double("1").clean, "1")
@@ -58,6 +65,7 @@ class TestDouble(unittest.TestCase):
         self.assertEqual(tok.Double("12345678").clean, "12345678")
         self.assertEqual(tok.Double("12345678.0").clean, "12345678.0")
         self.assertEqual(tok.Double("bogus").clean, None)
+
 
 class TestBoolean(unittest.TestCase):
     def test_Boolean(self):
@@ -71,6 +79,7 @@ class TestBoolean(unittest.TestCase):
         self.assertEqual(tok.Boolean("nO").clean, "false")
         self.assertEqual(tok.Boolean("faLse").clean, "false")
         self.assertEqual(tok.Boolean("bogus").clean, None)
+
 
 class TestBarcode(unittest.TestCase):
     def test_Barcode(self):
@@ -266,9 +275,7 @@ class TestGenbank(unittest.TestCase):
 class TestEpiSeqid(unittest.TestCase):
     def test_EpiSeqid(self):
         # no upper bound on integers
-        self.assertEqual(
-            ftok.EpiSeqid("EPI_1234567890123").clean, "EPI1234567890123"
-        )
+        self.assertEqual(ftok.EpiSeqid("EPI_1234567890123").clean, "EPI1234567890123")
         # underscore optional
         self.assertEqual(ftok.EpiSeqid("EPI1234567890123").clean, "EPI1234567890123")
         # but at least 3
@@ -614,6 +621,7 @@ class TestFasta(unittest.TestCase):
         x2.connect(g2)
         s2 = sorted([(str(s), str(p), str(o)) for s, p, o in g2])
         self.assertEqual(s1, s2)
+
 
 if __name__ == "__main__":
     unittest.main()

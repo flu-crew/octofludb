@@ -1,13 +1,13 @@
 import sys
 from rdflib import Literal
 import pandas as pd
-import src.classes as classes
-import src.classifiers.flucrew as flu
-import src.token as tok
-import src.domain.identifier as identifier
+import octofludb.classes as classes
+import octofludb.classifiers.flucrew as flu
+import octofludb.token as tok
+import octofludb.domain.identifier as identifier
 import parsec
-from src.nomenclature import P, O, make_uri, make_tag_uri
-from src.util import log, file_str
+from octofludb.nomenclature import P, O, make_uri, make_tag_uri
+from octofludb.util import log, file_str
 import re
 from tqdm import tqdm
 import datetime as datetime

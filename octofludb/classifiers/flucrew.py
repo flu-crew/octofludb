@@ -1,12 +1,12 @@
 import parsec as p
-from src.hash import chksum
-from src.util import log
-from src.domain.flu import SEGMENT
+from octofludb.hash import chksum
+from octofludb.util import log
+from octofludb.domain.flu import SEGMENT
 from rdflib import Literal
 from collections import OrderedDict
 import re
 
-from src.domain.identifier import (
+from octofludb.domain.identifier import (
     p_global_clade,
     p_A0,
     p_tosu,
@@ -16,7 +16,7 @@ from src.domain.identifier import (
     p_epi_id,
 )
 
-from src.domain.flu import (
+from octofludb.domain.flu import (
     p_HA,
     p_NA,
     p_internal_gene,
@@ -32,18 +32,18 @@ from src.domain.flu import (
     p_n2_clade,
 )
 
-from src.domain.date import p_year, p_longyear, p_month, p_day, p_date, p_any_date
-from src.domain.geography import (
+from octofludb.domain.date import p_year, p_longyear, p_month, p_day, p_date, p_any_date
+from octofludb.domain.geography import (
     country_to_code,
     state_to_code,
     location_to_country_code,
 )
-from src.domain.animal import p_host
-from src.domain.sequence import p_dnaseq, p_proseq
+from octofludb.domain.animal import p_host
+from octofludb.domain.sequence import p_dnaseq, p_proseq
 
-from src.token import Token, Unknown
-from src.util import rmNone
-from src.nomenclature import (
+from octofludb.token import Token, Unknown
+from octofludb.util import rmNone
+from octofludb.nomenclature import (
     make_uri,
     make_date,
     make_property,

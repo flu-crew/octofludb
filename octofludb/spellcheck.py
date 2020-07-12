@@ -1,4 +1,4 @@
-from src.util import compose, underscore, lower, strip
+from octofludb.util import compose, underscore, lower, strip
 
 
 def make_flat_wordfinder(

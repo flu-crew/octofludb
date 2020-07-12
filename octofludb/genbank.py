@@ -1,6 +1,6 @@
-from src.nomenclature import uidgen, P, O, make_property, make_uri
-from src.util import rmNone, make_maybe_add
-from src.hash import chksum
+from octofludb.nomenclature import uidgen, P, O, make_property, make_uri
+from octofludb.util import rmNone, make_maybe_add
+from octofludb.hash import chksum
 from rdflib import Literal
 import sys
 

@@ -1,8 +1,8 @@
 import parsec as p
-from src.domain.date import p_year
-from src.domain.identifier import p_A0
-from src.parser import wordset
-from src.util import rmNone, concat
+from octofludb.domain.date import p_year
+from octofludb.domain.identifier import p_A0
+from octofludb.parser import wordset
+from octofludb.util import rmNone, concat
 
 # the 8 segments of the flu genome (order matters)
 SEGMENT = ["PB2", "PB1", "PA", "HA", "NP", "NA", "M", "NS"]

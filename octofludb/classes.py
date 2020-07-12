@@ -1,13 +1,13 @@
 import sys
 import parsec
-from src.classifiers.flucrew import allClassifiers
-from src.token import Token, Unknown, Missing
-from src.util import zipGen, strOrNone, log, concat, file_str
-from src.nomenclature import make_tag_uri, P
+from octofludb.classifiers.flucrew import allClassifiers
+from octofludb.token import Token, Unknown, Missing
+from octofludb.util import zipGen, strOrNone, log, concat, file_str
+from octofludb.nomenclature import make_tag_uri, P
 import dateutil.parser as dateparser
 import xlrd
 import pandas as pd
-import src.colors as colors
+import octofludb.colors as colors
 import datetime as datetime
 from rdflib import Literal
 from tqdm import tqdm

@@ -1,4 +1,4 @@
- [ ] convert into proper package and upload to pypi
+ [x] convert into proper package and upload to pypi
  [ ] add A0 numbers linked to strain
  [ ] add function for genebank annotation
  [ ] command for loading list of IDs as a tag

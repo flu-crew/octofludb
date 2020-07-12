@@ -1,6 +1,6 @@
 import parsec as p
-from src.util import padDigit, rmNone
-from src.parser import wordset
+from octofludb.util import padDigit, rmNone
+from octofludb.parser import wordset
 from rdflib.namespace import XSD
 from rdflib import Literal
 

@@ -7,7 +7,7 @@ import pgraphdb as db
 import argparse
 import textwrap
 import requests
-import src.cli as cli
+import octofludb.cli as cli
 
 
 parser = argparse.ArgumentParser(
@@ -28,13 +28,13 @@ tag_arg = cli.argument("tag", help="A tag to associate with each identifier")
 
 def open_graph():
     from rdflib import Graph
-    from src.nomenclature import manager
+    from octofludb.nomenclature import manager
 
     return Graph(namespace_manager=manager)
 
 
 def with_graph(f, filename, *args, **kwargs):
-    from src.util import log, file_str
+    from octofludb.util import log, file_str
 
     g = open_graph()
     with open(filename, "r") as fh:
@@ -107,7 +107,7 @@ def call_query_cmd(args):
     """
     Submit a SPARQL query to octofludb
     """
-    import src.formatting as formatting
+    import octofludb.formatting as formatting
 
     results = db.sparql_query(
         sparql_file=args.sparql_filename, url=args.url, repo_name=args.repo
@@ -173,8 +173,8 @@ def tag_cmd(args):
     """
     from rdflib import Literal
     import datetime as datetime
-    from src.nomenclature import make_uri, make_tag_uri, P
-    from src.util import file_str
+    from octofludb.nomenclature import make_uri, make_tag_uri, P
+    from octofludb.util import file_str
 
     def _tag_cmd(g, fh):
         taguri = make_tag_uri(args.tag)
@@ -196,7 +196,7 @@ def mk_ivr_cmd(args):
     load big table from IVR, with roughly the following format:
     gb | host | - | subtype | date | - | "Influenza A virus (<strain>(<subtype>))" | ...
     """
-    import src.recipes as recipe
+    import octofludb.recipes as recipe
 
     with_graph(recipe.mk_influenza_na, args.filename)
 
@@ -206,7 +206,7 @@ def mk_ivr_cmd(args):
     """
     Translate an IRD table to RDF
     """
-    import src.recipes as recipe
+    import octofludb.recipes as recipe
 
     with_graph(recipe.ird, args.filename)
 
@@ -218,7 +218,7 @@ def mk_gis_cmd(args):
     """
     Translate a Gisaid metadata excel file to RDF
     """
-    import src.recipes as recipe
+    import octofludb.recipes as recipe
 
     with_graph(recipe.gis, args.filename)
 
@@ -230,9 +230,9 @@ def mk_gbids_cmd(args):
     """
     Retrieve data for a list of genbank ids
     """
-    import src.entrez as entrez
-    import src.genbank as gb
-    from src.util import log, file_str
+    import octofludb.entrez as entrez
+    import octofludb.genbank as gb
+    from octofludb.util import log, file_str
 
     def _mk_gbids_cmd(g, fh):
         log(f"Retrieving and parsing genbank ids from '{file_str(filehandle)}'")
@@ -257,8 +257,8 @@ def mk_blast_cmd(args):
     """
     Translate BLAST results into RDF
     """
-    import src.recipes as recipe
-    from src.util import log, file_str
+    import octofludb.recipes as recipe
+    from octofludb.util import log, file_str
 
     log(f"Retrieving and parsing blast results from '{args.filename}'")
     with_graph(recipe.mk_blast, args.filename, tag=args.tag)
@@ -304,7 +304,7 @@ def mk_table_cmd(args):
     """
     Translate a table to RDF
     """
-    import src.classes as classes
+    import octofludb.classes as classes
 
     def _mk_table_cmd(g, fh):
         (inc, exc, levels) = process_tablelike(
@@ -342,7 +342,7 @@ def mk_fasta_cmd(args):
     """
     Translate a fasta file to RDF
     """
-    import src.classes as classes
+    import octofludb.classes as classes
 
     def _mk_fasta_cmd(g, fh):
         (inc, exc, levels) = process_tablelike(

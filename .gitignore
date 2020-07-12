@@ -8,3 +8,6 @@ zz.*
 *.fna
 *.db/
 src/.orientdb_history
+build/
+dist/
+octofludb.egg-info/

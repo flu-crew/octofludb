@@ -1,5 +1,5 @@
 import re
-from src.spellcheck import make_flat_wordfinder
+from octofludb.spellcheck import make_flat_wordfinder
 
 STATE_NAME2ABBR = {
     "alaska": "AK",

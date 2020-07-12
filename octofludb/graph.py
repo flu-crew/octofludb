@@ -1,4 +1,4 @@
-from src.classes import Datum, Phrase
+from octofludb.classes import Datum, Phrase
 
 
 def addTriples(g, triples):

@@ -4,7 +4,7 @@ import rdflib
 from typing import List
 from collections import defaultdict
 
-from src.nomenclature import (
+from octofludb.nomenclature import (
     P,
     O,
     make_uri,

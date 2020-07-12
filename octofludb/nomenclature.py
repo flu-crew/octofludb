@@ -3,10 +3,10 @@ import rdflib
 import urllib.parse as url
 import sys
 import re
-import src.domain.geography as geo
-import src.domain.date as date
+import octofludb.domain.geography as geo
+import octofludb.domain.date as date
 from rdflib.namespace import RDF, RDFS, OWL, XSD
-from src.util import padDigit
+from octofludb.util import padDigit
 
 ni = rdflib.Namespace("https://flu-crew.org/id/")
 nt = rdflib.Namespace("https://flu-crew.org/term/")
