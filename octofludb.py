@@ -6,6 +6,7 @@ import signal
 import pgraphdb as db
 import argparse
 import textwrap
+import requests
 import src.cli as cli
 
 
@@ -67,6 +68,21 @@ def make_na(na_str):
     return na_list
 
 
+@subcommand(["init", url_arg, repo_name_arg])
+def call_init_cmd(args):
+    """
+    Initialize an empty octofludb database
+    """
+    config_file = os.path.join(
+        os.path.dirname(__file__), "graphdb-config", "octofludb-config.ttl"
+    )
+    try:
+        db.make_repo(config=config_file, url=args.url)
+    except requests.exceptions.ConnectionError:
+        print(f"Could not connect to a GraphDB database at {args.url}", file=sys.stderr)
+        sys.exit(1)
+
+
 @subcommand(
     [
         "query",
@@ -106,7 +122,7 @@ def call_query_cmd(args):
 @subcommand(["update", cli.argument("sparql_filename"), url_arg, repo_name_arg])
 def call_query_cmd(args):
     """
-    Submit a SPARQL query to octofludb
+    Submit a SPARQL delete or insert query to octofludb
     """
     db.update(sparql_file=args.sparql_filename, url=args.url, repo_name=args.repo)
     return None
