@@ -21,7 +21,7 @@ subparsers = parser.add_subparsers(metavar="<subcommand>", title="subcommands")
 subcommand = cli.subcommand_maker(subparsers)
 
 url_arg = cli.argument("--url", help="GraphDB URL", default="http://localhost:7200")
-repo_name_arg = cli.argument("--repo", help="Repository name", default="flu")
+repo_name_arg = cli.argument("--repo", help="Repository name", default="octofludb")
 tag_arg = cli.argument("tag", help="A tag to associate with each identifier")
 
 

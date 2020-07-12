@@ -2,6 +2,7 @@
 v0.1.0
 ======
 
+ * Change default repo name to "octofludb"
  * Replace docopt with argparse
  * Renamed all `load_*` commands to `mk_*`. The commands are not "loading" data
    into the database but only creating turtle files
