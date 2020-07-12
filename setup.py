@@ -23,4 +23,5 @@ setup(
     entry_points={"console_scripts": ["octofludb=octofludb.ui:main"]},
     py_modules=["octofludb"],
     zip_safe=False,
+    include_package_data=True,
 )

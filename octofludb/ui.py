@@ -74,7 +74,7 @@ def call_init_cmd(args):
     Initialize an empty octofludb database
     """
     config_file = os.path.join(
-        os.path.dirname(__file__), "graphdb-config", "octofludb-config.ttl"
+        os.path.dirname(__file__), "data", "octofludb-config.ttl"
     )
     try:
         db.make_repo(config=config_file, url=args.url)
