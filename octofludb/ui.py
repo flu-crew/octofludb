@@ -23,7 +23,8 @@ subcommand = cli.subcommand_maker(subparsers)
 
 url_arg = cli.argument("--url", help="GraphDB URL", default="http://localhost:7200")
 repo_name_arg = cli.argument("--repo", help="Repository name", default="octofludb")
-tag_arg = cli.argument("tag", help="A tag to associate with each identifier")
+tag_arg_pos = cli.argument("tag", help="A tag to associate with each identifier")
+tag_arg_opt = cli.argument("--tag", help="A tag to associate with each identifier")
 
 
 def open_graph():
@@ -166,7 +167,7 @@ def call_upload_cmd(args):
     sys.exit(0)
 
 
-@subcommand(["tag", cli.argument("filename", help="File of identifiers"), tag_arg])
+@subcommand(["tag", cli.argument("filename", help="File of identifiers"), tag_arg_pos])
 def tag_cmd(args):
     """
     Associate list of IDs with a tag
@@ -220,7 +221,7 @@ def mk_gis_cmd(args):
     """
     import octofludb.recipes as recipe
 
-    with_graph(recipe.gis, args.filename)
+    with_graph(recipe.mk_gis, args.filename)
 
 
 @subcommand(
@@ -250,7 +251,7 @@ def mk_gbids_cmd(args):
     [
         "mk_blast",
         cli.argument("filename", help="File containing a list of genbank ids"),
-        tag_arg,
+        tag_arg_opt,
     ]
 )
 def mk_blast_cmd(args):
@@ -293,7 +294,7 @@ na_arg = cli.argument("--na", help="The string that represents a missing value")
     [
         "mk_table",
         cli.argument("filename", help="Path to a table"),
-        tag_arg,
+        tag_arg_opt,
         include_arg,
         exclude_arg,
         cli.argument("--levels", help="levels"),
@@ -327,7 +328,7 @@ def mk_table_cmd(args):
     [
         "mk_fasta",
         cli.argument("filename", help="Path to a TAB-delimited or excel table"),
-        tag_arg,
+        tag_arg_opt,
         cli.argument(
             "--delimiter",
             help="The delimiter between fields in the header",
