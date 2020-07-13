@@ -313,7 +313,7 @@ def mk_table_cmd(args):
         )
         classes.Ragged(
             filehandle=fh,
-            tag=tagstr,
+            tag=args.tag,
             include=inc,
             exclude=exc,
             log=True,
@@ -351,7 +351,7 @@ def mk_fasta_cmd(args):
         )
         classes.Ragged(
             filehandle=fh,
-            tag=tagstr,
+            tag=args.tag,
             include=inc,
             exclude=exc,
             log=True,
