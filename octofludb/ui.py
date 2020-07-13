@@ -208,7 +208,7 @@ def mk_ivr_cmd(args):
     """
     import octofludb.recipes as recipe
 
-    with_graph(recipe.ird, args.filename)
+    with_graph(recipe.mk_ird, args.filename)
 
 
 @subcommand(
