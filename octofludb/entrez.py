@@ -10,7 +10,7 @@ Entrez.email = "zebulun.arendsee@usda.gov"
 
 # code adapted from http://biopython.org/DIST/docs/tutorial/Tutorial.html#htoc122
 def get_gbs(gb_ids: List[str]) -> List[dict]:
-    batch_size = 500
+    batch_size = 1000
     count = len(gb_ids)
     for start in tqdm(range(0, count, batch_size)):
         end = min(count, start + batch_size)

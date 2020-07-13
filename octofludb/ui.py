@@ -181,7 +181,7 @@ def tag_cmd(args):
         g = open_graph()
         g.add((taguri, P.name, Literal(args.tag)))
         g.add((taguri, P.time, Literal(datetime.datetime.now())))
-        g.add((taguri, P.file, Literal(file_str(filehandle))))
+        g.add((taguri, P.file, Literal(file_str(fh))))
         for identifier in (s.strip() for s in fh.readlines()):
             g.add((make_uri(identifier), P.tag, taguri))
 
@@ -235,7 +235,7 @@ def mk_gbids_cmd(args):
     from octofludb.util import log, file_str
 
     def _mk_gbids_cmd(g, fh):
-        log(f"Retrieving and parsing genbank ids from '{file_str(filehandle)}'")
+        log(f"Retrieving and parsing genbank ids from '{file_str(fh)}'")
         gbids = [gbid.strip() for gbid in fh.readlines()]
         for gb_metas in entrez.get_gbs(gbids):
             for gb_meta in gb_metas:

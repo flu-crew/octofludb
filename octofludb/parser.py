@@ -4,16 +4,6 @@ import rdflib
 from typing import List
 from collections import defaultdict
 
-from octofludb.nomenclature import (
-    P,
-    O,
-    make_uri,
-    make_literal,
-    make_property,
-    make_usa_state_uri,
-)
-
-
 def wordset(words, label, f=lambda x: x.lower().replace(" ", "_")):
     """
     Create a log(n) parser for a set of n strings.
