@@ -333,6 +333,15 @@ class TestSubtype(unittest.TestCase):
         self.assertEqual(ftok.Subtype("H11N12").clean, "H11N12")
         # with possible variants
         self.assertEqual(ftok.Subtype("H1N1v").clean, "H1N1v")
+        # with possible species annotations with and without v
+        self.assertEqual(ftok.Subtype("H1huN1v").clean, "H1huN1v")
+        self.assertEqual(ftok.Subtype("H1swN1v").clean, "H1swN1v")
+        self.assertEqual(ftok.Subtype("H1avN1v").clean, "H1avN1v")
+        self.assertEqual(ftok.Subtype("H1huN1").clean, "H1huN1")
+        self.assertEqual(ftok.Subtype("H1swN1").clean, "H1swN1")
+        self.assertEqual(ftok.Subtype("H1avN1").clean, "H1avN1")
+        # only hu, sw, and av species are supported for now
+        self.assertEqual(ftok.Subtype("H1laN1").clean, None)
         # no lower
         self.assertEqual(ftok.Subtype("h1n1").clean, None)
         # allow type

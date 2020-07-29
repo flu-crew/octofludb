@@ -35,7 +35,7 @@ def open_graph():
 
 
 def with_graph(f, filename, *args, **kwargs):
-    from octofludb.util import log, file_str
+    from octofludb.util import log
 
     g = open_graph()
     with open(filename, "r") as fh:
@@ -177,7 +177,10 @@ def tag_cmd(args):
     from octofludb.nomenclature import make_uri, make_tag_uri, P
     from octofludb.util import file_str
 
-    def _tag_cmd(g, fh):
+    from octofludb.util import log
+
+    g = open_graph()
+    with open(args.filename, "r") as fh:
         taguri = make_tag_uri(args.tag)
         g = open_graph()
         g.add((taguri, P.name, Literal(args.tag)))
@@ -185,8 +188,13 @@ def tag_cmd(args):
         g.add((taguri, P.file, Literal(file_str(fh))))
         for identifier in (s.strip() for s in fh.readlines()):
             g.add((make_uri(identifier), P.tag, taguri))
-
-    with_graph(_tag_cmd, args.filename)
+        g.commit()  # just in case we missed anything
+        log("Serializing to turtle format ... ", end="")
+        turtles = g.serialize(format="turtle")
+        log("done")
+        for l in turtles.splitlines():
+            print(l.decode("utf-8"))
+    g.close()
 
 
 @subcommand(["mk_ivr", cli.argument("filename", help="The filename of an IVR table")])
@@ -265,7 +273,7 @@ def mk_blast_cmd(args):
     with_graph(recipe.mk_blast, args.filename, tag=args.tag)
 
 
-def process_tablelike(include, exclude, levels, is_fasta=False):
+def process_tablelike(include, exclude, levels):
     if not include:
         inc = {}
     else:
@@ -309,9 +317,9 @@ def mk_table_cmd(args):
 
     def _mk_table_cmd(g, fh):
         (inc, exc, levels) = process_tablelike(
-            args.include, args.exclude, args.levels, is_fasta=False
+            args.include, args.exclude, args.levels
         )
-        classes.Ragged(
+        classes.Table(
             filehandle=fh,
             tag=args.tag,
             include=inc,
@@ -347,7 +355,7 @@ def mk_fasta_cmd(args):
 
     def _mk_fasta_cmd(g, fh):
         (inc, exc, levels) = process_tablelike(
-            args.include, args.exclude, None, is_fasta=True
+            args.include, args.exclude, None
         )
         classes.Ragged(
             filehandle=fh,
