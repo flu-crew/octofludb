@@ -456,18 +456,13 @@ class TestStrain(unittest.TestCase):
             [
                 (
                     "https://flu-crew.org/id/a%2Fasdf%2Fa01234567%2Fsdf",
-                    "http://www.w3.org/2002/07/owl#sameAs",
-                    "https://flu-crew.org/id/a01234567",
+                    "https://flu-crew.org/term/barcode",
+                    "A01234567",
                 ),
                 (
                     "https://flu-crew.org/id/a%2Fasdf%2Fa01234567%2Fsdf",
                     "https://flu-crew.org/term/strain_name",
                     "A/asdf/A01234567/sdf",
-                ),
-                (
-                    "https://flu-crew.org/id/a01234567",
-                    "https://flu-crew.org/term/barcode",
-                    "A01234567",
                 ),
             ],
         )

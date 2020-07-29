@@ -48,6 +48,7 @@ from octofludb.nomenclature import (
     make_date,
     make_property,
     make_usa_state_uri,
+    make_literal,
     make_country_uri,
     P,
 )
@@ -225,9 +226,8 @@ class Strain(StrainToken):
 
                 # some strain names contain a barcode, which is also a unique id
                 if barcode_match is not None:
-                    barcode = Barcode(barcode_match.group())
-                    barcode.add_triples(g)
-                    g.add((uri, P.sameAs, barcode.as_uri()))
+                    g.add((uri, P.strain_name, self.as_literal()))
+                    g.add((uri, P.barcode, make_literal(barcode_match[0])))
                 elif state_str is not None:
                     state = StateUSA(state_str)
                     state.object_of(g, uri)
