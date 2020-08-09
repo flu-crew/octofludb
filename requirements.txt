@@ -1,0 +1,6 @@
+parsec
+rdflib
+urllib
+pandas
+biopython
+tqdm
