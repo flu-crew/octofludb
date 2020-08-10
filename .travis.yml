@@ -4,4 +4,4 @@ python:
  - "3.7"
  - "3.8"
  - "nightly"
-script: ./runtest.py && cd test-data && make && cd ..
+script: ./runtests.py && cd test-data && make && cd ..
