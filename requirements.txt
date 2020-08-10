@@ -3,3 +3,4 @@ rdflib
 pandas
 biopython
 tqdm
+xlrd

@@ -21,7 +21,7 @@ setup(
         "Operating System :: OS Independent",
     ],
     entry_points={"console_scripts": ["octofludb=octofludb.ui:main"]},
-    install_requires=["parsec", "rdflib", "urllib", "pandas", "biopython", "tqdm"],
+    install_requires=["parsec", "rdflib", "urllib", "pandas", "biopython", "tqdm", "xlrd"],
     py_modules=["octofludb"],
     zip_safe=False,
     include_package_data=True,
