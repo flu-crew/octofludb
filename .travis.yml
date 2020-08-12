@@ -4,4 +4,7 @@ python:
  - "3.7"
  - "3.8"
  - "nightly"
-script: python3 setup.py sdist bdist_wheel && pip install dist/*whl && ./runtests.py && cd test-data && make && cd ..
+install:
+    - pip install -r requirements.txt
+    - pip install .
+script: ./runtests.py && cd test-data && make && cd ..
