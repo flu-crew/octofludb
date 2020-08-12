@@ -4,3 +4,4 @@ pandas
 biopython
 tqdm
 xlrd
+termcolor
