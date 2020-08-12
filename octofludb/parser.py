@@ -40,7 +40,7 @@ def parse_match(parser, text):
     return True
 
 
-def regexWithin(regex: re.Pattern, context: p.Parser):
+def regexWithin(regex, context: p.Parser):
     @p.Parser
     def regexWithinParser(text, index=0):
         try:
