@@ -1,9 +1,10 @@
 [![stable](http://badges.github.io/stability-badges/dist/experimental.svg)](http://github.com/badges/stability-badges)
 [![Build Status](https://travis-ci.org/flu-crew/octofludb.svg?branch=master)](https://travis-ci.org/flu-crew/octofludb)
+![PyPI](https://img.shields.io/pypi/v/octofludb.svg)
 
 # octofludb
 
-Manage
+Manage the flu-crew swine surveillance database
 
 ## Installation
 

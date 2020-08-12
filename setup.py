@@ -8,7 +8,7 @@ with open("README.md", "r") as fh:
 setup(
     name="octofludb",
     version=__version__,
-    description="Interface to the flu-crew swine surveillance database",
+    description="Mangage the flu-crew swine surveillance database",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/flu-crew/octofludb",
