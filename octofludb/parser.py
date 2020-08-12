@@ -4,6 +4,7 @@ import rdflib
 from typing import List
 from collections import defaultdict
 
+
 def wordset(words, label, f=lambda x: x.lower().replace(" ", "_")):
     """
     Create a log(n) parser for a set of n strings.

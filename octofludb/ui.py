@@ -316,9 +316,7 @@ def mk_table_cmd(args):
     import octofludb.classes as classes
 
     def _mk_table_cmd(g, fh):
-        (inc, exc, levels) = process_tablelike(
-            args.include, args.exclude, args.levels
-        )
+        (inc, exc, levels) = process_tablelike(args.include, args.exclude, args.levels)
         classes.Table(
             filehandle=fh,
             tag=args.tag,
@@ -354,9 +352,7 @@ def mk_fasta_cmd(args):
     import octofludb.classes as classes
 
     def _mk_fasta_cmd(g, fh):
-        (inc, exc, levels) = process_tablelike(
-            args.include, args.exclude, None
-        )
+        (inc, exc, levels) = process_tablelike(args.include, args.exclude, None)
         classes.Ragged(
             filehandle=fh,
             tag=args.tag,

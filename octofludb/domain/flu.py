@@ -18,6 +18,7 @@ p_segment = p_internal_gene ^ p_HA ^ p_NA ^ p.string("HA") ^ p.string("NA")
 p_constellation = p.regex("[TPVH-]{6}")
 p_segment_number = p.regex("[1-8]")
 
+
 @p.generate
 def p_subtype():
     yield p.regex("(A *\/ *)?")
@@ -25,7 +26,7 @@ def p_subtype():
     host = yield p.regex("(hu|sw|av)?")
     na = yield p_NA
     v = yield p.regex("(v)?")
-    return (ha + host + na + v)
+    return ha + host + na + v
 
 
 def mapreplace(x, pattern, replace):
