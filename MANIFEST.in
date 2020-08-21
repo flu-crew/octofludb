@@ -1,1 +1,2 @@
 include octofludb/data/octofludb-config.ttl
+include octofludb/data/segments.rq

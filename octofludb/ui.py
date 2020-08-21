@@ -121,7 +121,7 @@ def call_query_cmd(args):
 
 
 @subcommand(["update", cli.argument("sparql_filename"), url_arg, repo_name_arg])
-def call_query_cmd(args):
+def call_update_cmd(args):
     """
     Submit a SPARQL delete or insert query to octofludb
     """
@@ -364,6 +364,34 @@ def mk_fasta_cmd(args):
         ).connect(g)
 
     with_graph(_mk_fasta_cmd, args.filename)
+
+
+
+@subcommand(["const", url_arg, repo_name_arg,])
+def const_cmd(args):
+    """
+    Generate constellations for all swine strains.
+
+    A constellation is a succinct description of the internal 6 genes. The
+    description consists of 6 symbols representing the phylogenetic clades of
+    the 6 proteins: PB2, PB1, PA, NP, M, and NS. Current US strains should
+    consist of genes from 3 groups: pandemic (P), TRIG (T), and the LAIV
+    vaccine strain (V). "-" indicates that no sequence is available for the
+    given segment. "H" represents a human seasonal internal gene (there are
+    only a few of these in the US. "X" represents something else exotic (e.g.,
+    not US). For mixed strains, the the constellation will be recorded as
+    MIXED.
+    """
+    import octofludb.formatting as formatting
+
+    sparql_filename = os.path.join(
+        os.path.dirname(__file__), "data", "segments.rq"
+    )
+
+    results = db.sparql_query(
+        sparql_file=sparql_filename, url=args.url, repo_name=args.repo
+    )
+    formatting.write_constellations(results)
 
 
 def main():

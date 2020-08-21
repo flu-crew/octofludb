@@ -33,3 +33,64 @@ def write_as_table(results, header=True):
     for row in results["results"]["bindings"]:
         fields = (val(row, field) for field in results["head"]["vars"])
         print("\t".join(fields))
+
+
+def write_constellations(results):
+    """
+    Prepare constellations
+    """
+
+    rows = _parse_constellation_query(results)
+
+    consts = _make_constellations(rows)
+
+    for (strain, const) in consts:
+        print(f"{strain}\t{const}")
+
+
+def _parse_constellation_query(results):
+    return [(
+        row["strain"]["value"],
+        row["segment"]["value"],
+        row["clade"]["value"],) for row in results["results"]["bindings"]]
+
+
+def _make_constellations(rows):
+
+    segment_lookup = dict(PB2=0, PB1=1, PA=2, NP=3, M=4, MP=4, NS=5)
+
+    clade_lookup = dict(
+        pdm="P", LAIV="V", TRIG="T", humanSeasonal="H", classicalSwine="C"
+    )
+
+    const = dict()
+    for (strain, segment, clade) in rows:
+
+        if strain in const:
+            if const[strain] is None:
+                continue
+        else:
+            const[strain] = list("------")
+
+        try:
+            index = segment_lookup[segment]
+        except KeyError as f:
+            raise f
+
+        if clade in clade_lookup:
+            char = clade_lookup[clade]
+        else:
+            char = "X"
+
+        if const[strain][index] == "-":
+            const[strain][index] = char
+        elif const[strain][index] != char:
+            const[strain] = None
+
+    rows = []
+    for (k, c) in const.items():
+        if c is None:
+            rows.append((k, "MIXED"))
+        else:
+            rows.append((k, "".join(c)))
+    return rows

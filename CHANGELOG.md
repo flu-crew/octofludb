@@ -1,3 +1,8 @@
+v0.3.0
+======
+
+ * Add first recipe - a subcommand for getting all constellations
+
 v0.2.0
 ======
 

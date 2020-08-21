@@ -1,0 +1,16 @@
+PREFIX f: <https://flu-crew.org/term/>
+
+SELECT DISTINCT
+    ?strain
+    ?segment
+    ?clade
+WHERE {
+    ?sid f:host "swine" .
+    ?sid f:strain_name ?strain .
+    ?sid f:has_segment ?gid .
+    ?gid f:segment_name ?segment .
+    ?gid f:clade ?clade .
+
+    FILTER (?segment != "HA") .
+    FILTER (?segment != "NA") .
+}

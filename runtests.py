@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import octofludb.classifiers.flucrew as ftok
+import octofludb.formatting as formatter
 import octofludb.token as tok
 from octofludb.nomenclature import (
     make_uri,
@@ -625,6 +626,102 @@ class TestFasta(unittest.TestCase):
         x2.connect(g2)
         s2 = sorted([(str(s), str(p), str(o)) for s, p, o in g2])
         self.assertEqual(s1, s2)
+
+
+class TestConstellations(unittest.TestCase):
+    def test_constellations_base_case(self):
+        self.assertEqual(formatter._make_constellations([]), [])
+
+    def test_constellations_regular(self):
+        data = [
+            # A PPPPPP
+            ("A", "PB2", "pdm"),
+            ("A", "PB1", "pdm"),
+            ("A", "PA", "pdm"),
+            ("A", "NP", "pdm"),
+            ("A", "M", "pdm"),
+            ("A", "NS", "pdm"),
+            # B TTTTTT
+            ("B", "PB2", "TRIG"),
+            ("B", "PA", "TRIG"),
+            ("B", "NP", "TRIG"),
+            ("B", "PB1", "TRIG"),
+            ("B", "M", "TRIG"),
+            ("B", "NS", "TRIG"),
+            # C VVVVVV
+            ("C", "PB2", "LAIV"),
+            ("C", "PA", "LAIV"),
+            ("C", "NP", "LAIV"),
+            ("C", "M", "LAIV"),
+            ("C", "PB1", "LAIV"),
+            ("C", "NS", "LAIV"),
+            # D HHHHHH
+            ("D", "PB1", "humanSeasonal"),
+            ("D", "PA", "humanSeasonal"),
+            ("D", "M", "humanSeasonal"),
+            ("D", "NP", "humanSeasonal"),
+            ("D", "NS", "humanSeasonal"),
+            ("D", "PB2", "humanSeasonal"),
+            # E PTHV-P
+            ("E", "PB1", "TRIG"),
+            ("E", "PA", "humanSeasonal"),
+            ("E", "NP", "LAIV"),
+            ("E", "NS", "pdm"),
+            ("E", "PB2", "pdm"),
+        ]
+        out = [
+            ("A", "PPPPPP"),
+            ("B", "TTTTTT"),
+            ("C", "VVVVVV"),
+            ("D", "HHHHHH"),
+            ("E", "PTHV-P"),
+        ]
+        self.assertEqual(formatter._make_constellations(data), out)
+
+    def test_constellations_mixed(self):
+        data = [
+            # A PPPPPP
+            ("A", "PB2", "pdm"),
+            ("A", "PB1", "pdm"),
+            ("A", "PA", "pdm"),
+            ("A", "NP", "pdm"),
+            ("A", "M", "pdm"),
+            ("A", "NS", "pdm"),
+            ("A", "NS", "TRIG"),
+        ]
+        out = [
+            ("A", "MIXED"),
+        ]
+        self.assertEqual(formatter._make_constellations(data), out)
+
+    def test_constellations_well_mixed(self):
+        data = [
+            # A PPPPPP
+            ("A", "PB2", "pdm"),
+            ("A", "PB1", "pdm"),
+            ("A", "PA", "pdm"),
+            ("A", "NP", "pdm"),
+            ("A", "M", "pdm"),
+            ("A", "NS", "TRIG"),
+            ("A", "NS", "TRIG"),
+        ]
+        out = [
+            ("A", "PPPPPT"),
+        ]
+        self.assertEqual(formatter._make_constellations(data), out)
+
+    def test_constellations_irregular(self):
+        data = [
+            # A PPPPPP
+            ("A", "PB2", "pdm"),
+            ("A", "PB1", "chocolate"), # FYI - unfortunately, it doesn't come in chocolate
+            ("A", "NP", "pdm"),
+            ("A", "NS", "TRIG"),
+        ]
+        out = [
+            ("A", "PX-P-T"),
+        ]
+        self.assertEqual(formatter._make_constellations(data), out)
 
 
 if __name__ == "__main__":
