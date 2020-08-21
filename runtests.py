@@ -93,6 +93,8 @@ class TestConstellation(unittest.TestCase):
     def test_Constellation(self):
         self.assertEqual(ftok.Constellation("TTPVVP").clean, "TTPVVP")
         self.assertEqual(ftok.Constellation("T-----").clean, "T-----")
+        self.assertEqual(ftok.Constellation("XXXXXX").clean, "XXXXXX")
+        self.assertEqual(ftok.Constellation("MIXED").clean, "MIXED")
         self.assertEqual(ftok.Constellation("bogus").clean, None)
 
 

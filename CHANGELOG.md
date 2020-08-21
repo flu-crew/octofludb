@@ -2,6 +2,7 @@ v0.3.0
 ======
 
  * Add first recipe - a subcommand for getting all constellations
+ * Allow the constellation MIXED and allow X for unknown clades
 
 v0.2.0
 ======
