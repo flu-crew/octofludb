@@ -1,0 +1,7 @@
+PREFIX f: <https://flu-crew.org/term/>
+
+SELECT DISTINCT ?gb
+WHERE {
+    ?sid f:has_segment/f:genbank_id ?gb .
+    ?sid f:host "swine" .
+}
