@@ -133,6 +133,21 @@ function make-tags(){
     octofludb upload $ttl/$tag.ttl
 }
 
+function make-motifs(){
+    ./find-motifs.sh
+    for motif in Sa Sb Ca1 Ca2 Cb
+    do
+        awk -v name=${motif}_motif 'BEGIN{OFS="\t"}
+            NR == 1 {print "genbank_id", name}
+            {print}' ${motif}.tab > .tmp
+        octofludb mk_table .tmp > ${motif}.ttl
+        octofludb upload ${motif}.ttl 
+        mv ${motif}.ttl $ttl/${motif}.ttl
+        rm .tmp
+        rm ${motif}.tab
+    done
+}
+
 
 upload influenza_na.dat influenza_na.ttl mk_ivr
 upload IRD-results.tsv IRD.ttl mk_ird
@@ -161,3 +176,6 @@ make-tags $dat/vaccine/isolate_ids.txt vaccine
 
 # variants
 make-tags $dat/variants/isolate_ids.txt variant
+
+# add antigenic motifs
+make-motifs

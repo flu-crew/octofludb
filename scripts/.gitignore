@@ -1,0 +1,16 @@
+*.tab
+.*aln
+.*faa
+.*fna
+.A0*
+.all.fna
+.gb_.*
+.new.fna
+.octoflu_results
+.tmp
+archive/
+genbank-new.ttl
+log
+octoFLU/
+turtles/
+z

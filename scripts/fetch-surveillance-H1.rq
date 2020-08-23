@@ -1,0 +1,25 @@
+PREFIX f: <https://flu-crew.org/term/>
+
+SELECT DISTINCT
+    ?gb
+    ?clade
+    ?date
+    ?seq
+WHERE {
+    ?sid f:host "swine" .
+    ?sid f:strain_name ?strain .
+    ?sid f:subtype ?subtype .
+    ?sid f:date ?date .
+
+    # limit to surveillance data (post-pandemic, US, A0 strain)
+    ?sid f:country/f:code "USA" .       # only US
+    FILTER (REGEX(?strain, "A0")) .     # only A0 strains
+    FILTER (YEAR(?date) > 2008) .       # 2009-present
+    FILTER (REGEX(?subtype, "H1N")) .   # only H1, for now
+
+    ?sid f:has_segment ?gid .
+    ?gid f:segment_name "HA" .
+    ?gid f:clade ?clade .
+    ?gid f:genbank_id ?gb .
+    ?gid f:dnaseq ?seq .
+}
