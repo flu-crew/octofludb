@@ -6,5 +6,4 @@ WHERE {
     ?sid f:has_segment ?gid .
     ?gid f:genbank_id ?gb .
     ?gid f:dnaseq ?seq .
-    MINUS { ?gid  f:clade ?clade . }
 }

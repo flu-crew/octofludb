@@ -101,7 +101,7 @@ export -f update-epiflu-fasta
 function octoflu(){
     octofludb query --fasta fetch-swine-sequences.rq > .all.fna
     touch $ttl/octoflu.ttl
-    smof grep -Xvf <(grep genbank_id $ttl/octoflu.ttl | sed 's/.*genbank_id "\([^"]*\).*/\1/') .all.fna > .new.fna
+    smof grep -Xvf <(grep genbank_id $ttl/octoflu.ttl | sed 's/.*genbank_id "\([^"]*\).*/\1/') .all.fna | smof uniq -f > .new.fna
     rm -f .xxx*
     smof split --number=1000 --seqs --prefix=".xxx"  .new.fna
     rm -rf octoFLU/.xxx*
@@ -111,7 +111,7 @@ function octoflu(){
     cd ..
     cat octoFLU/.xxx*Final_Output.txt |
         sort -u |
-        awk 'BEGIN {OFS="\t"; FS="\t"; print "genbank_id", "clade", "gl_clade"} {print $1, $3, $4}' > .octoflu_results
+        awk 'BEGIN {OFS="\t"; FS="\t"; print "genbank_id", "segment_subtype", "clade", "gl_clade"} {print $1, $2, $3, $4}' > .octoflu_results
     octofludb mk_table .octoflu_results > $ttl/octoflu.ttl
     octofludb upload $ttl/octoflu.ttl
 }
