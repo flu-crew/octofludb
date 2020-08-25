@@ -1,3 +1,10 @@
+v0.4.0
+======
+
+ * Update patterns for global clades
+   * allow "Other-Equine" and such
+   * allow lowercase letters after "3.XXXX."
+
 v0.3.0
 ======
 

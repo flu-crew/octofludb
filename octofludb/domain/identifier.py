@@ -12,7 +12,7 @@ p_seqid = p_gb ^ p_epi_id
 
 p_global_clade = (
     p.regex("\d[ABC]([\._-]\d+){1,4}([_-]?like)?([_-]?vaccine)?")
-    ^ p.regex("Other-Human[0-9.ABC-]*")
-    ^ p.regex("3\.[12][09]\d0\.[0-9.ABC-]+")
-    ^ p.regex("humanVaccine")
+    ^ p.regex("Other-[A-Za-z]*[0-9.a-zA-Z-]*")
+    ^ p.regex("3\.[12][09]\d0\.[0-9.a-zA-Z-]+")
+    ^ p.regex("(humanVaccine|Outgroup)")
 )
