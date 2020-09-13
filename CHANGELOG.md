@@ -1,3 +1,8 @@
+v0.5.1
+======
+
+ * in `update_gb` - work backwards through months, not just years
+
 v0.5.0
 ======
 

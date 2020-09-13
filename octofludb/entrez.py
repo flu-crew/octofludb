@@ -67,7 +67,7 @@ def missing_acc_by_date(min_year=1918, url="http://localhost:7200", repo="octofl
     for year in reversed(range(2000, cur_year + 1)):
         if year < min_year:
             break
-        for month in range(1, 12 + 1):
+        for month in reversed(range(1, 12 + 1)):
             if year == cur_year and month > cur_month:
                 # pulling future sequences is not yet supported
                 continue
