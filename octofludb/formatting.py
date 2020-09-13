@@ -49,10 +49,10 @@ def write_constellations(results):
 
 
 def _parse_constellation_query(results):
-    return [(
-        row["strain"]["value"],
-        row["segment"]["value"],
-        row["clade"]["value"],) for row in results["results"]["bindings"]]
+    return [
+        (row["strain"]["value"], row["segment"]["value"], row["clade"]["value"])
+        for row in results["results"]["bindings"]
+    ]
 
 
 def _make_constellations(rows):

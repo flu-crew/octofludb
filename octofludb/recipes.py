@@ -9,6 +9,7 @@ import parsec
 from octofludb.nomenclature import P, O, make_uri, make_tag_uri
 from octofludb.util import log, file_str
 import re
+import math
 from tqdm import tqdm
 import datetime as datetime
 
@@ -116,8 +117,9 @@ def mk_ird(g, filehandle) -> None:
                     tok.Unknown(els[10], field_name="flu_season", na_str=na_str),
                     flu.Strain(els[11], field_name="strain_name", na_str=na_str),
                     # curation report - hard pass
-                    flu.US_Clade(els[13], field_name="us_clade", na_str=na_str),
-                    flu.GlobalClade(els[14], field_name="gl_clade", na_str=na_str),
+                    ### I don't need your annotations, I can do my own, thank you very much
+                    #  flu.US_Clade(els[13], field_name="us_clade", na_str=na_str),
+                    #  flu.GlobalClade(els[14], field_name="gl_clade", na_str=na_str),
                 ]
             ).connect(g)
         except IndexError:
@@ -201,3 +203,172 @@ def mk_gis(g, filehandle) -> None:
             log("Bad line - other error")
             for name, col in d.items():
                 log(name + " : " + str(col[i]))
+
+
+def default_access(row, field):
+    try:
+        return row[field]["value"].split("+")
+    except:
+        return []
+
+
+def append_add(entry, field, values):
+    if len(values) > 0:
+        if field in entry:
+            for value in values:
+                if not value in entry[field]:
+                    entry[field].append(value)
+        else:
+            entry[field] = values
+    else:
+        entry[field] = []
+
+
+def quarter_from_date(date):
+    year, month = date.split("-")[0:2]
+    quarter = str(math.ceil(int(month) / 3))
+    return f"{year}Q{quarter}"
+
+
+def _get_subtype(has, nas):
+    if len(has) > 1:
+        ha = None
+    elif len(has) == 0:
+        ha = ""
+    else:
+        ha = has[0]
+
+    if len(nas) > 1:
+        na = None
+    elif len(nas) == 0:
+        na = ""
+    else:
+        na = nas[0]
+
+    if na is None or ha is None:
+        subtype = "Mixed"
+    else:
+        subtype = ha + na
+
+    return subtype
+
+
+MASTERLIST_HEADER = [
+    "Barcode",
+    "Date",
+    "Collection_Q",
+    "State",
+    "Subtype",
+    "H_Genbank",
+    "N_Genbank",
+    "PB2_Genbank",
+    "PB1_Genbank",
+    "PA_Genbank",
+    "NP_Genbank",
+    "M_Genbank",
+    "NS_Genbank",
+    "Strain",
+    "US_Clade",
+    "GL_Clade",
+    "H1",
+    "H3",
+    "N1",
+    "N2",
+    "PB2",
+    "PB1",
+    "PA",
+    "NP",
+    "M",
+    "NS",
+    "Constellation",
+    "Motif",
+    "Sa_Motif",
+    "Sb_Motif",
+    "Ca1_Motif",
+    "Ca2_Motif",
+    "Cb_Motif",
+]
+
+
+def mk_masterlist(results):
+    entries = dict()
+
+    for row in results["results"]["bindings"]:
+        barcode = row["barcode"]["value"]
+        if barcode in entries:
+            entry = entries[barcode]
+        else:
+            entry = dict()
+            # initialize fields
+            for field in ["ha_subtype", "na_subtype"] + MASTERLIST_HEADER:
+                entry[field] = []
+
+        gb = row["genbank_id"]["value"]
+        segment = row["segment"]["value"]
+
+        genbank_id = default_access(row, "genbank_id")[0]
+        segment = default_access(row, "segment")[0]
+        dates = default_access(row, "dates")
+        states = default_access(row, "states")
+        strains = default_access(row, "strains")
+        us_clades = default_access(row, "us_clades")
+        gl_clades = default_access(row, "gl_clades")
+        consts = default_access(row, "consts")
+        h3_motifs = default_access(row, "h3_motifs")
+        sa_motifs = default_access(row, "sa_motifs")
+        sb_motifs = default_access(row, "sb_motifs")
+        ca1_motifs = default_access(row, "ca1_motifs")
+        ca2_motifs = default_access(row, "ca2_motifs")
+        cb_motifs = default_access(row, "cb_motifs")
+
+        append_add(entry, "Date", dates)
+        append_add(entry, "Collection_Q", [quarter_from_date(date) for date in dates])
+        append_add(entry, "State", states)
+
+        if segment == "HA":
+            append_add(entry, "H_Genbank", [genbank_id])
+            append_add(entry, "US_Clade", us_clades)
+            append_add(entry, "GL_Clade", gl_clades)
+        elif segment == "NA":
+            append_add(entry, "N_Genbank", [genbank_id])
+            append_add(entry, segment, us_clades)
+        else:
+            append_add(entry, segment + "_Genbank", [genbank_id])
+            append_add(entry, segment, us_clades)
+
+        maybe_segment_subtype = default_access(row, "segment_subtype")
+        if maybe_segment_subtype:
+            segment_subtype = maybe_segment_subtype[0]
+            if re.fullmatch("H\d+", segment_subtype):
+                append_add(entry, "ha_subtype", [segment_subtype])
+            elif re.fullmatch("N\d+", segment_subtype):
+                append_add(entry, "na_subtype", [segment_subtype])
+
+            if segment_subtype == "H1":
+                append_add(entry, "H1", us_clades)
+            elif segment_subtype == "H3":
+                append_add(entry, "H3", us_clades)
+
+            if segment_subtype == "N1":
+                append_add(entry, "N1", us_clades)
+            elif segment_subtype == "N2":
+                append_add(entry, "N2", us_clades)
+
+        append_add(entry, "Strain", strains)
+        append_add(entry, "Constellation", consts)
+        append_add(entry, "Motif", h3_motifs)
+        append_add(entry, "Sa_Motif", sa_motifs)
+        append_add(entry, "Sb_Motif", sb_motifs)
+        append_add(entry, "Ca1_Motif", ca1_motifs)
+        append_add(entry, "Ca2_Motif", ca2_motifs)
+        append_add(entry, "Cb_Motif", cb_motifs)
+
+        entries[barcode] = entry
+
+    print("\t".join(MASTERLIST_HEADER))
+
+    for barcode, entry in entries.items():
+        entry["Barcode"] = [barcode]
+        entry["Subtype"] = [_get_subtype(entry["ha_subtype"], entry["na_subtype"])]
+        row = [",".join([f for f in entry[field] if f]) for field in MASTERLIST_HEADER]
+        print("\t".join(row))

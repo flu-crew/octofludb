@@ -1,0 +1,49 @@
+PREFIX onto: <http://www.ontotext.com/>
+PREFIX f: <https://flu-crew.org/term/>
+
+SELECT DISTINCT
+  # required for upload to IRD
+  ?barcode
+  ?genbank_id
+  ?segment
+  ?segment_subtype
+  (GROUP_CONCAT(DISTINCT ?date;      separator="+") as ?dates      )
+  (GROUP_CONCAT(DISTINCT ?state;     separator="+") as ?states     )
+  (GROUP_CONCAT(DISTINCT ?strain;    separator="+") as ?strains    )
+  (GROUP_CONCAT(DISTINCT ?us_clade;  separator="+") as ?us_clades  )
+  (GROUP_CONCAT(DISTINCT ?gl_clade;  separator="+") as ?gl_clades  )
+  (GROUP_CONCAT(DISTINCT ?const;     separator="+") as ?consts     )
+  (GROUP_CONCAT(DISTINCT ?h3_motif;  separator="+") as ?h3_motifs  )
+  (GROUP_CONCAT(DISTINCT ?sa_motif;  separator="+") as ?sa_motifs  )
+  (GROUP_CONCAT(DISTINCT ?sb_motif;  separator="+") as ?sb_motifs  )
+  (GROUP_CONCAT(DISTINCT ?ca1_motif; separator="+") as ?ca1_motifs )
+  (GROUP_CONCAT(DISTINCT ?ca2_motif; separator="+") as ?ca2_motifs )
+  (GROUP_CONCAT(DISTINCT ?cb_motif;  separator="+") as ?cb_motifs  )
+FROM onto:disable-sameAs
+WHERE {
+  ?sid f:strain_name ?strain .
+
+  # limit to usa surveillance strains
+  ?sid f:host "swine" .
+  ?sid f:country/f:code "USA" .
+  FILTER REGEX(?strain, "A/swine/.*/A0") .
+
+  ?sid f:barcode ?barcode .
+  ?sid f:date ?date .
+  OPTIONAL { ?sid f:state/f:abbr ?state . }
+  OPTIONAL { ?sid f:constellation ?const . }
+
+  ?sid f:has_segment ?gid .
+  ?gid f:segment_name ?segment .
+  OPTIONAL { ?gid f:segment_subtype ?segment_subtype . }
+  ?gid f:genbank_id ?genbank_id .
+  OPTIONAL { ?gid f:clade     ?us_clade  . }
+  OPTIONAL { ?gid f:gl_clade  ?gl_clade  . }
+  OPTIONAL { ?gid f:h3_motif  ?h3_motif  . }
+  OPTIONAL { ?gid f:sa_motif  ?sa_motif  . }
+  OPTIONAL { ?gid f:sb_motif  ?sb_motif  . }
+  OPTIONAL { ?gid f:ca1_motif ?ca1_motif . }
+  OPTIONAL { ?gid f:ca2_motif ?ca2_motif . }
+  OPTIONAL { ?gid f:cb_motif  ?cb_motif  . }
+}
+GROUP BY ?barcode ?genbank_id ?segment ?segment_subtype

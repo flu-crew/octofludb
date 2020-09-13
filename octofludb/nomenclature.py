@@ -206,6 +206,6 @@ class P:
     gb_product = nt.product
     gb_protein_id = nt.protein_id
     gb_serotype = nt.serotype
-    gb_strain = nt.strain
+    gb_strain = nt.strain_name
     gb_transl_table = nt.transl_table
     gb_translation = nt.translation

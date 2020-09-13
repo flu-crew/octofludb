@@ -455,16 +455,32 @@ class TestStrain(unittest.TestCase):
         self.assertEqual(ftok.Strain("A/asdf/er  	").clean, "A/asdf/er")
         # support influenza A-D but not E (since there isn't one yet, and even
         # if there were, being pig people, we wouldn't care about it)
-        self.assertEqual(ftok.Strain("A/asdf").clean, "A/asdf")
-        self.assertEqual(ftok.Strain("B/asdf").clean, "B/asdf")
-        self.assertEqual(ftok.Strain("C/asdf").clean, "C/asdf")
-        self.assertEqual(ftok.Strain("D/asdf").clean, "D/asdf")
-        self.assertEqual(ftok.Strain("E/asdf").clean, None)
+        self.assertEqual(ftok.Strain("A/asdf/2020").clean, "A/asdf/2020")
+        self.assertEqual(ftok.Strain("B/asdf/2020").clean, "B/asdf/2020")
+        self.assertEqual(ftok.Strain("C/asdf/2020").clean, "C/asdf/2020")
+        self.assertEqual(ftok.Strain("D/asdf/2020").clean, "D/asdf/2020")
+        # there is no E type
+        self.assertEqual(ftok.Strain("E/asdf/2020").clean, None)
         # allow space, but munge it to underscores
-        self.assertEqual(ftok.Strain("A/asdf foo bar").clean, "A/asdf_foo_bar")
-        # match does not include parentheses, these should be treated as
-        # metadata outside the strain name
-        self.assertEqual(ftok.Strain("A/asdf()").clean, None)
+        self.assertEqual(
+            ftok.Strain("A/asdf foo bar/2020").clean, "A/asdf_foo_bar/2020"
+        )
+        # match removes parentheses
+        self.assertEqual(ftok.Strain("A/asdf/2020()").clean, "A/asdf/2020")
+        self.assertEqual(ftok.Strain("A/asdf/2020 ()").clean, "A/asdf/2020")
+        self.assertEqual(ftok.Strain("A/asdf/2020[]").clean, "A/asdf/2020")
+        self.assertEqual(ftok.Strain("A/asdf/2020 []").clean, "A/asdf/2020")
+        self.assertEqual(ftok.Strain("A/asdf/2020(H1N1)").clean, "A/asdf/2020")
+        self.assertEqual(ftok.Strain("A/asdf/2020 (H1N1)").clean, "A/asdf/2020")
+        self.assertEqual(ftok.Strain("A/asdf/2020[H1N1]").clean, "A/asdf/2020")
+        self.assertEqual(ftok.Strain("A/asdf/2020 [H1N1]").clean, "A/asdf/2020")
+        # remove enclosing parentheses (there are lots of these in genbank)
+        self.assertEqual(
+            ftok.Strain("(A/Bratislava/6/97 (H3N2))").clean, "A/Bratislava/6/97"
+        )
+        # require at least two slashes
+        self.assertEqual(ftok.Strain("A/bogus").clean, None)
+        # otherwise return nothing
         self.assertEqual(ftok.Strain("bogus").clean, None)
 
     def test_strain_barcode_parsing(self):
@@ -708,9 +724,7 @@ class TestConstellations(unittest.TestCase):
             ("A", "NS", "pdm"),
             ("A", "NS", "TRIG"),
         ]
-        out = [
-            ("A", "MIXED"),
-        ]
+        out = [("A", "MIXED")]
         self.assertEqual(formatter._make_constellations(data), out)
 
     def test_constellations_well_mixed(self):
@@ -724,22 +738,22 @@ class TestConstellations(unittest.TestCase):
             ("A", "NS", "TRIG"),
             ("A", "NS", "TRIG"),
         ]
-        out = [
-            ("A", "PPPPPT"),
-        ]
+        out = [("A", "PPPPPT")]
         self.assertEqual(formatter._make_constellations(data), out)
 
     def test_constellations_irregular(self):
         data = [
             # A PPPPPP
             ("A", "PB2", "pdm"),
-            ("A", "PB1", "chocolate"), # FYI - unfortunately, it doesn't come in chocolate
+            (
+                "A",
+                "PB1",
+                "chocolate",
+            ),  # FYI - unfortunately, it doesn't come in chocolate
             ("A", "NP", "pdm"),
             ("A", "NS", "TRIG"),
         ]
-        out = [
-            ("A", "PX-P-T"),
-        ]
+        out = [("A", "PX-P-T")]
         self.assertEqual(formatter._make_constellations(data), out)
 
 

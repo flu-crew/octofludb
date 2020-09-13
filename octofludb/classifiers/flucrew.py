@@ -163,6 +163,9 @@ class StrainToken(Token):
     def as_uri(self):
         return make_uri(self.clean)
 
+    def munge(self, text):
+        return text.replace(" ", "_")
+
     def _has_segment(self, tokens):
         for token in tokens:
             if token.group == "segment" or token.typename == "dnaseq":

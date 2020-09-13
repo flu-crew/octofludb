@@ -1,3 +1,32 @@
+v0.5.0
+======
+
+ * new subcommands:
+   * `update_gb`: add missing genbank entries
+   * `const`: generate constellations for all swine strains
+   * `masterlist`: generate the A0 masterlist used in NADC quarterly/annual
+     reports and octoflushow
+
+ * cleaner strain name parsing:
+   * require two forward slashes
+   * remove parenthesis/bracket terms, for example:
+        "A/wherever/2020 (H1N1)" --> "A/whereever/2020"
+   * replace space with underscores, for example:
+        "A/South Dakota/2020" --> ""A/South_Dakota/2020""
+
+ * improved data extraction from genbank records 
+   * link parental strains to genbank segment records
+   * link strain info to the parental strain, including: 
+     * host - with new cleaning
+     * country - with new cleaning
+     * A0 numbers - for USA strains
+     * states - for USA strains
+     * collection date - as string literal
+   * fix incorrect (s, length, locus) link
+   * convert `create_date` from string literal to date
+   * convert `update_date` from string literal to date
+   * convert `length` from string literal to integer
+
 v0.4.0
 ======
 

@@ -164,7 +164,7 @@ p_strain_field = p.regex("[^|/\n\t]+")
 # A/Denver/1957
 @p.generate
 def p_s3():
-    flutype = yield p.regex("[ABC]") << p.string("/")
+    flutype = yield p.regex("[ABCD]") << p.string("/")
     place = yield p_strain_field << p.string("/")
     year = yield p_year
     subtype = yield p.optional(p.string("(") >> p_subtype << p.string(")"))
@@ -178,7 +178,7 @@ def p_s3():
 # A/District_Of_Columbia/03/2014
 @p.generate
 def p_s4():
-    flutype = yield p.regex("[ABC]") << p.string("/")
+    flutype = yield p.regex("[ABCD]") << p.string("/")
     place = yield p_strain_field << p.string("/")
     ident = yield p_strain_field << p.string("/")
     year = yield p_year
@@ -193,7 +193,7 @@ def p_s4():
 # A/swine/Oklahoma/A01785279/2017
 @p.generate
 def p_s5():
-    flutype = yield p.regex("[ABC]") << p.string("/")
+    flutype = yield p.regex("[ABCD]") << p.string("/")
     host = yield p_strain_field << p.string("/")
     place = yield p_strain_field << p.string("/")
     ident = yield p_strain_field << p.string("/")

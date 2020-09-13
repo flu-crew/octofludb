@@ -1,0 +1,12 @@
+# Get all Genbank accessions for which full genbank data is stored
+
+PREFIX onto: <http://www.ontotext.com/>
+PREFIX f: <https://flu-crew.org/term/>
+
+SELECT DISTINCT ?acc
+FROM onto:disable-sameAs
+WHERE {
+  ?gid f:genbank_id ?acc .
+  ?gid f:dnaseq ?seq .
+  ?gid f:definition ?def .
+}

@@ -69,10 +69,10 @@ def compose(*args):
 
 
 def make_maybe_add(g, meta, sid):
-    def maybe_add(p, key):
+    def maybe_add(p, key, formatter=Literal):
         if key in meta and meta[key] != None:
             try:
-                g.add((sid, p, Literal(meta[key])))
+                g.add((sid, p, formatter(meta[key])))
             except:
                 pass
 

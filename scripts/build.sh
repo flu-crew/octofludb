@@ -99,11 +99,9 @@ function update-epiflu-fasta(){
 export -f update-epiflu-fasta
 
 function octoflu(){
-    octofludb query --fasta fetch-swine-sequences.rq > .all.fna
-    touch $ttl/octoflu.ttl
-    smof grep -Xvf <(grep genbank_id $ttl/octoflu.ttl | sed 's/.*genbank_id "\([^"]*\).*/\1/') .all.fna | smof uniq -f > .new.fna
+    # octofludb query --fasta fetch-unclassified-swine.rq | smof uniq -f > .all.fna
     rm -f .xxx*
-    smof split --number=1000 --seqs --prefix=".xxx"  .new.fna
+    smof split --number=5000 --seqs --prefix=".xxx"  .all.fna
     rm -rf octoFLU/.xxx*
     mv .xxx* octoFLU
     cd octoFLU
@@ -149,33 +147,33 @@ function make-motifs(){
 }
 
 
-upload influenza_na.dat influenza_na.ttl mk_ivr
-upload IRD-results.tsv IRD.ttl mk_ird
-update-genbank
-
-parallel "update-epiflu-metadata {} ${ttl}/{/}.ttl" ::: ${dat}/epiflu/h*/*xls
-parallel "update-epiflu-fasta    {} ${ttl}/{/}.ttl" ::: ${dat}/epiflu/h*/*fasta
+# upload influenza_na.dat influenza_na.ttl mk_ivr
+# upload IRD-results.tsv IRD.ttl mk_ird
+# update-genbank
+#
+# parallel "update-epiflu-metadata {} ${ttl}/{/}.ttl" ::: ${dat}/epiflu/h*/*xls
+# parallel "update-epiflu-fasta    {} ${ttl}/{/}.ttl" ::: ${dat}/epiflu/h*/*fasta
 
 octoflu
-constellate
-
-# CVV
-make-tags $dat/CDC_CVV/isolate_ids.txt cdc_cvv
-
-# antiserum
-make-tags $dat/antiserum/antiserum_strain_names.txt antiserum
-
-# antigen
-make-tags $dat/antiserum/antigen_strain_names.txt antigen
-
-# octoflu-references
-make-tags $dat/octoflu-references/segment-ids.txt octoflu_refs
-
-# vaccine
-make-tags $dat/vaccine/isolate_ids.txt vaccine
-
-# variants
-make-tags $dat/variants/isolate_ids.txt variant
-
-# add antigenic motifs
-make-motifs
+# constellate
+#
+# # CVV
+# make-tags $dat/CDC_CVV/isolate_ids.txt cdc_cvv
+#
+# # antiserum
+# make-tags $dat/antiserum/antiserum_strain_names.txt antiserum
+#
+# # antigen
+# make-tags $dat/antiserum/antigen_strain_names.txt antigen
+#
+# # octoflu-references
+# make-tags $dat/octoflu-references/segment-ids.txt octoflu_refs
+#
+# # vaccine
+# make-tags $dat/vaccine/isolate_ids.txt vaccine
+#
+# # variants
+# make-tags $dat/variants/isolate_ids.txt variant
+#
+# # add antigenic motifs
+# make-motifs

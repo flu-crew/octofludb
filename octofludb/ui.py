@@ -8,7 +8,7 @@ import argparse
 import textwrap
 import requests
 import octofludb.cli as cli
-
+from octofludb.util import log
 
 parser = argparse.ArgumentParser(
     prog="octofludb",
@@ -34,18 +34,21 @@ def open_graph():
     return Graph(namespace_manager=manager)
 
 
-def with_graph(f, filename, *args, **kwargs):
-    from octofludb.util import log
-
+def with_graph(f, filename=None, outfile=sys.stdout, *args, **kwargs):
     g = open_graph()
-    with open(filename, "r") as fh:
-        f(g, fh, *args, **kwargs)
-        g.commit()  # just in case we missed anything
-        log("Serializing to turtle format ... ", end="")
-        turtles = g.serialize(format="turtle")
-        log("done")
-        for l in turtles.splitlines():
-            print(l.decode("utf-8"))
+
+    if filename is not None:
+        with open(filename, "r") as fh:
+            f(g, fh, *args, **kwargs)
+    else:
+        f(g, *args, **kwargs)
+
+    g.commit()  # just in case we missed anything
+    log("Serializing to turtle format ... ", end="")
+    turtles = g.serialize(format="turtle")
+    log("done")
+    for l in turtles.splitlines():
+        print(l.decode("utf-8"), file=outfile)
     g.close()
 
 
@@ -177,8 +180,6 @@ def tag_cmd(args):
     from octofludb.nomenclature import make_uri, make_tag_uri, P
     from octofludb.util import file_str
 
-    from octofludb.util import log
-
     g = open_graph()
     with open(args.filename, "r") as fh:
         taguri = make_tag_uri(args.tag)
@@ -232,6 +233,17 @@ def mk_gis_cmd(args):
     with_graph(recipe.mk_gis, args.filename)
 
 
+def _mk_gbids_cmd(g, gbids):
+    import octofludb.entrez as entrez
+    import octofludb.genbank as gb
+
+    for gb_metas in entrez.get_gbs(gbids):
+        for gb_meta in gb_metas:
+            gb.add_gb_meta_triples(g, gb_meta)
+        # commit the current batch (say of 1000 entries)
+        g.commit()
+
+
 @subcommand(
     ["mk_gbids", cli.argument("filename", help="File containing a list of genbank ids")]
 )
@@ -239,20 +251,34 @@ def mk_gbids_cmd(args):
     """
     Retrieve data for a list of genbank ids
     """
-    import octofludb.entrez as entrez
-    import octofludb.genbank as gb
-    from octofludb.util import log, file_str
+    with open(args.filename, "r") as fh:
+        gbids = [gbid.strip() for gbid in fh]
+    log(f"Retrieving and parsing genbank ids from '{args.filename}'")
+    with_graph(_mk_gbids_cmd, gbids=gbids)
 
-    def _mk_gbids_cmd(g, fh):
-        log(f"Retrieving and parsing genbank ids from '{file_str(fh)}'")
-        gbids = [gbid.strip() for gbid in fh.readlines()]
-        for gb_metas in entrez.get_gbs(gbids):
-            for gb_meta in gb_metas:
-                gb.add_gb_meta_triples(g, gb_meta)
-            # commit the current batch (say of 1000 entries)
-            g.commit()
 
-    with_graph(_mk_gbids_cmd, args.filename)
+@subcommand(
+    [
+        "update_gb",
+        cli.argument("--minyear", help="Earliest year to update", default=1918),
+    ]
+)
+def mk_update_gb(args):
+    """
+    Retrieve any missing genbank records. Results are stored in files with the prefix '.gb_###.ttl'.
+    """
+    from octofludb.entrez import missing_acc_by_date
+    import octofludb.colors as colors
+
+    minyear = int(args.minyear)
+    for date, missing_acc in missing_acc_by_date(min_year=minyear):
+        if missing_acc:
+            log(colors.good(f"Updating {date} ..."))
+            outfile = ".gb_" + date.replace("/", "-") + ".ttl"
+            with open(outfile, "w") as fh:
+                with_graph(_mk_gbids_cmd, gbids=missing_acc, outfile=fh)
+        else:
+            log(colors.good(f"Up-to-date for {date}"))
 
 
 @subcommand(
@@ -267,7 +293,6 @@ def mk_blast_cmd(args):
     Translate BLAST results into RDF
     """
     import octofludb.recipes as recipe
-    from octofludb.util import log, file_str
 
     log(f"Retrieving and parsing blast results from '{args.filename}'")
     with_graph(recipe.mk_blast, args.filename, tag=args.tag)
@@ -366,8 +391,7 @@ def mk_fasta_cmd(args):
     with_graph(_mk_fasta_cmd, args.filename)
 
 
-
-@subcommand(["const", url_arg, repo_name_arg,])
+@subcommand(["const", url_arg, repo_name_arg])
 def const_cmd(args):
     """
     Generate constellations for all swine strains.
@@ -384,14 +408,30 @@ def const_cmd(args):
     """
     import octofludb.formatting as formatting
 
-    sparql_filename = os.path.join(
-        os.path.dirname(__file__), "data", "segments.rq"
-    )
+    sparql_filename = os.path.join(os.path.dirname(__file__), "data", "segments.rq")
 
     results = db.sparql_query(
         sparql_file=sparql_filename, url=args.url, repo_name=args.repo
     )
     formatting.write_constellations(results)
+
+
+@subcommand(["masterlist", url_arg, repo_name_arg])
+def const_cmd(args):
+    """
+    Generate the surveillance masterlist
+    """
+    import octofludb.recipes as recipe
+
+    sparql_filename = os.path.join(os.path.dirname(__file__), "data", "masterlist.rq")
+
+    results = db.sparql_query(
+        sparql_file=sparql_filename, url=args.url, repo_name=args.repo
+    )
+
+    masterlist = recipe.mk_masterlist(results)
+
+    print(masterlist)
 
 
 def main():
