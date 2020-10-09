@@ -20,3 +20,8 @@ You may need to replace `pip` with `pip3` on your system.
 
 You can get a list of subcommands with `octofludb -h`. More detailed
 documentation is available for each subcommand, e.g., `octofludb query -h`.
+
+## Problem strain examples
+
+    `A/USA/LAN_(P10)_NA/2018`
+    `A/R(duck/Hokkaido/9/99-tern/South Africa/1961)`

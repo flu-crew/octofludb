@@ -3,6 +3,7 @@
 .*faa
 .*fna
 .A0*
+*.ids
 .all.fna
 .gb_.*
 .new.fna
@@ -11,6 +12,7 @@
 .gb*
 archive/
 genbank-new.ttl
+constellations.ttl
 log
 octoFLU/
 turtles/

@@ -181,11 +181,11 @@ f:name rdfs:domain world:Country .
 f:code rdfs:domain world:Country .
 
 # none of these are really countries, but I include them since they can show up
-world:czechoslovakia f:name "Czechoslovakia" .
-world:gaza_strip f:name "Gaza Strip" .
-world:kosovo f:name "Kosovo" .
+world:czechoslovakia  f:name "Czechoslovakia"  .
+world:gaza_strip      f:name "Gaza Strip"      .
+world:kosovo          f:name "Kosovo"          .
 world:northern_cyprus f:name "Northern Cyprus" .
-world:west_bank f:name "West Bank" .
+world:west_bank       f:name "West Bank"       .
 
 # countries indexed by 3-letter code
 world:ABW f:code "ABW" .

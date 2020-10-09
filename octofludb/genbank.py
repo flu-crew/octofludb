@@ -113,7 +113,11 @@ def add_gb_meta_triples(g, gb_meta, only_influenza_a=True):
             g.add((sid, P.date, date))
         if country:
             code = geo.country_to_code(country)
-            g.add((sid, P.country, make_country_uri(code)))
+            country_uri = make_country_uri(country)
+            g.add((sid, P.country, country_uri))
+            if code is None:
+              # if this is an unrecognized country (e.g., Kosovo) then state
+              g.add((country_uri, P.name, Literal(country)))
             if code == "USA":
                 fields = strain.split("/")
                 for field in fields[1:]:
