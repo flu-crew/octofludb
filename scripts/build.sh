@@ -44,30 +44,6 @@ function upload(){
 
 mkdir -p "$ttl" 
 
-update-genbank() {
-    log "Fetching all influenza genbank ids"
-
-    allgb=.all-gb.ids
-    oldgb=.gb-existing.ids
-    newgb=.gb-new.ids
-
-    time octofludb query fetch-gids.rq > $allgb
-
-    touch $ttl/genbank.ttl
-    grep genbank_id $ttl/genbank.ttl | sed 's/.*"\([^"]*\)".*/\1/' > $oldgb
-
-    # find the genbank ids that are not in the current genbank.ttl file
-    comm -1 -3 <(sort $oldgb) <(sort $allgb) > $newgb
-
-    log "Adding $(nlines $newgb) genbank ids to the current set of $(nlines $oldgb)"
-    time octofludb mk_gbids $newgb > genbank-new.ttl
-    octofludb upload genbank-new.ttl
-
-    cat genbank-new.ttl <(grep -v '^@prefix' $ttl/genbank.ttl) > genbank.ttl~
-    mv genbank.ttl~ $ttl/genbank.ttl
-    rm -f $allgb $oldgb $newgb
-}
-
 function update-epiflu-metadata(){
     data=$1
     turtle=$2
@@ -99,7 +75,7 @@ function update-epiflu-fasta(){
 export -f update-epiflu-fasta
 
 function octoflu(){
-    # octofludb query --fasta fetch-unclassified-swine.rq | smof uniq -f > .all.fna
+    octofludb query --fasta fetch-unclassified-swine.rq | smof uniq -f > .all.fna
     rm -f .xxx*
     smof split --number=5000 --seqs --prefix=".xxx"  .all.fna
     rm -rf octoFLU/.xxx*
@@ -110,6 +86,7 @@ function octoflu(){
     cat octoFLU/.xxx*Final_Output.txt |
         sort -u |
         awk 'BEGIN {OFS="\t"; FS="\t"; print "genbank_id", "segment_subtype", "clade", "gl_clade"} {print $1, $2, $3, $4}' > .octoflu_results
+        # awk 'BEGIN {OFS="\t"; FS="\t"} {print $1, $2, $3, $4}' >> .octoflu_results
     octofludb mk_table .octoflu_results > $ttl/octoflu.ttl
     octofludb upload $ttl/octoflu.ttl
 }
@@ -146,34 +123,32 @@ function make-motifs(){
     done
 }
 
+octofludb update_gb
+octofludb upload .gb_*.ttl
 
-# upload influenza_na.dat influenza_na.ttl mk_ivr
-# upload IRD-results.tsv IRD.ttl mk_ird
-# update-genbank
-#
-# parallel "update-epiflu-metadata {} ${ttl}/{/}.ttl" ::: ${dat}/epiflu/h*/*xls
-# parallel "update-epiflu-fasta    {} ${ttl}/{/}.ttl" ::: ${dat}/epiflu/h*/*fasta
+parallel "update-epiflu-metadata {} ${ttl}/{/}.ttl" ::: ${dat}/epiflu/h*/*xls
+parallel "update-epiflu-fasta    {} ${ttl}/{/}.ttl" ::: ${dat}/epiflu/h*/*fasta
 
 octoflu
-# constellate
-#
-# # CVV
-# make-tags $dat/CDC_CVV/isolate_ids.txt cdc_cvv
-#
-# # antiserum
-# make-tags $dat/antiserum/antiserum_strain_names.txt antiserum
-#
-# # antigen
-# make-tags $dat/antiserum/antigen_strain_names.txt antigen
-#
-# # octoflu-references
-# make-tags $dat/octoflu-references/segment-ids.txt octoflu_refs
-#
-# # vaccine
-# make-tags $dat/vaccine/isolate_ids.txt vaccine
-#
-# # variants
-# make-tags $dat/variants/isolate_ids.txt variant
-#
-# # add antigenic motifs
-# make-motifs
+constellate
+
+# CVV
+make-tags $dat/CDC_CVV/isolate_ids.txt cdc_cvv
+
+# antiserum
+make-tags $dat/antiserum/antiserum_strain_names.txt antiserum
+
+# antigen
+make-tags $dat/antiserum/antigen_strain_names.txt antigen
+
+# octoflu-references
+make-tags $dat/octoflu-references/segment-ids.txt octoflu_refs
+
+# vaccine
+make-tags $dat/vaccine/isolate_ids.txt vaccine
+
+# variants
+make-tags $dat/variants/isolate_ids.txt variant
+
+# add antigenic motifs
+make-motifs

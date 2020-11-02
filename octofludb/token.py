@@ -58,13 +58,15 @@ class Token:
         """
         Add knowledge to the graph
         """
-        if (
-            self.field_name
-            and self.field_name != self.typename
-            and self.class_predicate
-            and self.matches
-        ):
-            define_subproperty(self.as_predicate(), self.class_predicate, g)
+        return None
+        # # FIXME: the following code unifies fields of the same type, but it can go too far
+        #  if (
+        #      self.field_name
+        #      and self.field_name != self.typename
+        #      and self.class_predicate
+        #      and self.matches
+        #  ):
+        #      define_subproperty(self.as_predicate(), self.class_predicate, g)
 
     def relate(self, fields, g, levels=None):
         """

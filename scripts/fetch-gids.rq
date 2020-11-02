@@ -5,7 +5,6 @@ WHERE {
     # ?sid f:has_segment/f:genbank_id ?gb .
     # ?sid f:host "swine" .
 
-
     ?sid f:host ?host .
     ?sid f:has_segment/f:genbank_id ?gb .
 

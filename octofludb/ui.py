@@ -233,7 +233,7 @@ def mk_gis_cmd(args):
     with_graph(recipe.mk_gis, args.filename)
 
 
-def _mk_gbids_cmd(g, gbids):
+def _mk_gbids_cmd(g, gbids=[]):
     import octofludb.entrez as entrez
     import octofludb.genbank as gb
 

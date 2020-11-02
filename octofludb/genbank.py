@@ -14,6 +14,7 @@ from rdflib import Literal
 from rdflib.namespace import XSD
 import re
 import octofludb.domain.identifier as identifier
+import octofludb.domain.flu as flu
 import octofludb.domain.animal as animal
 import sys
 from octofludb.util import log
@@ -23,15 +24,21 @@ import octofludb.domain.geography as geo
 
 def add_gb_meta_triples(g, gb_meta, only_influenza_a=True):
 
+    try:
+        accession = str(gb_meta["GBSeq_primary-accession"])
+    except:
+        log(bad("Bad Genbank Entry"))
+        return None
+
     if only_influenza_a:
         # ignore this entry if the organism is not specified
         if not "GBSeq_organism" in gb_meta:
+            log(f"No organsim specified for {accession}")
             return None
         # ignore this entry if the organism is not an Influenza virus
         if not bool(re.match("Influenza [ABCD] virus", gb_meta["GBSeq_organism"])):
+            log(f"Accession '{accession}' does not appear to be influenza")
             return None
-
-    accession = str(gb_meta["GBSeq_primary-accession"])
 
     gid = make_uri(accession)
     g.add((gid, P.gb, Literal(accession)))
@@ -99,6 +106,13 @@ def add_gb_meta_triples(g, gb_meta, only_influenza_a=True):
                     host = val
                 elif key == "country":
                     country = re.sub(":.*", "", val)
+                elif key == "gene":
+                    try:
+                      segment_name = flu.p_segment.parse_strict(val)
+                      g.add((fid, P.segment_name, Literal(segment_name)))
+                    except:
+                      pass
+                    g.add((fid, make_property(key), Literal(val)))
                 else:
                     g.add((fid, make_property(key), Literal(val)))
 
@@ -116,8 +130,8 @@ def add_gb_meta_triples(g, gb_meta, only_influenza_a=True):
             country_uri = make_country_uri(country)
             g.add((sid, P.country, country_uri))
             if code is None:
-              # if this is an unrecognized country (e.g., Kosovo) then state
-              g.add((country_uri, P.name, Literal(country)))
+                # if this is an unrecognized country (e.g., Kosovo) then state
+                g.add((country_uri, P.name, Literal(country)))
             if code == "USA":
                 fields = strain.split("/")
                 for field in fields[1:]:

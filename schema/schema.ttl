@@ -1,6 +1,8 @@
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX f: <https://flu-crew.org/term/>
 
+f:collection_date rdfs:subPropertyOf f:date .
+
 rdfs:label rdfs:subPropertyOf f:name .
 
 f:h1 rdfs:subPropertyOf f:ha .
