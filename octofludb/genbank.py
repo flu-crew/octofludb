@@ -109,9 +109,11 @@ def add_gb_meta_triples(g, gb_meta, only_influenza_a=True):
                 elif key == "gene":
                     try:
                       segment_name = flu.p_segment.parse_strict(val)
-                      g.add((fid, P.segment_name, Literal(segment_name)))
+                      # attach the segment_name to the top-level genbank record, not the feature
+                      g.add((gid, P.segment_name, Literal(segment_name)))
                     except:
                       pass
+                    # attach the original, unparsed gene name to the feature
                     g.add((fid, make_property(key), Literal(val)))
                 else:
                     g.add((fid, make_property(key), Literal(val)))
