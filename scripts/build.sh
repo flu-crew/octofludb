@@ -19,6 +19,8 @@ dat=DATA
 ttl=turtles
 
 octofludb init
+octofludb upload ../schema/geography.ttl
+octofludb upload ../schema/schema.ttl
 
 function upload(){
     datfile=$dat/$1
