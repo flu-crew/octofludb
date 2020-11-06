@@ -11,7 +11,7 @@ p_HA = p.regex("H\d+") ^ p.regex("pdmH\d+")
 p_NA = p.regex("N\d+") ^ p.regex("N\d+pdm")
 
 p_ns = p.regex("NS1?").parsecmap(lambda x: "NS")
-p_m = p.regex("M[P12]?").parsecmap(lambda x: "M")
+p_m = p.regex("M[P1]?").parsecmap(lambda x: "M")
 p_internal_gene = p.regex("PB2|PB1|PA|NP") ^ p_ns ^ p_m
 
 p_segment = p_internal_gene ^ p_HA ^ p_NA ^ p.string("HA") ^ p.string("NA")
