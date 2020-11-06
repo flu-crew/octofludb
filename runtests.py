@@ -409,6 +409,11 @@ class TestInternalGene(unittest.TestCase):
         self.assertEqual(ftok.InternalGene("NP").clean, "NP")
         self.assertEqual(ftok.InternalGene("M").clean, "M")
         self.assertEqual(ftok.InternalGene("MP").clean, "M")
+        # The M1 and M2 are required for parsing genbanks, which store the
+        # segment name under the key "gene" as M1 or M2. These are the names of
+        # the protein subunits.
+        self.assertEqual(ftok.InternalGene("M1").clean, "M")
+        self.assertEqual(ftok.InternalGene("M2").clean, "M")
         self.assertEqual(ftok.InternalGene("NS1").clean, "NS")
         self.assertEqual(ftok.InternalGene("NS").clean, "NS")
         # but not HA and NA
