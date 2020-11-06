@@ -41,12 +41,20 @@ def get_acc_by_date(
         "maxdate": maxdate,
         "idtype": "acc",
     }
-    result = requests.get(base, params=params).json()["esearchresult"]
+    
+    req = requests.get(base, params=params)
+    try:
+      result = req.json()["esearchresult"]
 
-    if int(result["retmax"]) < int(result["count"]):
-        log(
-            f'{colors.bad("Warning:")} results truncated at {result["retmax"]} of {result["count"]} ids'
-        )
+      if int(result["retmax"]) < int(result["count"]):
+          log(
+              f'{colors.bad("Warning:")} results truncated at {result["retmax"]} of {result["count"]} ids'
+          )
+    except:
+      log(f'{colors.bad("Error:")} could not find "esearchresult"')
+      log(str(req))
+      log(params)
+      return []
 
     # For great manner
     time.sleep(1)
