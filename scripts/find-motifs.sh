@@ -3,13 +3,15 @@
 set -e
 set -u
 
-octofludb query --fasta fetch-surveillance-H1.rq | sed 's/ /_/g' > .A0.fna
-./extractHA1.sh .A0.fna
-HA1=.A0.fna_HA1.faa
+HA1=.A0.faa
+
+octofludb query --fasta fetch-surveillance-H1.rq |
+    sed 's/ /_/g' |
+    flutile trim h1-ha1 --conversion=dna2aa > $HA1
 
 for clade in gamma delta1 delta2 alpha pdm beta LAIV_gamma2-beta-like
 do
-   smof grep $clade .A0.fna_HA1.faa > .A0_$clade.faa
+   smof grep $clade $HA1 > .A0_$clade.faa
 done
 
 function most-common-interval(){
@@ -72,7 +74,7 @@ function make-Sa-table(){
 #     delta ----'    |    beta/LAIV ----'
 #        alpha ------'
 #
-# smof grep -qgP --gff 'WP.*FY.*(KINK|NLSK|[MR]LNI|KL[NS][QK]|KLSK)' .A0.fna_HA1.faa > z
+# smof grep -qgP --gff 'WP.*FY.*(KINK|NLSK|[MR]LNI|KL[NS][QK]|KLSK)' $HA1 > z
 # 8378/10763 (127 174)
 #   25/10763 (127 276) -- Late hit ... chance sequence convergence (or exotic chimerism)
 #    4/10763 ( 79 174) -- Bad hit, due to early WP
