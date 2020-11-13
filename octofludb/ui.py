@@ -261,6 +261,8 @@ def mk_gbids_cmd(args):
     [
         "update_gb",
         cli.argument("--minyear", help="Earliest year to update", default=1918),
+        cli.argument("--maxyear", help="Latest year to update", default=2099),
+        cli.argument("--nmonths", help="Update Genbank files for the last N months"),
     ]
 )
 def mk_update_gb(args):
@@ -271,7 +273,14 @@ def mk_update_gb(args):
     import octofludb.colors as colors
 
     minyear = int(args.minyear)
-    for date, missing_acc in missing_acc_by_date(min_year=minyear):
+    maxyear = int(args.maxyear)
+
+    if args.nmonths is None:
+        nmonths = 9999
+    else:
+        nmonths = int(args.nmonths)
+
+    for date, missing_acc in missing_acc_by_date(min_year=minyear, max_year=maxyear, nmonths=nmonths):
         if missing_acc:
             log(colors.good(f"Updating {date} ..."))
             outfile = ".gb_" + date.replace("/", "-") + ".ttl"

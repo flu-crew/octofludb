@@ -1,3 +1,10 @@
+v0.6.0
+======
+
+ * Add options for updating a certain number of months to `update_gb`
+ * Add maxyear option to `update_gb`
+ * Fix bug in `update_gb` that prevented updating of pre-2000 data
+
 v0.5.1
 ======
 

@@ -131,26 +131,26 @@ octofludb upload .gb_*.ttl
 parallel "update-epiflu-metadata {} ${ttl}/{/}.ttl" ::: ${dat}/epiflu/h*/*xls
 parallel "update-epiflu-fasta    {} ${ttl}/{/}.ttl" ::: ${dat}/epiflu/h*/*fasta
 
-octoflu
-constellate
-
-# CVV
-make-tags $dat/CDC_CVV/isolate_ids.txt cdc_cvv
-
-# antiserum
-make-tags $dat/antiserum/antiserum_strain_names.txt antiserum
-
-# antigen
-make-tags $dat/antiserum/antigen_strain_names.txt antigen
-
-# octoflu-references
-make-tags $dat/octoflu-references/segment-ids.txt octoflu_refs
-
-# vaccine
-make-tags $dat/vaccine/isolate_ids.txt vaccine
-
-# variants
-make-tags $dat/variants/isolate_ids.txt variant
-
-# add antigenic motifs
-make-motifs
+# octoflu
+# constellate
+#
+# # CVV
+# make-tags $dat/CDC_CVV/isolate_ids.txt cdc_cvv
+#
+# # antiserum
+# make-tags $dat/antiserum/antiserum_strain_names.txt antiserum
+#
+# # antigen
+# make-tags $dat/antiserum/antigen_strain_names.txt antigen
+#
+# # octoflu-references
+# make-tags $dat/octoflu-references/segment-ids.txt octoflu_refs
+#
+# # vaccine
+# make-tags $dat/vaccine/isolate_ids.txt vaccine
+#
+# # variants
+# make-tags $dat/variants/isolate_ids.txt variant
+#
+# # add antigenic motifs
+# make-motifs

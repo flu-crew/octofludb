@@ -41,20 +41,20 @@ def get_acc_by_date(
         "maxdate": maxdate,
         "idtype": "acc",
     }
-    
+
     req = requests.get(base, params=params)
     try:
-      result = req.json()["esearchresult"]
+        result = req.json()["esearchresult"]
 
-      if int(result["retmax"]) < int(result["count"]):
-          log(
-              f'{colors.bad("Warning:")} results truncated at {result["retmax"]} of {result["count"]} ids'
-          )
+        if int(result["retmax"]) < int(result["count"]):
+            log(
+                f'{colors.bad("Warning:")} results truncated at {result["retmax"]} of {result["count"]} ids'
+            )
     except:
-      log(f'{colors.bad("Error:")} could not find "esearchresult"')
-      log(str(req))
-      log(params)
-      return []
+        log(f'{colors.bad("Error:")} could not find "esearchresult"')
+        log(str(req))
+        log(params)
+        return []
 
     # For great manner
     time.sleep(1)
@@ -62,7 +62,9 @@ def get_acc_by_date(
     return result["idlist"]
 
 
-def missing_acc_by_date(min_year=1918, url="http://localhost:7200", repo="octofludb"):
+def missing_acc_by_date(
+    min_year=1918, max_year=2099, nmonths=9999, url="http://localhost:7200", repo="octofludb"
+):
     """
     Find all genbank accessions that are missing from the database. Return as a tuples of (date, [accession]) 
     """
@@ -75,7 +77,12 @@ def missing_acc_by_date(min_year=1918, url="http://localhost:7200", repo="octofl
     for year in reversed(range(2000, cur_year + 1)):
         if year < min_year:
             break
+        if year > max_year:
+            continue
         for month in reversed(range(1, 12 + 1)):
+            if nmonths <= 0:
+                break
+
             if year == cur_year and month > cur_month:
                 # pulling future sequences is not yet supported
                 continue
@@ -83,14 +90,18 @@ def missing_acc_by_date(min_year=1918, url="http://localhost:7200", repo="octofl
                 mindate=f"{str(year)}/{str(month)}", maxdate=f"{str(year)}/{str(month)}"
             )
             new_acc = [acc for acc in mth_acc if not acc in old_acc]
+            nmonths -= 1
             yield (f"{str(year)}/{str(month)}", new_acc)
 
     # step backwards in time, year-by-year to year 1918
     for year in reversed(range(1918, 2000)):
-        if year < min_year:
+        if year < min_year or nmonths <= 0:
             break
-        mth_acc = get_acc_by_date(mindate=str(year), maxdate=str(year))
-        new_acc = [acc for acc in mth_acc if not mth_acc in old_acc]
+        if year > max_year:
+            continue
+        year_acc = get_acc_by_date(mindate=str(year), maxdate=str(year))
+        new_acc = [acc for acc in year_acc if not acc in old_acc]
+        #  nmonths -= 12
         yield (str(year), new_acc)
 
 
