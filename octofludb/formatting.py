@@ -1,3 +1,7 @@
+from octofludb.util import log
+from octofludb.colors import bad
+
+
 def write_as_fasta(results):
     """
     Write a SPARQL query result as a FASTA file
@@ -74,8 +78,11 @@ def _make_constellations(rows):
 
         try:
             index = segment_lookup[segment]
-        except KeyError as f:
-            raise f
+        except KeyError as e:
+            log(
+                f"{bad('WARNING:')} segment/segment_subtype mismatch, {str((strain, segment, clade))}"
+            )
+            continue
 
         if clade in clade_lookup:
             char = clade_lookup[clade]
