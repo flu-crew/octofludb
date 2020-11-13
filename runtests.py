@@ -430,14 +430,30 @@ class TestSegmentName(unittest.TestCase):
         self.assertEqual(ftok.SegmentName("NP").clean, "NP")
         self.assertEqual(ftok.SegmentName("M").clean, "M")
         self.assertEqual(ftok.SegmentName("NS1").clean, "NS")
-        self.assertEqual(ftok.SegmentName("H1").clean, "H1")
         self.assertEqual(ftok.SegmentName("HA").clean, "HA")
         self.assertEqual(ftok.SegmentName("NA").clean, "NA")
-        self.assertEqual(ftok.SegmentName("N1").clean, "N1")
         self.assertEqual(ftok.SegmentName("bogus").clean, None)
+        self.assertEqual(ftok.SegmentName("H1").clean, None)
+        self.assertEqual(ftok.SegmentName("N1").clean, None)
 
     def test_AlternativeSegmentNames(self):
         self.assertEqual(ftok.SegmentName("MP").clean, "M")
+
+class TestSegmentSubtype(unittest.TestCase):
+    def test_SegmentSubtype(self):
+        self.assertEqual(ftok.SegmentSubtype("PB2").clean, "PB2")
+        self.assertEqual(ftok.SegmentSubtype("PB1").clean, "PB1")
+        self.assertEqual(ftok.SegmentSubtype("PA").clean, "PA")
+        self.assertEqual(ftok.SegmentSubtype("NP").clean, "NP")
+        self.assertEqual(ftok.SegmentSubtype("M").clean, "M")
+        self.assertEqual(ftok.SegmentSubtype("NS1").clean, "NS")
+        self.assertEqual(ftok.SegmentSubtype("H1").clean, "H1")
+        self.assertEqual(ftok.SegmentSubtype("H3").clean, "H3")
+        self.assertEqual(ftok.SegmentSubtype("HA").clean, "HA")
+        self.assertEqual(ftok.SegmentSubtype("NA").clean, "NA")
+        self.assertEqual(ftok.SegmentSubtype("N1").clean, "N1")
+        self.assertEqual(ftok.SegmentSubtype("N2").clean, "N2")
+        self.assertEqual(ftok.SegmentSubtype("bogus").clean, None)
 
 
 class TestSegmentNumber(unittest.TestCase):
@@ -591,7 +607,7 @@ class TestHomoList(unittest.TestCase):
 class TestPhrase(unittest.TestCase):
     def test_phrase(self):
         self.assertEqual(
-            showTriple(["A01234567", "H1"]),
+            showTriple(["A01234567", "H1N1"]),
             [
                 (
                     "https://flu-crew.org/id/a01234567",
@@ -600,8 +616,8 @@ class TestPhrase(unittest.TestCase):
                 ),
                 (
                     "https://flu-crew.org/id/a01234567",
-                    "https://flu-crew.org/term/ha",
-                    "H1",
+                    "https://flu-crew.org/term/subtype",
+                    "H1N1",
                 ),
             ],
         )

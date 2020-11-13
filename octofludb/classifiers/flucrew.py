@@ -21,6 +21,7 @@ from octofludb.domain.flu import (
     p_NA,
     p_internal_gene,
     p_segment,
+    p_segment_subtype,
     p_segment_number,
     p_subtype,
     p_strain_obj,
@@ -343,6 +344,10 @@ class SegmentName(SegmentAttribute):
     typename = "segment_name"
     parser = p_segment
 
+class SegmentSubtype(SegmentAttribute):
+    typename = "segment_subtype"
+    parser = p_segment_subtype
+
 
 class SegmentNumber(SegmentAttribute):
     typename = "segment_number"
@@ -467,8 +472,7 @@ allClassifiers = OrderedDict(
             GlobalClade,
             Subtype,
             SegmentName,
-            HA,
-            NA,
+            SegmentSubtype,
             Host,
             InternalGene,
             SegmentNumber,
