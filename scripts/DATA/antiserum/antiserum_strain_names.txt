@@ -1,0 +1,123 @@
+A/Bangkok/1/1979
+A/Beijing/262/1995
+A/Beijing/32/1992
+A/Beijing/353/1989
+A/Brazil/11/1978
+A/Brisbane/10/2007
+A/Brisbane/59/2007
+A/California/04/2009
+A/Chile/1/1983
+A/Fujian/411/2002
+A/Hong Kong/4801/2014
+A/Indiana/08/2011
+A/Leningrad/360/1986
+A/Memphis/8/2003
+A/Mexico/4108/2009
+A/Michigan/2/2003
+A/Michigan/45/2015
+A/Moscow/10/1999
+A/New Caledonia/20/1999
+A/Ohio/09/2015
+A/Perth/16/2009
+A/Philippines/2/1982
+A/Port Chalmers/1/1973
+A/Shanghai/11/1987
+A/Sichuan/2/1987
+A/Singapore/6/1986
+A/Solomon Islands/3/2006
+A/Swine/Colorado/23619/99
+A/Switzerland/9715293/2013
+A/Sydney/5/1997
+A/Taiwan/1/1986
+A/Texas/1/1977
+A/Texas/36/1991
+A/USSR/90/1977
+A/Victoria/3/1975
+A/Victoria/361/2011
+A/Wisconsin/67/2005
+A/Wuhan/359/1995
+A/Wuhan/359/1995	
+A/swine/Alberta/SD0038/2014
+A/swine/Alberta/SD0049/2014
+A/swine/Cotes d'Armor/0070/2010
+A/swine/Cotes d'Armor/0113/2006
+A/swine/Cotes d'Armor/0186/2010
+A/swine/Cotes d'Armor/0190/2006
+A/swine/Finistere/2899/1982
+A/swine/France/22-120067/2012
+A/swine/France/22-130212/2013
+A/swine/France/CotesdArmor-0214/2006
+A/swine/France/CotesdArmor-0388/2009
+A/swine/Illinois/00685/2005
+A/swine/Illinois/02907/2009
+A/swine/Illinois/A01047020/2010
+A/swine/Illinois/A01201606/2011
+A/swine/Illinois/A01203922/2012
+A/swine/Illinois/A01462475/2015
+A/swine/Illinois/A01493472/2014
+A/swine/Indiana/A00968373/2012
+A/swine/Indiana/A01202866/2011
+A/swine/Indiana/A01729045/2016
+A/swine/Iowa/00239/2004
+A/swine/Iowa/01700/2007
+A/swine/Iowa/02039/2008
+A/swine/Iowa/02096/2008
+A/swine/Iowa/02955/2010
+A/swine/Iowa/15/1930
+A/swine/Iowa/1945
+A/swine/Iowa/1973
+A/swine/Iowa/A01202613/2011
+A/swine/Iowa/A01432500/2013
+A/swine/Iowa/A01476931/2014
+A/swine/Iowa/A01480656/2014
+A/swine/Iowa/A01731653/2016
+A/swine/Iowa/A02025359/2015
+A/swine/Kansas/00246/2004
+A/swine/Kentucky/02086/2008
+A/swine/Michigan/A01432375/2013
+A/swine/Minnesota/00194/2003
+A/swine/Minnesota/01146/2006
+A/swine/Minnesota/02011/2008
+A/swine/Minnesota/02053/2008
+A/swine/Minnesota/02093/2008
+A/swine/Minnesota/02782/2009
+A/swine/Minnesota/07002083/2007
+A/swine/Minnesota/1192/2001
+A/swine/Minnesota/37866/1999
+A/swine/Minnesota/A01134353/2011
+A/swine/Minnesota/A01280592/2013
+A/swine/Minnesota/A01432544/2013
+A/swine/Minnesota/A01567490/2014
+A/swine/Missouri/02060/2008
+A/swine/Missouri/A01410819/2014
+A/swine/Missouri/A01444664/2013
+A/swine/Morbihan/0070/2005
+A/swine/NY/A01104005/2011
+A/swine/Nebraska/02013/2008
+A/swine/Nebraska/A01492366/2014
+A/swine/Nebraska/A01567651/2015
+A/swine/North Carolina/02023/2008
+A/swine/North Carolina/02084/2008
+A/swine/North Carolina/36883/2002
+A/swine/North Carolina/A01797415/2015
+A/swine/OH/511445/2007
+A/swine/Ohio/003295/2010
+A/swine/Ohio/02026/2008
+A/swine/Ohio/A01104092/2016
+A/swine/Ohio/A01847657/2015
+A/swine/Oklahoma/A01409770/2014
+A/swine/Pennsylvania/A01076777/2010
+A/swine/Saskatchewan/SD0059/2014
+A/swine/Saskatchewan/SD0065/2014
+A/swine/Saskatchewan/SD0069/2015
+A/swine/Scotland/410440/94
+A/swine/South Dakota/A01349306/2013
+A/swine/South Dakota/A01349341/2013
+A/swine/South Dakota/A01823237/2015
+A/swine/Texas/01976/2008
+A/swine/Texas/4199-2/1998
+A/swine/Texas/A01049914/2011
+A/swine/Wisconsin/1/1968
+A/swine/Wyoming/A01444562/2013
+A/turkey/Ohio/313053/2004
+A/swine/Indiana/A02430356/2019
