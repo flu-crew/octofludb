@@ -5,6 +5,7 @@ v0.6.0
  * Add maxyear option to `update_gb`
  * Fix bug in `update_gb` that prevented updating of pre-2000 data
  * Fix handling of segment subtypes
+ * Determine strain subtype using octoFLU info
 
 v0.5.1
 ======

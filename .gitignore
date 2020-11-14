@@ -4,6 +4,8 @@
 __pycache__/
 z.*
 z
+y
+y.*
 zz.*
 *.fna
 *.db/

@@ -83,7 +83,10 @@ function octoflu(){
     rm -rf octoFLU/.xxx*
     mv .xxx* octoFLU
     cd octoFLU
-    parallel "./octoFLU.sh {}" ::: .xxx*
+    for file in .xxx*
+    do
+        ./octoFLU.sh "$file"
+    done
     cd ..
     cat octoFLU/.xxx*Final_Output.txt |
         sort -u |
@@ -131,7 +134,12 @@ octofludb upload .gb_*.ttl
 parallel "update-epiflu-metadata {} ${ttl}/{/}.ttl" ::: ${dat}/epiflu/h*/*xls
 parallel "update-epiflu-fasta    {} ${ttl}/{/}.ttl" ::: ${dat}/epiflu/h*/*fasta
 
-# octoflu
+octoflu
+
+# This must be run after octoFLU
+octofludb subtypes > .subtype.ttl
+octofludb upload .subtypes.ttl
+
 constellate
 
 # CVV

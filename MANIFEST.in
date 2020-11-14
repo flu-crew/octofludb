@@ -1,4 +1,5 @@
 include octofludb/data/octofludb-config.ttl
 include octofludb/data/segments.rq
 include octofludb/data/masterlist.rq
+include octofludb/data/subtypes.rq
 include octofludb/data/all-acc.rq

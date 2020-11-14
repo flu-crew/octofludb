@@ -6,8 +6,8 @@ SELECT DISTINCT
   ?barcode
   ?genbank_id
   ?segment
-  ?segment_subtype
-  (GROUP_CONCAT(DISTINCT ?date;      separator="+") as ?dates      )
+  (GROUP_CONCAT(DISTINCT ?subtype;  separator="+") as ?subtypes)
+  (MIN (?date) as ?earliest_date)
   (GROUP_CONCAT(DISTINCT ?state;     separator="+") as ?states     )
   (GROUP_CONCAT(DISTINCT ?strain;    separator="+") as ?strains    )
   (GROUP_CONCAT(DISTINCT ?us_clade;  separator="+") as ?us_clades  )
@@ -32,10 +32,10 @@ WHERE {
   ?sid f:date ?date .
   OPTIONAL { ?sid f:state/f:abbr ?state . }
   OPTIONAL { ?sid f:constellation ?const . }
+  OPTIONAL { ?sid f:subtype ?subtype . }
 
   ?sid f:has_segment ?gid .
   ?gid f:segment_name ?segment .
-  OPTIONAL { ?gid f:segment_subtype ?segment_subtype . }
   ?gid f:genbank_id ?genbank_id .
   OPTIONAL { ?gid f:clade     ?us_clade  . }
   OPTIONAL { ?gid f:gl_clade  ?gl_clade  . }
@@ -46,4 +46,4 @@ WHERE {
   OPTIONAL { ?gid f:ca2_motif ?ca2_motif . }
   OPTIONAL { ?gid f:cb_motif  ?cb_motif  . }
 }
-GROUP BY ?barcode ?genbank_id ?segment ?segment_subtype
+GROUP BY ?barcode ?genbank_id ?segment

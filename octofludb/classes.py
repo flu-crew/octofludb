@@ -174,7 +174,10 @@ def tabularTyping(data, levels=None, na_str=[None]):
     cols = []
     for k, v in data.items():
         hl = HomoList(v, field_name=k, na_str=na_str).data
-        log(f" - '{k}':{colors.good(hl[0].typename)}")
+        if len(hl) > 0:
+          log(f" - '{k}':{colors.good(hl[0].typename)}")
+        else:
+          log(f"{colors.bad('Warning:')} no data")
         cols.append(hl)
     phrases = [
         Phrase([col[i] for col in cols], levels=levels) for i in range(len(cols[0]))

@@ -1,0 +1,20 @@
+PREFIX f: <https://flu-crew.org/term/>
+PREFIX onto: <http://www.ontotext.com/>
+
+SELECT DISTINCT
+    ?strain_name
+    ?segment_name
+    (GROUP_CONCAT(DISTINCT ?segment_subtype; separator="+") as ?segment_subtypes)
+    (GROUP_CONCAT(DISTINCT ?subtype; separator="+") as ?subtypes)
+    (GROUP_CONCAT(DISTINCT ?serotype; separator="+") as ?serotypes)
+FROM onto:disable-sameAs
+WHERE {
+    ?gid f:segment_name ?segment_name .
+    FILTER (?segment_name = "HA" || ?segment_name = "NA") .
+    ?sid f:strain_name ?strain_name .
+    ?sid f:has_segment ?gid .
+    OPTIONAL { ?gid f:segment_subtype ?segment_subtype . }
+    OPTIONAL { ?gid f:has_feature/f:serotype ?serotype . }
+    OPTIONAL { ?sid f:subtype ?subtype . }
+}
+GROUP BY ?strain_name ?segment_name

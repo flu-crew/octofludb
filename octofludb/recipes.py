@@ -2,6 +2,7 @@ import sys
 from rdflib import Literal
 import pandas as pd
 import octofludb.classes as classes
+from octofludb.colors import bad
 import octofludb.classifiers.flucrew as flu
 import octofludb.token as tok
 import octofludb.domain.identifier as identifier
@@ -220,7 +221,7 @@ def append_add(entry, field, values):
                     entry[field].append(value)
         else:
             entry[field] = values
-    else:
+    elif field not in entry:
         entry[field] = []
 
 
@@ -230,7 +231,18 @@ def quarter_from_date(date):
     return f"{year}Q{quarter}"
 
 
-def _get_subtype(has, nas):
+def _get_subtype(strain, has, nas, subtypes, serotypes):
+
+    subtypes = [subtype for subtype in subtypes if len(subtype) > 0]
+    serotypes = [serotype for serotype in serotypes if len(serotype) > 0]
+    has = [ha for ha in has if len(ha) > 0]
+    nas = [na for na in nas if len(na) > 0]
+
+    if len(subtypes) == 1:
+        return subtypes[0]
+    elif len(subtypes) > 1:
+        return "mixed"
+
     if len(has) > 1:
         ha = None
     elif len(has) == 0:
@@ -245,12 +257,61 @@ def _get_subtype(has, nas):
     else:
         na = nas[0]
 
+    # ambiguous subtype, probably mixed
     if na is None or ha is None:
-        subtype = "Mixed"
-    else:
+        subtype = "mixed"
+    # good subtype
+    elif (len(na) > 0) and (len(ha) > 0):
         subtype = ha + na
+    # no subtype found based on HA/NA subtypes, so use serotype field
+    elif len(serotypes) == 1:
+        subtype = serotypes[0]
+    elif len(serotypes) > 1:
+        subtype = "mixed"
+    elif len(ha) > 0 or len(na) > 0:
+        subtype = ha + na
+    else:
+        log(f"{bad('Warning:')} could not determine subtype for {strain}")
+        subtype = "unknown"
+        # otherwise just paste together whatever we do have
 
     return subtype
+
+
+def mk_subtypes(results):
+    entries = dict()
+
+    for row in results["results"]["bindings"]:
+        strain = row["strain_name"]["value"]
+
+        if strain not in entries:
+            entry = dict(ha_subtypes=[], na_subtypes=[], subtypes=[], serotypes=[])
+        else:
+            entry = entries[strain]
+
+        append_add(entry, "subtypes", default_access(row, "subtypes"))
+        append_add(entry, "serotypes", default_access(row, "serotypes"))
+
+        maybe_segment_subtype = default_access(row, "segment_subtypes")
+        if len(maybe_segment_subtype) == 1:
+            segment_subtype = maybe_segment_subtype[0]
+            if re.fullmatch("H\d+", segment_subtype):
+                append_add(entry, "ha_subtypes", [segment_subtype])
+            elif re.fullmatch("N\d+", segment_subtype):
+                append_add(entry, "na_subtypes", [segment_subtype])
+
+        entries[strain] = entry
+
+    print("strain_name\tsubtype")
+    for strain, entry in entries.items():
+        subtype = _get_subtype(
+            strain,
+            entry["ha_subtypes"],
+            entry["na_subtypes"],
+            entry["subtypes"],
+            entry["serotypes"],
+        )
+        print("\t".join([strain, subtype]))
 
 
 MASTERLIST_HEADER = [
@@ -300,7 +361,7 @@ def mk_masterlist(results):
         else:
             entry = dict()
             # initialize fields
-            for field in ["ha_subtype", "na_subtype"] + MASTERLIST_HEADER:
+            for field in MASTERLIST_HEADER:
                 entry[field] = []
 
         gb = row["genbank_id"]["value"]
@@ -308,7 +369,11 @@ def mk_masterlist(results):
 
         genbank_id = default_access(row, "genbank_id")[0]
         segment = default_access(row, "segment")[0]
-        dates = default_access(row, "dates")
+        subtype = default_access(row, "subtypes")[0]
+        # Use the earliest date since occasionally people resequence a sample
+        # and incorrectly set the sequence date to the collection date (among
+        # other issues)
+        date = default_access(row, "earliest_date")[0]
         states = default_access(row, "states")
         strains = default_access(row, "strains")
         us_clades = default_access(row, "us_clades")
@@ -321,8 +386,8 @@ def mk_masterlist(results):
         ca2_motifs = default_access(row, "ca2_motifs")
         cb_motifs = default_access(row, "cb_motifs")
 
-        append_add(entry, "Date", dates)
-        append_add(entry, "Collection_Q", [quarter_from_date(date) for date in dates])
+        append_add(entry, "Date", [date])
+        append_add(entry, "Collection_Q", [quarter_from_date(date)])
         append_add(entry, "State", states)
 
         if segment == "HA":
@@ -339,10 +404,6 @@ def mk_masterlist(results):
         maybe_segment_subtype = default_access(row, "segment_subtype")
         if maybe_segment_subtype:
             segment_subtype = maybe_segment_subtype[0]
-            if re.fullmatch("H\d+", segment_subtype):
-                append_add(entry, "ha_subtype", [segment_subtype])
-            elif re.fullmatch("N\d+", segment_subtype):
-                append_add(entry, "na_subtype", [segment_subtype])
 
             if segment_subtype == "H1":
                 append_add(entry, "H1", us_clades)
@@ -355,6 +416,7 @@ def mk_masterlist(results):
                 append_add(entry, "N2", us_clades)
 
         append_add(entry, "Strain", strains)
+        append_add(entry, "Subtype", [subtype])
         append_add(entry, "Constellation", consts)
         append_add(entry, "Motif", h3_motifs)
         append_add(entry, "Sa_Motif", sa_motifs)
@@ -369,6 +431,5 @@ def mk_masterlist(results):
 
     for barcode, entry in entries.items():
         entry["Barcode"] = [barcode]
-        entry["Subtype"] = [_get_subtype(entry["ha_subtype"], entry["na_subtype"])]
         row = [",".join([f for f in entry[field] if f]) for field in MASTERLIST_HEADER]
         print("\t".join(row))

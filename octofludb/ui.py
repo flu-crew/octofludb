@@ -424,6 +424,21 @@ def const_cmd(args):
     )
     formatting.write_constellations(results)
 
+@subcommand(["subtypes", url_arg, repo_name_arg])
+def subtypes(args):
+    """
+    Determine subtypes based on Genbank serotype field, epiflu data, or octoflu HA/NA classifications
+    """
+    import octofludb.recipes as recipe
+
+    sparql_filename = os.path.join(os.path.dirname(__file__), "data", "subtypes.rq")
+
+    results = db.sparql_query(
+        sparql_file=sparql_filename, url=args.url, repo_name=args.repo
+    )
+
+    recipe.mk_subtypes(results)
+
 
 @subcommand(["masterlist", url_arg, repo_name_arg])
 def const_cmd(args):
@@ -438,9 +453,7 @@ def const_cmd(args):
         sparql_file=sparql_filename, url=args.url, repo_name=args.repo
     )
 
-    masterlist = recipe.mk_masterlist(results)
-
-    print(masterlist)
+    recipe.mk_masterlist(results)
 
 
 def main():
