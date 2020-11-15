@@ -367,6 +367,10 @@ class TestSubtype(unittest.TestCase):
         # allow type
         self.assertEqual(ftok.Subtype("A / H1N1").clean, "H1N1")
         self.assertEqual(ftok.Subtype("A/H1N1").clean, "H1N1")
+        # subtypes may be mixed, which should be case-insensitive
+        self.assertEqual(ftok.Subtype("Mixed").clean, "mixed")
+        self.assertEqual(ftok.Subtype("mixed").clean, "mixed")
+        self.assertEqual(ftok.Subtype("MiXeD").clean, "mixed")
         # die correctly on bad input
         self.assertEqual(ftok.Subtype("bogus").clean, None)
 

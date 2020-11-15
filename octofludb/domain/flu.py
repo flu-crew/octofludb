@@ -1,4 +1,5 @@
 import parsec as p
+import re
 from octofludb.domain.date import p_year
 from octofludb.domain.identifier import p_A0
 from octofludb.parser import wordset
@@ -20,7 +21,7 @@ p_segment_number = p.regex("[1-8]")
 p_segment_subtype = p_segment ^ p_HA ^ p_NA
 
 @p.generate
-def p_subtype():
+def p_subtype_unmixed():
     yield p.regex("(A *\/ *)?")
     ha = yield p_HA
     host = yield p.regex("(hu|sw|av)?")
@@ -28,6 +29,8 @@ def p_subtype():
     v = yield p.regex("(v)?")
     return ha + host + na + v
 
+p_subtype_mixed = p.regex("mixed", re.I).parsecmap(lambda x: "mixed")
+p_subtype = p_subtype_mixed  ^ p_subtype_unmixed
 
 def mapreplace(x, pattern, replace):
     if x == pattern:
