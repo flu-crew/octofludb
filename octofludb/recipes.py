@@ -401,7 +401,7 @@ def mk_masterlist(results):
             append_add(entry, segment + "_Genbank", [genbank_id])
             append_add(entry, segment, us_clades)
 
-        maybe_segment_subtype = default_access(row, "segment_subtype")
+        maybe_segment_subtype = default_access(row, "segment_subtypes")
         if maybe_segment_subtype:
             segment_subtype = maybe_segment_subtype[0]
 

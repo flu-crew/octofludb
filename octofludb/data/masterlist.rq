@@ -6,6 +6,7 @@ SELECT DISTINCT
   ?barcode
   ?genbank_id
   ?segment
+  (GROUP_CONCAT(DISTINCT ?segment_subtype;  separator="+") as ?segment_subtypes)
   (GROUP_CONCAT(DISTINCT ?subtype;  separator="+") as ?subtypes)
   (MIN (?date) as ?earliest_date)
   (GROUP_CONCAT(DISTINCT ?state;     separator="+") as ?states     )
@@ -36,6 +37,7 @@ WHERE {
 
   ?sid f:has_segment ?gid .
   ?gid f:segment_name ?segment .
+  OPTIONAL { ?gid f:segment_subtype ?segment_subtype . }
   ?gid f:genbank_id ?genbank_id .
   OPTIONAL { ?gid f:clade     ?us_clade  . }
   OPTIONAL { ?gid f:gl_clade  ?gl_clade  . }
