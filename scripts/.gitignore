@@ -2,6 +2,7 @@
 .*aln
 .*faa
 .*fna
+.*ttl
 .A0*
 *.ids
 .all.fna

@@ -138,7 +138,7 @@ octoflu
 
 # This must be run after octoFLU
 octofludb subtypes > .subtype.ttl
-octofludb upload .subtypes.ttl
+octofludb upload .subtype.ttl
 
 constellate
 
