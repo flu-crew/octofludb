@@ -9,6 +9,7 @@
 .gb_.*
 .new.fna
 .octoflu_results
+.subtype*
 .tmp
 .gb*
 archive/

@@ -137,7 +137,8 @@ parallel "update-epiflu-fasta    {} ${ttl}/{/}.ttl" ::: ${dat}/epiflu/h*/*fasta
 octoflu
 
 # This must be run after octoFLU
-octofludb subtypes > .subtype.ttl
+octofludb subtypes > .subtype.txt
+octofludb mk_table .subtype.txt > .subtype.ttl
 octofludb upload .subtype.ttl
 
 constellate
@@ -159,6 +160,9 @@ make-tags $dat/vaccine/isolate_ids.txt vaccine
 
 # variants
 make-tags $dat/variants/isolate_ids.txt variant
+
+# wgs submission
+make-tags $dat/wgs/wgs.txt wgs
 
 # add antigenic motifs
 make-motifs
