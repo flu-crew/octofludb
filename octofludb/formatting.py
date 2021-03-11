@@ -1,6 +1,7 @@
 from octofludb.util import log
 from octofludb.colors import bad
 
+import sys
 
 def write_as_fasta(results):
     """
@@ -97,7 +98,7 @@ def _make_constellations(rows):
     rows = []
     for (k, c) in const.items():
         if c is None:
-            rows.append((k, "MIXED"))
+            rows.append((k, "mixed"))
         else:
             rows.append((k, "".join(c)))
     return rows

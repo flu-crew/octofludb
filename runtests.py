@@ -874,19 +874,19 @@ class TestConstellations(unittest.TestCase):
             ("A", "NS", "pdm"),
             ("A", "NS", "TRIG"),
         ]
-        out = [("A", "MIXED")]
+        out = [("A", "mixed")]
         self.assertEqual(formatter._make_constellations(data), out)
 
     def test_constellations_well_mixed(self):
         data = [
-            # A PPPPPP
+            # A PPPPPT
             ("A", "PB2", "pdm"),
             ("A", "PB1", "pdm"),
             ("A", "PA", "pdm"),
             ("A", "NP", "pdm"),
             ("A", "M", "pdm"),
             ("A", "NS", "TRIG"),
-            ("A", "NS", "TRIG"),
+            ("A", "NS", "TRIG"), # duplicates are fine
         ]
         out = [("A", "PPPPPT")]
         self.assertEqual(formatter._make_constellations(data), out)
