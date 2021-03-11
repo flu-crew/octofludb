@@ -175,9 +175,9 @@ def tabularTyping(data, levels=None, na_str=[None]):
     for k, v in data.items():
         hl = HomoList(v, field_name=k, na_str=na_str).data
         if len(hl) > 0:
-          log(f" - '{k}':{colors.good(hl[0].typename)}")
+            log(f" - '{k}':{colors.good(hl[0].typename)}")
         else:
-          log(f"{colors.bad('Warning:')} no data")
+            log(f"{colors.bad('Warning:')} no data")
         cols.append(hl)
     phrases = [
         Phrase([col[i] for col in cols], levels=levels) for i in range(len(cols[0]))
@@ -280,7 +280,7 @@ class Ragged(ParsedPhraseList):
 
     def parse(self, filehandle):
         """
-        Return a list of lists of strings. Currently only FASTA is supported. 
+        Return a list of lists of strings. Currently only FASTA is supported.
         """
         return self._parse_fasta(filehandle, sep="|")
 

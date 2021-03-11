@@ -63,10 +63,14 @@ def get_acc_by_date(
 
 
 def missing_acc_by_date(
-    min_year=1918, max_year=2099, nmonths=9999, url="http://localhost:7200", repo="octofludb"
+    min_year=1918,
+    max_year=2099,
+    nmonths=9999,
+    url="http://localhost:7200",
+    repo="octofludb",
 ):
     """
-    Find all genbank accessions that are missing from the database. Return as a tuples of (date, [accession]) 
+    Find all genbank accessions that are missing from the database. Return as a tuples of (date, [accession])
     """
     now = datetime.datetime.now()
     cur_year, cur_month = now.year, now.month

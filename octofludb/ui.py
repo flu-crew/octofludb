@@ -280,7 +280,9 @@ def mk_update_gb(args):
     else:
         nmonths = int(args.nmonths)
 
-    for date, missing_acc in missing_acc_by_date(min_year=minyear, max_year=maxyear, nmonths=nmonths):
+    for date, missing_acc in missing_acc_by_date(
+        min_year=minyear, max_year=maxyear, nmonths=nmonths
+    ):
         if missing_acc:
             log(colors.good(f"Updating {date} ..."))
             outfile = ".gb_" + date.replace("/", "-") + ".ttl"
@@ -423,6 +425,7 @@ def const_cmd(args):
         sparql_file=sparql_filename, url=args.url, repo_name=args.repo
     )
     formatting.write_constellations(results)
+
 
 @subcommand(["subtypes", url_arg, repo_name_arg])
 def subtypes(args):
