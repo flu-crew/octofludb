@@ -146,7 +146,7 @@ def mk_gis(g, filehandle) -> None:
             )
 
             host_tok = flu.Host(d["Host"][i], field_name="host")
-            subtype_tok = flu.Subtype(d["Subtype"][i])
+            subtype_tok = flu.Subtype(d["Subtype"][i], field_name="gisaid_subtype")
             lineage_tok = tok.Unknown(
                 d["Lineage"][i], field_name="lineage", na_str=["", None]
             )
@@ -231,49 +231,55 @@ def quarter_from_date(date):
     return f"{year}Q{quarter}"
 
 
-def _get_subtype(strain, has, nas, subtypes, serotypes):
+def _ustr(s):
+    return s.upper().strip()
 
-    subtypes = [subtype for subtype in subtypes if len(subtype) > 0]
-    serotypes = [serotype for serotype in serotypes if len(serotype) > 0]
-    has = [ha for ha in has if len(ha) > 0]
-    nas = [na for na in nas if len(na) > 0]
 
-    if len(subtypes) == 1:
-        return subtypes[0]
-    elif len(subtypes) > 1:
+def _clean_subtype(s):
+    try:
+        (ha, na) = re.search(".*(H\\d+).*(N\\d+).*", _ustr(s)).groups()
+        return ha + na
+    except:
+        return ""
+
+
+def _get_subtype(strain, has, nas, gisaid_subtypes, genbank_subtypes):
+    # subtype annotations that where either determined in the past or retrieved from epiflu
+    gisaid_subtypes = list(
+        {_clean_subtype(subtype) for subtype in gisaid_subtypes if len(subtype) > 0}
+    )
+    # genbank_subtypes annotations from genbank
+    genbank_subtypes = list(
+        {
+            _clean_subtype(genbank_subtype)
+            for genbank_subtype in genbank_subtypes
+            if len(genbank_subtype) > 0
+        }
+    )
+    # unique ha and na clades from octoFLU
+    has = list({_ustr(ha) for ha in has if len(ha) > 0})
+    nas = list({_ustr(na) for na in nas if len(na) > 0})
+
+    # good subtype - trust octoFLU more than anything
+    if len(nas) == 1 and len(has) == 1:
+        subtype = has[0] + nas[0]
+    # no subtype found based on HA/NA subtypes, so use genbank subtype field
+    elif (
+        len(gisaid_subtypes) > 1
+        or len(genbank_subtypes) > 1
+        or len(nas) > 1
+        or len(has) > 1
+    ):
         return "mixed"
-
-    if len(has) > 1:
-        ha = None
-    elif len(has) == 0:
-        ha = ""
     else:
-        ha = has[0]
-
-    if len(nas) > 1:
-        na = None
-    elif len(nas) == 0:
-        na = ""
-    else:
-        na = nas[0]
-
-    # ambiguous subtype, probably mixed
-    if na is None or ha is None:
-        subtype = "mixed"
-    # good subtype
-    elif (len(na) > 0) and (len(ha) > 0):
-        subtype = ha + na
-    # no subtype found based on HA/NA subtypes, so use serotype field
-    elif len(serotypes) == 1:
-        subtype = serotypes[0]
-    elif len(serotypes) > 1:
-        subtype = "mixed"
-    elif len(ha) > 0 or len(na) > 0:
-        subtype = ha + na
-    else:
-        log(f"{bad('Warning:')} could not determine subtype for {strain}")
-        subtype = "unknown"
-        # otherwise just paste together whatever we do have
+        # if we have no octoFLU data
+        # prefer genebank data over subtype data (e.g., from epiflu)
+        if len(genbank_subtypes) == 1:
+            subtype = genbank_subtypes[0]
+        elif len(gisaid_subtypes) == 1:
+            subtype = gisaid_subtypes[0]
+        else:
+            subtype = "unknown"
 
     return subtype
 
@@ -289,8 +295,8 @@ def mk_subtypes(results):
         else:
             entry = entries[strain]
 
-        append_add(entry, "subtypes", default_access(row, "subtypes"))
-        append_add(entry, "serotypes", default_access(row, "serotypes"))
+        append_add(entry, "genbank_subtypes", default_access(row, "genbank_subtypes"))
+        append_add(entry, "gisaid_subtypes", default_access(row, "gisaid_subtypes"))
 
         maybe_segment_subtype = default_access(row, "segment_subtypes")
         if len(maybe_segment_subtype) == 1:
@@ -306,10 +312,10 @@ def mk_subtypes(results):
     for strain, entry in entries.items():
         subtype = _get_subtype(
             strain,
-            entry["ha_subtypes"],
-            entry["na_subtypes"],
-            entry["subtypes"],
-            entry["serotypes"],
+            has=entry["ha_subtypes"],
+            nas=entry["na_subtypes"],
+            gisaid_subtypes=entry["gisaid_subtypes"],
+            genbank_subtypes=entry["genbank_subtypes"],
         )
         print("\t".join([strain, subtype]))
 

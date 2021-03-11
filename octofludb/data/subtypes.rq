@@ -5,8 +5,8 @@ SELECT DISTINCT
     ?strain_name
     ?segment_name
     (GROUP_CONCAT(DISTINCT ?segment_subtype; separator="+") as ?segment_subtypes)
-    (GROUP_CONCAT(DISTINCT ?subtype; separator="+") as ?subtypes)
-    (GROUP_CONCAT(DISTINCT ?serotype; separator="+") as ?serotypes)
+    (GROUP_CONCAT(DISTINCT ?gisaid_subtypes; separator="+") as ?gisaid_subtypes)
+    (GROUP_CONCAT(DISTINCT ?genbank_subtype; separator="+") as ?genbank_subtypes)
 FROM onto:disable-sameAs
 WHERE {
     ?gid f:segment_name ?segment_name .
@@ -14,7 +14,7 @@ WHERE {
     ?sid f:strain_name ?strain_name .
     ?sid f:has_segment ?gid .
     OPTIONAL { ?gid f:segment_subtype ?segment_subtype . }
-    OPTIONAL { ?gid f:has_feature/f:serotype ?serotype . }
-    OPTIONAL { ?sid f:subtype ?subtype . }
+    OPTIONAL { ?gid f:has_feature/f:serotype ?genbank_subtype . }
+    OPTIONAL { ?sid f:gisaid_subtype ?gisaid_subtype . }
 }
 GROUP BY ?strain_name ?segment_name

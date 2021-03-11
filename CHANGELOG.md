@@ -1,3 +1,8 @@
+v0.7.0
+======
+
+ * Standardize subtype handling (see runtest `get_subtypes` tests)
+
 v0.6.0
 ======
 

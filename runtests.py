@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import octofludb.classifiers.flucrew as ftok
+import octofludb.recipes as recipes
 import octofludb.formatting as formatter
 import octofludb.token as tok
 from octofludb.nomenclature import (
@@ -443,6 +444,7 @@ class TestSegmentName(unittest.TestCase):
     def test_AlternativeSegmentNames(self):
         self.assertEqual(ftok.SegmentName("MP").clean, "M")
 
+
 class TestSegmentSubtype(unittest.TestCase):
     def test_SegmentSubtype(self):
         self.assertEqual(ftok.SegmentSubtype("PB2").clean, "PB2")
@@ -684,6 +686,131 @@ class TestFasta(unittest.TestCase):
         x2.connect(g2)
         s2 = sorted([(str(s), str(p), str(o)) for s, p, o in g2])
         self.assertEqual(s1, s2)
+
+
+class TestSubtypeSelection(unittest.TestCase):
+    def test_get_subtype_nothing_comes_from_nothing(self):
+        # nothing comes from nothing and nothing ever will
+        self.assertEqual(
+            recipes._get_subtype(
+                "whatever", [], [], gisaid_subtypes=[], genbank_subtypes=[]
+            ),
+            "unknown",
+        )
+
+    def test_get_subtype_from_segments(self):
+        self.assertEqual(
+            recipes._get_subtype("whatever", ["H1"], ["N1"], [], []), "H1N1"
+        )
+
+        # spacing and capitolization shouldn't matter
+        self.assertEqual(
+            recipes._get_subtype("whatever", ["h1", "H1"], ["N1"], [], []), "H1N1"
+        )
+        self.assertEqual(
+            recipes._get_subtype("whatever", ["h1 "], ["  n1 "], [], []), "H1N1"
+        )
+
+        # repetitions shouldn't matter
+        self.assertEqual(
+            recipes._get_subtype("whatever", ["H1", "H1"], ["N1"], [], []), "H1N1"
+        )
+
+        # but if they are different, then the "mixed" annotation should be returned
+        self.assertEqual(
+            recipes._get_subtype("whatever", ["H1", "H2"], ["N1"], [], []), "mixed"
+        )
+
+        # if either HA or NA is missing, the subtype is unknown
+        self.assertEqual(
+            recipes._get_subtype("whatever", ["H1"], [], [], []), "unknown"
+        )
+        self.assertEqual(
+            recipes._get_subtype("whatever", [], ["N1"], [], []), "unknown"
+        )
+
+        # if either HA or NA is missing, but genbank or gisaid have info, use their info
+        # these subtype annotations could have been derived from PCR
+        self.assertEqual(
+            recipes._get_subtype("whatever", ["H1"], [], ["H1N1"], []), "H1N1"
+        )
+        self.assertEqual(
+            recipes._get_subtype("whatever", [], ["N1"], [], ["H1N1"]), "H1N1"
+        )
+        self.assertEqual(
+            recipes._get_subtype("whatever", [], ["N1"], ["H1N1"], ["H1N1"]), "H1N1"
+        )
+
+    def test_get_subtype_from_genbank_and_gisaid(self):
+        # genbank or gisaid subtypes will be used if no clade info is available
+        self.assertEqual(recipes._get_subtype("whatever", [], [], ["H1N1"], []), "H1N1")
+        self.assertEqual(recipes._get_subtype("whatever", [], [], [], ["H1N1"]), "H1N1")
+
+        # repetitions shouldn't matter
+        self.assertEqual(
+            recipes._get_subtype("whatever", [], [], ["H1N1", "H1N1"], ["H1N1"]), "H1N1"
+        )
+        self.assertEqual(
+            recipes._get_subtype("whatever", [], [], ["H1N1"], ["H1N1", "H1N1"]), "H1N1"
+        )
+        self.assertEqual(
+            recipes._get_subtype(
+                "whatever", [], [], ["H1N1", "H1N1"], ["H1N1", "H1N1"]
+            ),
+            "H1N1",
+        )
+
+        # case and space shouldn't matter
+        self.assertEqual(
+            recipes._get_subtype("whatever", [], [], [" H1n1 ", " h1N1 "], []), "H1N1"
+        )
+
+        # variant tags and other annotations shouldn't matter
+        self.assertEqual(
+            recipes._get_subtype("whatever", [], [], ["H12avN12v"], ["H12N12pdm"]),
+            "H12N12",
+        )
+
+        # multiple subtypes should yield mixed
+        self.assertEqual(
+            recipes._get_subtype("whatever", [], [], ["H1N1", "H3N2"], []), "mixed"
+        )
+        self.assertEqual(
+            recipes._get_subtype("whatever", [], [], [], ["H1N1", "H3N2"]), "mixed"
+        )
+        self.assertEqual(
+            recipes._get_subtype("whatever", [], ["H1N1"], ["H1N1", "H3N2"], []),
+            "mixed",
+        )
+        self.assertEqual(
+            recipes._get_subtype("whatever", [], [], ["H1N1", "H3N2"], ["H1N1"]),
+            "mixed",
+        )
+
+        # order of search
+        #  look first at the octoFLU inferred subtypes, use this even if gisaid of epiflu think it is mixed
+        self.assertEqual(
+            recipes._get_subtype("whatever", ["H4"], ["N6"], [], ["H1N1", "H3N2"]),
+            "H4N6",
+        )
+        self.assertEqual(
+            recipes._get_subtype(
+                "whatever",
+                ["H4"],
+                ["N6"],
+                gisaid_subtypes=["H1N1", "H3N2"],
+                genbank_subtypes=[],
+            ),
+            "H4N6",
+        )
+
+        #  if there is no octoFLU info, and if genbank and gisaid disagree, go with genbank
+        self.assertEqual(
+            recipes._get_subtype(
+                "whatever", [], [], gisaid_subtypes=["H4N6"], genbank_subtypes=["H3N2"]
+            ),
+            "H3N2",
+        )
 
 
 class TestConstellations(unittest.TestCase):
