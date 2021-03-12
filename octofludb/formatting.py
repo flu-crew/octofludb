@@ -3,6 +3,7 @@ from octofludb.colors import bad
 
 import sys
 
+
 def write_as_fasta(results):
     """
     Write a SPARQL query result as a FASTA file

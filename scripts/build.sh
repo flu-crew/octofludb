@@ -91,7 +91,6 @@ function octoflu(){
     cat octoFLU/.xxx*Final_Output.txt |
         sort -u |
         awk 'BEGIN {OFS="\t"; FS="\t"; print "genbank_id", "segment_subtype", "clade", "gl_clade"} {print $1, $2, $3, $4}' > .octoflu_results
-        # awk 'BEGIN {OFS="\t"; FS="\t"} {print $1, $2, $3, $4}' >> .octoflu_results
     octofludb mk_table .octoflu_results > $ttl/octoflu.ttl
     octofludb upload $ttl/octoflu.ttl
 }
@@ -128,41 +127,42 @@ function make-motifs(){
     done
 }
 
-octofludb update_gb
+# rm -f .gb_*.ttl
+# octofludb update_gb
 octofludb upload .gb_*.ttl
 
 parallel "update-epiflu-metadata {} ${ttl}/{/}.ttl" ::: ${dat}/epiflu/h*/*xls
 parallel "update-epiflu-fasta    {} ${ttl}/{/}.ttl" ::: ${dat}/epiflu/h*/*fasta
 
-octoflu
+# octoflu
+#
+# # This must be run after octoFLU
+# octofludb subtypes > .subtype.txt
+# octofludb mk_table .subtype.txt > .subtype.ttl
+# octofludb upload .subtype.ttl
+#
+# constellate
 
-# This must be run after octoFLU
-octofludb subtypes > .subtype.txt
-octofludb mk_table .subtype.txt > .subtype.ttl
-octofludb upload .subtype.ttl
-
-constellate
-
-# CVV
-make-tags $dat/CDC_CVV/isolate_ids.txt cdc_cvv
-
-# antiserum
-make-tags $dat/antiserum/antiserum_strain_names.txt antiserum
-
-# antigen
-make-tags $dat/antiserum/antigen_strain_names.txt antigen
-
-# octoflu-references
-make-tags $dat/octoflu-references/segment-ids.txt octoflu_refs
-
-# vaccine
-make-tags $dat/vaccine/isolate_ids.txt vaccine
-
-# variants
-make-tags $dat/variants/isolate_ids.txt variant
-
-# wgs submission
-make-tags $dat/wgs/wgs.txt wgs
-
-# add antigenic motifs
-make-motifs
+# # CVV
+# make-tags $dat/CDC_CVV/isolate_ids.txt cdc_cvv
+#
+# # antiserum
+# make-tags $dat/antiserum/antiserum_strain_names.txt antiserum
+#
+# # antigen
+# make-tags $dat/antiserum/antigen_strain_names.txt antigen
+#
+# # octoflu-references
+# make-tags $dat/octoflu-references/segment-ids.txt octoflu_refs
+#
+# # vaccine
+# make-tags $dat/vaccine/isolate_ids.txt vaccine
+#
+# # variants
+# make-tags $dat/variants/isolate_ids.txt variant
+#
+# # wgs submission
+# make-tags $dat/wgs/wgs.txt wgs
+#
+# # add antigenic motifs
+# make-motifs
