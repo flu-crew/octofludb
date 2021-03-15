@@ -201,7 +201,7 @@ def upload_cmd(turtle_filenames, url, repo):
     sys.exit(0)
 
 
-# ===== input subcommands ====
+# ===== parse subcommands ====
 
 
 @click.command(
@@ -209,7 +209,7 @@ def upload_cmd(turtle_filenames, url, repo):
 )
 @click.argument("tag", type=str)
 @filename_arg
-def input_tag_cmd(tag, filename):
+def parse_tag_cmd(tag, filename):
     """
     Associate list of IDs with a tag
     """
@@ -240,9 +240,9 @@ def input_tag_cmd(tag, filename):
     name="ivr",
 )
 @filename_arg
-def input_ivr_cmd(filename):
+def parse_ivr_cmd(filename):
     """
-    Translate an IVR table to RDF
+    Translate an IVR table to RDF.
 
     load big table from IVR, with roughly the following format:
     gb | host | - | subtype | date | - | "Influenza A virus (<strain>(<subtype>))" | ...
@@ -256,8 +256,10 @@ def input_ivr_cmd(filename):
     name="ird",
 )
 @filename_arg
-def input_ird_cmd(filename):
-    import octofludb.recipes as recipe
+def parse_ird_cmd(filename):
+    """
+    Translate an IRD table to RDF.
+    """
 
     with_graph(recipe.mk_ird, filename)
 
@@ -266,10 +268,10 @@ def input_ird_cmd(filename):
     name="gis",
 )
 @filename_arg
-def input_gis_cmd(filename):
+def parse_gis_cmd(filename):
     """
-    Translate a Gisaid metadata excel file to RDF
-
+    Translate a Gisaid metadata excel file to RDF.
+    
     "filename" is a path to a Gisaid metadata excel file
     """
     import octofludb.recipes as recipe
@@ -292,9 +294,9 @@ def _mk_gbids_cmd(g, gbids=[]):
     name="gbids",
 )
 @filename_arg
-def input_gbids_cmd(*args, **kwargs):
+def parse_gbids_cmd(*args, **kwargs):
     """
-    Retrieve data for a list of genbank ids
+    Retrieve data for a list of genbank ids.
 
     <filename> contains a list of genbank ids
     """
@@ -325,7 +327,7 @@ def input_gbids_cmd(*args, **kwargs):
     default=1440,
     type=click.IntRange(min=1, max=9999),
 )
-def input_update_gb_cmd(minyear, maxyear, nmonths):
+def parse_update_gb_cmd(minyear, maxyear, nmonths):
     """
     Retrieve any missing genbank records. Results are stored in files with the prefix '.gb_###.ttl'
     """
@@ -349,9 +351,9 @@ def input_update_gb_cmd(minyear, maxyear, nmonths):
 )
 @tag_arg_opt
 @filename_arg
-def input_blast_cmd(tag, filename):
+def parse_blast_cmd(tag, filename):
     """
-    Translate BLAST results into RDF
+    Translate BLAST results into RDF.
 
     <filename> File containing a list of genbank ids
     """
@@ -396,7 +398,7 @@ na_opt = click.option("--na", help="The string that represents a missing value")
 @exclude_opt
 @click.option("--levels", help="levels")
 @na_opt
-def input_table_cmd(filename, tag, include, exclude, levels, na):
+def parse_table_cmd(filename, tag, include, exclude, levels, na):
     """
     Translate a table to RDF
     """
@@ -428,9 +430,9 @@ def input_table_cmd(filename, tag, include, exclude, levels, na):
 @include_opt
 @exclude_opt
 @na_opt
-def input_fasta_cmd(*args, **kwargs):
+def parse_fasta_cmd(*args, **kwargs):
     """
-    Translate a fasta file to RDF
+    Translate a fasta file to RDF.
 
     <filename> Path to a TAB-delimited or excel table
     """
@@ -455,35 +457,35 @@ def input_fasta_cmd(*args, **kwargs):
 @click.command(
     name="unpublished",
 )
-def input_unpublished_cmd(*args, **kwargs):
+def parse_unpublished_cmd(*args, **kwargs):
     """
-    Prepare an unpublished set up sequences
+    Prepare an unpublished set up sequences.
     """
     raise NotImplemented
 
 
 @click.group(
     cls=OrderedGroup,
-    name="input",
+    name="parse",
     context_settings=CONTEXT_SETTINGS,
 )
-def input_grp():
+def parse_grp():
     """
-    Various recipes for prepping data for uploading
+    Various recipes for prepping data for uploading.
     """
     pass
 
 
-input_grp.add_command(input_tag_cmd)
-input_grp.add_command(input_ivr_cmd)
-input_grp.add_command(input_ird_cmd)
-input_grp.add_command(input_gis_cmd)
-input_grp.add_command(input_gbids_cmd)
-input_grp.add_command(input_update_gb_cmd)
-input_grp.add_command(input_blast_cmd)
-input_grp.add_command(input_table_cmd)
-input_grp.add_command(input_fasta_cmd)
-input_grp.add_command(input_unpublished_cmd)
+parse_grp.add_command(parse_update_gb_cmd)
+parse_grp.add_command(parse_fasta_cmd)
+parse_grp.add_command(parse_table_cmd)
+parse_grp.add_command(parse_unpublished_cmd)
+parse_grp.add_command(parse_tag_cmd)
+parse_grp.add_command(parse_blast_cmd)
+parse_grp.add_command(parse_gbids_cmd)
+parse_grp.add_command(parse_gis_cmd)
+parse_grp.add_command(parse_ird_cmd)
+parse_grp.add_command(parse_ivr_cmd)
 
 
 # ===== make subcommands ====
@@ -781,7 +783,7 @@ cli_grp.add_command(clean_cmd)
 cli_grp.add_command(query_cmd)
 cli_grp.add_command(update_cmd)
 cli_grp.add_command(upload_cmd)
-cli_grp.add_command(input_grp)
+cli_grp.add_command(parse_grp)
 cli_grp.add_command(make_grp)
 cli_grp.add_command(fetch_grp)
 cli_grp.add_command(report_grp)
