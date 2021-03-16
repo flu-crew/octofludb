@@ -543,10 +543,10 @@ class TestInternalGeneClade(unittest.TestCase):
     def test_InternalGeneClade(self):
         self.assertEqual(ftok.InternalGeneClade("TRIG").clean, "TRIG")
         self.assertEqual(ftok.InternalGeneClade("PDM").clean, "PDM")
-        self.assertEqual(ftok.InternalGeneClade("VTX98").clean, "VTX98")
+        self.assertEqual(ftok.InternalGeneClade("LAIV").clean, "LAIV")
         self.assertEqual(ftok.InternalGeneClade("trig").clean, "trig")
         self.assertEqual(ftok.InternalGeneClade("pdm").clean, "pdm")
-        self.assertEqual(ftok.InternalGeneClade("vtx98").clean, "vtx98")
+        self.assertEqual(ftok.InternalGeneClade("LaIv").clean, "laiv")
         # don't accept random strings
         self.assertEqual(ftok.InternalGeneClade("bogus").clean, None)
 

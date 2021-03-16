@@ -439,3 +439,54 @@ def mk_masterlist(results):
         entry["Barcode"] = [barcode]
         row = [",".join([f for f in entry[field] if f]) for field in MASTERLIST_HEADER]
         print("\t".join(row))
+
+
+class IrregularStrain(flu.StrainToken):
+    """
+    Matches anything and treats it as a strain.
+
+    This is useful when you want to force a field to refer to a strain, such as
+    when you are loading unpublished data that use idiosyncratic identifiers.
+    """
+    typename = "strain_id"
+    parser = parsec.regex(".+")
+
+
+class IrregularFasta(classes.Ragged):
+    """
+    Load a FASTA file where the first field is treated as a strain identifier.
+    """
+    def cast(self, data):
+        strain_ids = [IrregularStrain(d[0]) for d in data]
+        phrases = super().cast([d[1:] for d in data])
+        for i in range(len(strain_ids)):
+            phrases[i].tokens.append(strain_ids[i])
+        return phrases
+
+    def connect(self, g):
+        for phrase in self.data:
+          for token in phrase.tokens:
+            if token.group == "sequence":
+              g.add((token.as_uri(), P.tag, make_tag_uri("unpublished")))
+        super().connect(g)
+
+class IrregularSegment(flu.SegmentToken):
+    """
+    Matches anything and treats it as a segment.
+
+    Also see IrregularStrain
+    """
+    typename = None
+    parser = parsec.regex(".+")
+
+class IrregularSegmentTable(classes.Table):
+    """
+    Load a table; where the kth field is treated as a segment identifier.
+    """
+    def cast(self, data):
+        segment_ids = data[self.header[0]] 
+        del data[self.header[0]]
+        phrases = super().cast(data)
+        for i in range(len(segment_ids)):
+            phrases[i].tokens.append(IrregularSegment(segment_ids[i]))
+        return phrases

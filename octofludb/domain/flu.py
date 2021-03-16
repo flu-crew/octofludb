@@ -123,7 +123,7 @@ p_n2_clade = wordset(
     ],
     label="n3_clade",
 )
-p_internal_gene_clade = wordset(["PDM", "TRIG", "VTX98"], label="internal_gene_clade")
+p_internal_gene_clade = wordset(["PDM", "TRIG", "LAIV"], label="internal_gene_clade")
 
 
 class Strain:

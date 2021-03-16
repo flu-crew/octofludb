@@ -22,29 +22,8 @@ octofludb init
 octofludb upload ../schema/geography.ttl
 octofludb upload ../schema/schema.ttl
 
-function upload(){
-    datfile=$dat/$1
-    shift
-    ttlfile=$ttl/$1
-    shift
+mkdir -p "$ttl"
 
-    log -n "translating $datfile to $ttlfile"
-
-    if [ ! -f ${datfile} ]
-    then
-        log " ... Cannot find ${datfile}"
-        exit 1
-    elif [ ${datfile} -nt ${ttlfile} ] || [ ! -f ${ttlfile} ]
-    then
-        octofludb $@ ${datfile} > ${ttlfile}
-        octofludb upload ${ttlfile}
-    else
-        log " ... skipping"
-    echo
-    fi
-}
-
-mkdir -p "$ttl" 
 
 function update-epiflu-metadata(){
     data=$1
@@ -53,7 +32,7 @@ function update-epiflu-metadata(){
     if [ ! -f $turtle ]
     then
         echo "loading" >> log
-        octofludb mk_gis $data > $turtle
+        octofludb prep gis $data > $turtle
         octofludb upload $turtle
     else
         echo "skipping" >> log
@@ -68,7 +47,7 @@ function update-epiflu-fasta(){
     if [ ! -f $turtle ]
     then
         echo "loading" >> log
-        octofludb mk_fasta $data > $turtle
+        octofludb prep fasta $data > $turtle
         octofludb upload $turtle
     else
         echo "skipping" >> log
@@ -91,14 +70,13 @@ function octoflu(){
     cat octoFLU/.xxx*Final_Output.txt |
         sort -u |
         awk 'BEGIN {OFS="\t"; FS="\t"; print "genbank_id", "segment_subtype", "clade", "gl_clade"} {print $1, $2, $3, $4}' > .octoflu_results
-    octofludb mk_table .octoflu_results > $ttl/octoflu.ttl
+    octofludb prep table .octoflu_results > $ttl/octoflu.ttl
     octofludb upload $ttl/octoflu.ttl
 }
 
 function constellate(){
-    echo "strain_name	constellation" > .const.tab
-    octofludb const >> .const.tab
-    octofludb mk_table .const.tab > .const.ttl
+    octofludb make const > .const.tab
+    octofludb prep table .const.tab > .const.ttl
     rm .const.tab
     mv .const.ttl turtles/constellations.ttl
     octofludb upload turtles/constellations.ttl 
@@ -108,7 +86,7 @@ function constellate(){
 function make-tags(){
     list=$1
     tag=$2
-    octofludb tag $list $tag > $ttl/$tag.ttl
+    octofludb prep tag $list $tag > $ttl/$tag.ttl
     octofludb upload $ttl/$tag.ttl
 }
 
@@ -119,7 +97,7 @@ function make-motifs(){
         awk -v name=${motif}_motif 'BEGIN{OFS="\t"}
             NR == 1 {print "genbank_id", name}
             {print}' ${motif}.tab > .tmp
-        octofludb mk_table .tmp > ${motif}.ttl
+        octofludb prep table .tmp > ${motif}.ttl
         octofludb upload ${motif}.ttl 
         mv ${motif}.ttl $ttl/${motif}.ttl
         rm .tmp
@@ -127,21 +105,21 @@ function make-motifs(){
     done
 }
 
-# rm -f .gb_*.ttl
-# octofludb update_gb
+rm -f .gb_*.ttl
+octofludb update_gb
 octofludb upload .gb_*.ttl
 
 parallel "update-epiflu-metadata {} ${ttl}/{/}.ttl" ::: ${dat}/epiflu/h*/*xls
 parallel "update-epiflu-fasta    {} ${ttl}/{/}.ttl" ::: ${dat}/epiflu/h*/*fasta
 
-# octoflu
-#
-# # This must be run after octoFLU
-# octofludb subtypes > .subtype.txt
-# octofludb mk_table .subtype.txt > .subtype.ttl
-# octofludb upload .subtype.ttl
-#
-# constellate
+octoflu
+
+# This must be run after octoFLU
+octofludb make subtypes > .subtype.txt
+octofludb prep table .subtype.txt > .subtype.ttl
+octofludb upload .subtype.ttl
+
+constellate
 
 # # CVV
 # make-tags $dat/CDC_CVV/isolate_ids.txt cdc_cvv

@@ -2,6 +2,9 @@ v0.7.0
 ======
 
  * Standardize subtype handling (see runtest `get_subtypes` tests)
+ * Replace "VTX98" with "LAIV" in internal gene parser
+ * Add header to `octofludb make const` output
+ * Add handlers for working with unpublished data
 
 v0.6.0
 ======

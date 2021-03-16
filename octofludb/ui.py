@@ -83,6 +83,11 @@ tag_arg_opt = click.option(
     "--tag", help="A tag to associate with each identifier", type=str
 )
 
+segment_key_opt = click.option(
+    "--segment-key", help="Treat the first column as a segment identifier. This is necessary for irregular segment identifiers (such as sequence checksums), for genbank or epiflu IDs, not special actio is needed, since octofludb will automatically recognize them.",
+    is_flag=True, default=False
+)
+
 sparql_filename_pos = click.argument("sparql_filename", type=click.Path(exists=True))
 
 all_the_turtles = click.argument(
@@ -99,6 +104,10 @@ fasta_opt = click.option(
     "--fasta",
     is_flag=True,
     help="Return query as a fasta file where last column is sequence",
+)
+
+delimiter_opt = click.option(
+    "--delimiter", help="The delimiter between fields in the header", default="|"
 )
 
 
@@ -201,7 +210,7 @@ def upload_cmd(turtle_filenames, url, repo):
     sys.exit(0)
 
 
-# ===== parse subcommands ====
+# ===== prep subcommands ====
 
 
 @click.command(
@@ -209,7 +218,7 @@ def upload_cmd(turtle_filenames, url, repo):
 )
 @click.argument("tag", type=str)
 @filename_arg
-def parse_tag_cmd(tag, filename):
+def prep_tag_cmd(tag, filename):
     """
     Associate list of IDs with a tag
     """
@@ -240,7 +249,7 @@ def parse_tag_cmd(tag, filename):
     name="ivr",
 )
 @filename_arg
-def parse_ivr_cmd(filename):
+def prep_ivr_cmd(filename):
     """
     Translate an IVR table to RDF.
 
@@ -256,7 +265,7 @@ def parse_ivr_cmd(filename):
     name="ird",
 )
 @filename_arg
-def parse_ird_cmd(filename):
+def prep_ird_cmd(filename):
     """
     Translate an IRD table to RDF.
     """
@@ -268,7 +277,7 @@ def parse_ird_cmd(filename):
     name="gis",
 )
 @filename_arg
-def parse_gis_cmd(filename):
+def prep_gis_cmd(filename):
     """
     Translate a Gisaid metadata excel file to RDF.
     
@@ -294,7 +303,7 @@ def _mk_gbids_cmd(g, gbids=[]):
     name="gbids",
 )
 @filename_arg
-def parse_gbids_cmd(*args, **kwargs):
+def prep_gbids_cmd(*args, **kwargs):
     """
     Retrieve data for a list of genbank ids.
 
@@ -327,7 +336,7 @@ def parse_gbids_cmd(*args, **kwargs):
     default=1440,
     type=click.IntRange(min=1, max=9999),
 )
-def parse_update_gb_cmd(minyear, maxyear, nmonths):
+def prep_update_gb_cmd(minyear, maxyear, nmonths):
     """
     Retrieve any missing genbank records. Results are stored in files with the prefix '.gb_###.ttl'
     """
@@ -351,7 +360,7 @@ def parse_update_gb_cmd(minyear, maxyear, nmonths):
 )
 @tag_arg_opt
 @filename_arg
-def parse_blast_cmd(tag, filename):
+def prep_blast_cmd(tag, filename):
     """
     Translate BLAST results into RDF.
 
@@ -398,15 +407,53 @@ na_opt = click.option("--na", help="The string that represents a missing value")
 @exclude_opt
 @click.option("--levels", help="levels")
 @na_opt
-def parse_table_cmd(filename, tag, include, exclude, levels, na):
+@segment_key_opt
+def prep_table_cmd(filename, tag, include, exclude, levels, na, segment_key):
     """
     Translate a table to RDF
     """
-    import octofludb.classes as classes
+    from octofludb.classes import Table
+    from octofludb.recipes import IrregularSegmentTable;
+
+    if segment_key:
+        constructor = IrregularSegmentTable
+    else:
+        constructor = Table
 
     def _mk_table_cmd(g, fh):
-        (inc, exc, levels) = process_tablelike(include, exclude, levels)
-        classes.Table(
+        (inc, exc, levelsProc) = process_tablelike(include, exclude, levels)
+        constructor(
+            filehandle=fh,
+            tag=tag,
+            include=inc,
+            exclude=exc,
+            log=True,
+            levels=levelsProc,
+            na_str=make_na(na),
+        ).connect(g)
+
+    with_graph(_mk_table_cmd, filename)
+
+@click.command(
+    name="fasta",
+)
+@filename_arg
+@tag_arg_opt
+@delimiter_opt
+@include_opt
+@exclude_opt
+@na_opt
+def prep_fasta_cmd(filename, tag, delimiter, include, exclude, na):
+    """
+    Translate a fasta file to RDF.
+
+    <filename> Path to a TAB-delimited or excel table
+    """
+    import octofludb.classes as classes
+
+    def _mk_fasta_cmd(g, fh):
+        (inc, exc, levels) = process_tablelike(include, exclude, None)
+        classes.Ragged(
             filehandle=fh,
             tag=tag,
             include=inc,
@@ -416,76 +463,85 @@ def parse_table_cmd(filename, tag, include, exclude, levels, na):
             na_str=make_na(na),
         ).connect(g)
 
-    with_graph(_mk_table_cmd, filename)
-
-
-@click.command(
-    name="fasta",
-)
-@filename_arg
-@tag_arg_opt
-@click.option(
-    "--delimiter", help="The delimiter between fields in the header", default="|"
-)
-@include_opt
-@exclude_opt
-@na_opt
-def parse_fasta_cmd(*args, **kwargs):
-    """
-    Translate a fasta file to RDF.
-
-    <filename> Path to a TAB-delimited or excel table
-    """
-    raise NotImplemented
-    import octofludb.classes as classes
-
-    def _mk_fasta_cmd(g, fh):
-        (inc, exc, levels) = process_tablelike(args.include, args.exclude, None)
-        classes.Ragged(
-            filehandle=fh,
-            tag=args.tag,
-            include=inc,
-            exclude=exc,
-            log=True,
-            levels=levels,
-            na_str=make_na(args.na),
-        ).connect(g)
-
-    with_graph(_mk_fasta_cmd, args.filename)
+    with_graph(_mk_fasta_cmd, filename)
 
 
 @click.command(
     name="unpublished",
 )
-def parse_unpublished_cmd(*args, **kwargs):
+@filename_arg
+@tag_arg_opt
+@delimiter_opt
+@include_opt
+@exclude_opt
+@na_opt
+def prep_unpublished_cmd(filename, tag, delimiter, include, exclude, na):
     """
     Prepare an unpublished set up sequences.
+
+    The input is a fasta file where the header is a series of terms separated
+    by a delimiter ("|" by default).
+    
+    The first term MUST be the strain ID. This can be anything. For example,
+    "A/swine/12345678/2020' or some arbitrary id.  If the ID is used elsewhere
+    in the database to refer to a strain, then all data loaded here will be
+    assumed to describe the other ID as well (i.e., they are considered to be
+    the same thing).
+
+    The sequence is assumed to be a segment of unknown subtype and clade. It
+    will be associated with the strain by its MD5 checksum. Subtype/clade info
+    can be added through octoFLU.
+
+    Additional terms after the strain ID may be added. Any term that looks like
+    a date (e.g., "2020-12-31") will be parsed as the collection date. Country
+    names like "United States" or 3-letter country codes (e.g., USA or CAN) are
+    supported.
+
+    I strongly recommend you skim the output turtle file before uploading to
+    the database.
+
+    The "unpublished" tag is automatically associated with the segments in
+    addition to any tag specified through the `--tag` option.
     """
-    raise NotImplemented
+    import octofludb.recipes as recipe
+
+    def _mk_unpublisehd_fasta_cmd(g, fh):
+        (inc, exc, levels) = process_tablelike(include, exclude, None)
+        recipe.IrregularFasta(
+            filehandle=fh,
+            tag=tag,
+            include=inc,
+            exclude=exc,
+            log=True,
+            levels=levels,
+            na_str=make_na(na),
+        ).connect(g)
+
+    with_graph(_mk_unpublisehd_fasta_cmd, filename)
 
 
 @click.group(
     cls=OrderedGroup,
-    name="parse",
+    name="prep",
     context_settings=CONTEXT_SETTINGS,
 )
-def parse_grp():
+def prep_grp():
     """
     Various recipes for prepping data for uploading.
     """
     pass
 
 
-parse_grp.add_command(parse_update_gb_cmd)
-parse_grp.add_command(parse_fasta_cmd)
-parse_grp.add_command(parse_table_cmd)
-parse_grp.add_command(parse_unpublished_cmd)
-parse_grp.add_command(parse_tag_cmd)
-parse_grp.add_command(parse_blast_cmd)
-parse_grp.add_command(parse_gbids_cmd)
-parse_grp.add_command(parse_gis_cmd)
-parse_grp.add_command(parse_ird_cmd)
-parse_grp.add_command(parse_ivr_cmd)
+prep_grp.add_command(prep_update_gb_cmd)
+prep_grp.add_command(prep_fasta_cmd)
+prep_grp.add_command(prep_table_cmd)
+prep_grp.add_command(prep_unpublished_cmd)
+prep_grp.add_command(prep_tag_cmd)
+prep_grp.add_command(prep_blast_cmd)
+prep_grp.add_command(prep_gbids_cmd)
+prep_grp.add_command(prep_gis_cmd)
+prep_grp.add_command(prep_ird_cmd)
+prep_grp.add_command(prep_ivr_cmd)
 
 
 # ===== make subcommands ====
@@ -496,7 +552,7 @@ parse_grp.add_command(parse_ivr_cmd)
 )
 @url_opt
 @repo_name_opt
-def make_const_cmd(*args, **kwargs):
+def make_const_cmd(url, repo):
     """
     Generate constellations for all swine strains.
 
@@ -513,7 +569,7 @@ def make_const_cmd(*args, **kwargs):
 
     sparql_filename = os.path.join(os.path.dirname(__file__), "data", "segments.rq")
     results = db.sparql_query(
-        sparql_file=sparql_filename, url=args.url, repo_name=args.repo
+        sparql_file=sparql_filename, url=url, repo_name=repo
     )
     formatting.write_constellations(results)
 
@@ -523,7 +579,7 @@ def make_const_cmd(*args, **kwargs):
 )
 @url_opt
 @repo_name_opt
-def make_subtypes_cmd(*args, **kwargs):
+def make_subtypes_cmd(url, repo):
     """
     Determine subtypes based on Genbank serotype field, epiflu data, or octoflu HA/NA classifications"
     """
@@ -532,7 +588,7 @@ def make_subtypes_cmd(*args, **kwargs):
     sparql_filename = os.path.join(os.path.dirname(__file__), "data", "subtypes.rq")
 
     results = db.sparql_query(
-        sparql_file=sparql_filename, url=args.url, repo_name=args.repo
+        sparql_file=sparql_filename, url=url, repo_name=repo
     )
 
     recipe.mk_subtypes(results)
@@ -543,7 +599,7 @@ def make_subtypes_cmd(*args, **kwargs):
 )
 @url_opt
 @repo_name_opt
-def make_masterlist_cmd(*args, **kwargs):
+def make_masterlist_cmd(url, repo):
     """
     Generate the surveillance masterlist
     """
@@ -552,7 +608,7 @@ def make_masterlist_cmd(*args, **kwargs):
     sparql_filename = os.path.join(os.path.dirname(__file__), "data", "masterlist.rq")
 
     results = db.sparql_query(
-        sparql_file=sparql_filename, url=args.url, repo_name=args.repo
+        sparql_file=sparql_filename, url=url, repo_name=repo
     )
 
     recipe.mk_masterlist(results)
@@ -563,7 +619,7 @@ def make_masterlist_cmd(*args, **kwargs):
 )
 @url_opt
 @repo_name_opt
-def make_motifs_cmd(*args, **kwargs):
+def make_motifs_cmd(url, repo):
     """
     Generate motifs for H1 and H3
     """
@@ -596,7 +652,7 @@ make_grp.add_command(make_motifs_cmd)
 )
 @url_opt
 @repo_name_opt
-def fetch_A0_cmd(*args, **kwargs):
+def fetch_A0_cmd(url, repo):
     """
     Fetch data by A0 number
     """
@@ -608,7 +664,7 @@ def fetch_A0_cmd(*args, **kwargs):
 )
 @url_opt
 @repo_name_opt
-def fetch_genbank_cmd(*args, **kwargs):
+def fetch_genbank_cmd(url, repo):
     """
     Fetch data by genbank number
     """
@@ -620,7 +676,7 @@ def fetch_genbank_cmd(*args, **kwargs):
 )
 @url_opt
 @repo_name_opt
-def fetch_gisaid_cmd(*args, **kwargs):
+def fetch_gisaid_cmd(url, repo):
     """
     Fetch data by gisaid epi_id number
     """
@@ -653,7 +709,7 @@ fetch_grp.add_command(fetch_gisaid_cmd)
 )
 @url_opt
 @repo_name_opt
-def report_monthly_cmd(*args, **kwargs):
+def report_monthly_cmd(url, repo):
     """
     Surveillance data for the given month (basis of WGS selections)
     """
@@ -665,7 +721,7 @@ def report_monthly_cmd(*args, **kwargs):
 )
 @url_opt
 @repo_name_opt
-def report_quarter_cmd(*args, **kwargs):
+def report_quarter_cmd(url, repo):
     """
     Surveillance data for the quarter (basis of quarterly reports)
     """
@@ -677,7 +733,7 @@ def report_quarter_cmd(*args, **kwargs):
 )
 @url_opt
 @repo_name_opt
-def report_offlu_cmd(*args, **kwargs):
+def report_offlu_cmd(url, repo):
     """
     Synthesize public and private data needed for offlu reports
     """
@@ -709,7 +765,7 @@ report_grp.add_command(report_offlu_cmd)
 )
 @url_opt
 @repo_name_opt
-def delete_constellations_cmd(*args, **kwargs):
+def delete_constellations_cmd(url, repo):
     """
     Delete all constellation data
     """
@@ -721,7 +777,7 @@ def delete_constellations_cmd(*args, **kwargs):
 )
 @url_opt
 @repo_name_opt
-def delete_subtypes_cmd(*args, **kwargs):
+def delete_subtypes_cmd(url, repo):
     """
     Delete all subtype data
     """
@@ -733,7 +789,7 @@ def delete_subtypes_cmd(*args, **kwargs):
 )
 @url_opt
 @repo_name_opt
-def delete_clades_cmd(*args, **kwargs):
+def delete_clades_cmd(url, repo):
     """
     Delete all clade data
     """
@@ -745,7 +801,7 @@ def delete_clades_cmd(*args, **kwargs):
 )
 @url_opt
 @repo_name_opt
-def delete_gl_clades_cmd(*args, **kwargs):
+def delete_gl_clades_cmd(url, repo):
     """
     Delete all global H1 clade data
     """
@@ -783,7 +839,7 @@ cli_grp.add_command(clean_cmd)
 cli_grp.add_command(query_cmd)
 cli_grp.add_command(update_cmd)
 cli_grp.add_command(upload_cmd)
-cli_grp.add_command(parse_grp)
+cli_grp.add_command(prep_grp)
 cli_grp.add_command(make_grp)
 cli_grp.add_command(fetch_grp)
 cli_grp.add_command(report_grp)

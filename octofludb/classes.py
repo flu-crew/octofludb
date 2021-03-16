@@ -198,26 +198,14 @@ def headlessTabularTyping(data, levels=None, na_str=[None]):
 
 
 class Table(ParsedPhraseList):
-    def __init__(self, headers=[], *args, **kwargs):
-        self.headers = headers
-        super().__init__(*args, **kwargs)
+    """
+    Parse a table.
 
+    The table may be a TAB-delimited file or an excel file. It is assumed to
+    have a header.
+    """
     def cast(self, data):
-        if self.headers:
-            if len(self.headers) != len(data):
-                log(
-                    "The number of described columns doesn't equal the number of observed columns"
-                )
-                exit(1)
-            else:
-                cols = [c.cast(d) for c, d in zip(self.headers, data)]
-                result = [
-                    Phrase([col[i] for col in cols], levels=self.levels)
-                    for i in range(len(cols[0]))
-                ]
-        else:
-            result = tabularTyping(data, levels=self.levels, na_str=self.na_str)
-        return result
+        return tabularTyping(data, levels=self.levels, na_str=self.na_str)
 
     def parse(self, filehandle):
         """
@@ -233,8 +221,8 @@ class Table(ParsedPhraseList):
     def _parse_excel(self, filehandle):
         try:
             log(f"Reading {file_str(filehandle)} as excel file ...")
-            # FIXME: what if there isn't a header?
             d = pd.read_excel(filehandle.name)
+            self.header = list(d.columns)
             # create a dictionary of List(str) with column names as keys
             return {c: [strOrNone(x) for x in d[c]] for c in d}
         except xlrd.biffh.XLRDError as e:
@@ -245,11 +233,10 @@ class Table(ParsedPhraseList):
     def _parse_table(self, filehandle, delimiter="\t"):
         log(f"Reading {file_str(filehandle)} as tab-delimited file ...")
         rows = [r.split(delimiter) for r in filehandle.readlines()]
-        # FIXME: I can't assume there is a header
-        header = [c.strip() for c in rows[0]]
-        indices = range(len(header))
+        self.header = [c.strip() for c in rows[0]]
+        indices = range(len(self.header))
         rows = rows[1:]
-        columns = {header[i]: [strOrNone(r[i].strip()) for r in rows] for i in indices}
+        columns = {self.header[i]: [strOrNone(r[i].strip()) for r in rows] for i in indices}
         return columns
 
 
