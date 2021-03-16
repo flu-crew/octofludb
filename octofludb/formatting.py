@@ -50,6 +50,7 @@ def write_constellations(results):
 
     consts = _make_constellations(rows)
 
+    print("strain_name\tconstellation")
     for (strain, const) in consts:
         print(f"{strain}\t{const}")
 
