@@ -1,0 +1,65 @@
+# make a nice fasta file with all tagged sequence
+
+PREFIX f: <https://flu-crew.org/term/>
+
+SELECT DISTINCT
+    ?gb
+    ?epi
+    ?strain
+    ?subtype
+    ?naclade
+    ?haclade
+    ?gl_clade
+    ?constellation
+    ?host
+    ?country
+    ?date
+    ?segment
+    ?seq
+WHERE {
+    ?s f:query_tag ?tag .
+    # * this will work for strain names, barcodes, epiflu isolate ids, genbank
+    #   ids or epiflu ids
+    # * they may also all be mixed together
+    # * epiflu isolate ids need to be in the format "EPI_ISL_xxxxx", case and
+    #   "_" are important, since I do an exact match.
+    # * like isolate ids, epiflu ids need to be in the format "EPI_xxxxx"
+    FILTER (
+        ?tag = ?barcode ||
+        ?tag = ?isolate ||
+        ?tag = ?seqid ||
+        ?tag = ?strain ||
+        REGEX (?tag, ?strain, "i")
+    ) .
+
+    ?sid f:strain_name ?strain .
+
+    OPTIONAL { ?sid f:host ?host . }
+    OPTIONAL { ?sid f:date ?date . }
+    OPTIONAL { ?sid f:subtype ?date . }
+    OPTIONAL { ?sid f:constellation ?const . }
+    OPTIONAL { ?sid f:isolate_id ?isolate . }
+    OPTIONAL { ?sid f:barcode ?barcode . }
+
+    ?sid f:has_segment ?gid .
+
+    OPTIONAL { ?gid f:genbank_id ?gb }
+    OPTIONAL { ?gid f:epi_id ?epi }
+
+    ?gid f:segment_name ?segment .
+
+    OPTIONAL { ?gid f:clade ?clade . }
+
+    OPTIONAL {
+        ?sid f:has_segment ?hagid .
+        ?hagid f:segment_name "HA" .
+        OPTIONAL { ?hagid f:clade ?haclade . }
+        OPTIONAL { ?hagid f:clade ?gl_clade . }
+    }
+
+    OPTIONAL {
+        ?sid f:has_segment ?nagid .
+        ?nagid f:segment_name "NA" .
+        OPTIONAL { ?nagid f:clade ?naclade . }
+    }
+}

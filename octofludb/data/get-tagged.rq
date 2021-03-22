@@ -1,0 +1,94 @@
+# retrieve the maximum for whatever is tagged
+
+PREFIX f: <https://flu-crew.org/term/>
+
+SELECT DISTINCT
+    ?isolate
+    ?strain
+    ?host
+    ?subtype
+    ?naclade
+    ?haclade
+    ?gl_clade
+    ?constellation
+    ?country
+    ?date
+    ?haid  as HA
+    ?naid  as NA
+    ?pb2id as PB2
+    ?pb1id as PB1
+    ?paid  as PA
+    ?npid  as NP
+    ?mid   as M
+    ?nsid  as NS
+WHERE {
+    ?s f:query_tag ?tag .
+    FILTER (?tag = ?isolate) .
+
+    ?sid f:isolate_id ?isolate .
+    ?sid f:strain_name ?strain .
+
+    FILTER (
+        ?tag = ?barcode ||
+        ?tag = ?isolate ||
+        ?tag = ?seqid ||
+        ?tag = ?strain ||
+        REGEX (?tag, ?strain, "i")
+    ) .
+
+    OPTIONAL { ?sid f:host ?host . }
+    OPTIONAL { ?sid f:date ?date . }
+    OPTIONAL { ?sid f:subtype ?date . }
+    OPTIONAL { ?sid f:constellation ?const . }
+
+    OPTIONAL {
+        ?sid f:has_segment ?pb2gid .
+        ?pb2gid f:segment_name "PB2" .
+        ?pb2gid f:seqid ?pb2id .
+    }
+
+    OPTIONAL {
+        ?sid f:has_segment ?pb1gid .
+        ?pb1gid f:segment_name "PB1" .
+        ?pb1gid f:seqid ?pb1id .
+    }
+
+    OPTIONAL {
+        ?sid f:has_segment ?pagid .
+        ?pagid f:segment_name "PA" .
+        ?pagid f:seqid ?paid .
+    }
+
+    OPTIONAL {
+        ?sid f:has_segment ?npgid .
+        ?npgid f:segment_name "NP" .
+        ?npgid f:seqid ?npid .
+    }
+
+    OPTIONAL {
+        ?sid f:has_segment ?mgid .
+        ?mgid f:segment_name "M" .
+        ?mgid f:seqid ?mid .
+    }
+
+    OPTIONAL {
+        ?sid f:has_segment ?nsgid .
+        ?msgid f:segment_name "MS" .
+        ?nsgid f:seqid ?msid .
+    }
+
+    OPTIONAL {
+        ?sid f:has_segment ?hagid .
+        ?hagid f:segment_name "HA" .
+        ?hagid f:seqid ?haid .
+        OPTIONAL { ?hagid f:clade ?haclade . }
+        OPTIONAL { ?hagid f:clade ?gl_clade . }
+    }
+
+    OPTIONAL {
+        ?sid f:has_segment ?nagid .
+        ?nagid f:segment_name "NA" .
+        ?nagid f:seqid ?naid .
+        OPTIONAL { ?nagid f:clade ?naclade . }
+    }
+}

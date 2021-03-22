@@ -1,0 +1,7 @@
+PREFIX f: <https://flu-crew.org/term/>
+
+DELETE {
+    ?s f:query_tag ?tag .
+} WHERE {
+    ?s f:query_tag ?tag .
+}

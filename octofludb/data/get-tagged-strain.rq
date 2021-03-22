@@ -1,0 +1,45 @@
+# retrieve just the strain-level information
+
+PREFIX f: <https://flu-crew.org/term/>
+
+SELECT DISTINCT
+    ?strain
+    ?isolate
+    ?host
+    ?subtype
+    ?naclade
+    ?haclade
+    ?gl_clade
+    ?constellation
+    ?country
+    ?date
+WHERE {
+    ?s f:query_tag ?tag .
+    FILTER (
+        ?tag = ?barcode ||
+        ?tag = ?isolate ||
+        ?tag = ?seqid ||
+        ?tag = ?strain ||
+        REGEX (?tag, ?strain, "i")
+    ) .
+
+    ?sid f:strain_name ?strain .
+
+    OPTIONAL { ?sid f:host ?host . }
+    OPTIONAL { ?sid f:date ?date . }
+    OPTIONAL { ?sid f:subtype ?date . }
+    OPTIONAL { ?sid f:constellation ?const . }
+
+    OPTIONAL {
+        ?sid f:has_segment ?hagid .
+        ?hagid f:segment_name "HA" .
+        OPTIONAL { ?hagid f:clade ?haclade . }
+        OPTIONAL { ?hagid f:clade ?gl_clade . }
+    }
+
+    OPTIONAL {
+        ?sid f:has_segment ?nagid .
+        ?nagid f:segment_name "NA" .
+        OPTIONAL { ?nagid f:clade ?naclade . }
+    }
+}

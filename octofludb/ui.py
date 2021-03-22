@@ -366,7 +366,6 @@ def prep_blast_cmd(tag, filename):
 
     <filename> File containing a list of genbank ids
     """
-    raise NotImplemented
     import octofludb.recipes as recipe
 
     log(f"Retrieving and parsing blast results from '{filename}'")
@@ -646,44 +645,61 @@ make_grp.add_command(make_motifs_cmd)
 
 # ===== fetch subcommands =====
 
-
 @click.command(
-    name="A0",
+    name="tag",
 )
 @url_opt
 @repo_name_opt
-def fetch_A0_cmd(url, repo):
+def fetch_tag_cmd(url, repo):
     """
-    Fetch data by A0 number
+    Upload list of tags
     """
     raise NotImplemented
 
-
 @click.command(
-    name="genbank",
+    name="isolate",
 )
 @url_opt
 @repo_name_opt
-def fetch_genbank_cmd(url, repo):
+def fetch_isolate_cmd(url, repo):
     """
-    Fetch data by genbank number
+    Fetch tagged isolate data
     """
     raise NotImplemented
 
-
 @click.command(
-    name="gisaid",
+    name="strain",
 )
 @url_opt
 @repo_name_opt
-def fetch_gisaid_cmd(url, repo):
+def fetch_strain_cmd(url, repo):
     """
-    Fetch data by gisaid epi_id number
+    Fetch tagged strain data
     """
     raise NotImplemented
 
+@click.command(
+    name="segment",
+)
+@url_opt
+@repo_name_opt
+def fetch_segment_cmd(url, repo):
+    """
+    Fetch tagged segment data
+    """
+    raise NotImplemented
 
-### push a UUID tag, pull everything through that tag
+@click.command(
+    name="clear",
+)
+@url_opt
+@repo_name_opt
+def fetch_clear_cmd(url, repo):
+    """
+    Clear all uploaded tags
+    """
+    raise NotImplemented
+
 @click.group(
     cls=OrderedGroup,
     name="fetch",
@@ -691,14 +707,27 @@ def fetch_gisaid_cmd(url, repo):
 )
 def fetch_grp():
     """
-    Recipes for fetching data
+    Tag and fetch data
+
+    Use the "tag" subcommand to push lists of identifiers (as either a
+    comma-delimited string or a file with one identifier per line).
+
+    These identifiers will all be tagged for retrieval in the database.
+
+    They may be fetched with the "isolate", "strain" or "segment" commands
+    (dependeing on what is tagged).
+
+    Tags can be cleared with `clear`. Until cleared, the tags reside in the
+    database, allowing multiple retrievals or allowing other database
+    operations to interact with the tagged sets (not a recommended operation).
     """
     pass
 
-
-fetch_grp.add_command(fetch_A0_cmd)
-fetch_grp.add_command(fetch_genbank_cmd)
-fetch_grp.add_command(fetch_gisaid_cmd)
+fetch_grp.add_command(fetch_tag_cmd)
+fetch_grp.add_command(fetch_isolate_cmd)
+fetch_grp.add_command(fetch_strain_cmd)
+fetch_grp.add_command(fetch_segment_cmd)
+fetch_grp.add_command(fetch_clear_cmd)
 
 
 # ===== report subcommands =====
