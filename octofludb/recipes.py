@@ -448,6 +448,7 @@ class IrregularStrain(flu.StrainToken):
     This is useful when you want to force a field to refer to a strain, such as
     when you are loading unpublished data that use idiosyncratic identifiers.
     """
+
     typename = "strain_id"
     parser = parsec.regex(".+")
 
@@ -456,6 +457,7 @@ class IrregularFasta(classes.Ragged):
     """
     Load a FASTA file where the first field is treated as a strain identifier.
     """
+
     def cast(self, data):
         strain_ids = [IrregularStrain(d[0]) for d in data]
         phrases = super().cast([d[1:] for d in data])
@@ -465,10 +467,11 @@ class IrregularFasta(classes.Ragged):
 
     def connect(self, g):
         for phrase in self.data:
-          for token in phrase.tokens:
-            if token.group == "sequence":
-              g.add((token.as_uri(), P.tag, make_tag_uri("unpublished")))
+            for token in phrase.tokens:
+                if token.group == "sequence":
+                    g.add((token.as_uri(), P.tag, make_tag_uri("unpublished")))
         super().connect(g)
+
 
 class IrregularSegment(flu.SegmentToken):
     """
@@ -476,15 +479,18 @@ class IrregularSegment(flu.SegmentToken):
 
     Also see IrregularStrain
     """
+
     typename = None
     parser = parsec.regex(".+")
+
 
 class IrregularSegmentTable(classes.Table):
     """
     Load a table; where the kth field is treated as a segment identifier.
     """
+
     def cast(self, data):
-        segment_ids = data[self.header[0]] 
+        segment_ids = data[self.header[0]]
         del data[self.header[0]]
         phrases = super().cast(data)
         for i in range(len(segment_ids)):

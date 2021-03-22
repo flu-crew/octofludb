@@ -1,5 +1,11 @@
+include octofludb/data/all-acc.rq
+include octofludb/data/clear-query-tags.rq
+include octofludb/data/get-tagged-isolate.rq
+include octofludb/data/get-tagged-segment.rq
+include octofludb/data/get-tagged-sequence.rq
+include octofludb/data/get-tagged-strain.rq
+include octofludb/data/get-tagged.rq
+include octofludb/data/masterlist.rq
 include octofludb/data/octofludb-config.ttl
 include octofludb/data/segments.rq
-include octofludb/data/masterlist.rq
 include octofludb/data/subtypes.rq
-include octofludb/data/all-acc.rq

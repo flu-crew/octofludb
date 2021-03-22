@@ -11,6 +11,7 @@ from octofludb.util import padDigit
 ni = rdflib.Namespace("https://flu-crew.org/id/")
 nt = rdflib.Namespace("https://flu-crew.org/term/")
 ntag = rdflib.Namespace("https://flu-crew.org/tag/")
+nquery = rdflib.Namespace("https://flu-crew.org/query/")
 nusa = rdflib.Namespace("https://flu-crew.org/geo/country/usa/")
 ncountry = rdflib.Namespace("https://flu-crew.org/geo/country/")
 
@@ -19,12 +20,18 @@ manager.bind("fid", ni)
 manager.bind("f", nt)
 manager.bind("usa", nusa)
 manager.bind("world", ncountry)
+manager.bind("query", nquery)
 
 
 def make_tag_uri(x):
     tag = x.strip().replace(" ", "_").lower()
     tag = url.quote_plus(tag)
     return ntag.term(tag)
+
+
+def make_query_tag_uri(x="default"):
+    tag = url.quote_plus(x)
+    return nquery.term(tag)
 
 
 def define_subproperty(p1, p2, g):
@@ -119,6 +126,7 @@ class P:
     # flu relations
     has_feature = nt.has_feature
     tag = nt.tag
+    query_tag = nt.query_tag
     dnaseq = nt.dnaseq
     proseq = nt.proseq
     global_clade = nt.global_clade

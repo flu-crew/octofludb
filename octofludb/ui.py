@@ -84,8 +84,10 @@ tag_arg_opt = click.option(
 )
 
 segment_key_opt = click.option(
-    "--segment-key", help="Treat the first column as a segment identifier. This is necessary for irregular segment identifiers (such as sequence checksums), for genbank or epiflu IDs, not special actio is needed, since octofludb will automatically recognize them.",
-    is_flag=True, default=False
+    "--segment-key",
+    help="Treat the first column as a segment identifier. This is necessary for irregular segment identifiers (such as sequence checksums), for genbank or epiflu IDs, not special actio is needed, since octofludb will automatically recognize them.",
+    is_flag=True,
+    default=False,
 )
 
 sparql_filename_pos = click.argument("sparql_filename", type=click.Path(exists=True))
@@ -142,18 +144,7 @@ def clean_cmd(url, repo):
     raise NotImplemented
 
 
-@click.command(
-    name="query",
-)
-@sparql_filename_pos
-@header_opt
-@fasta_opt
-@url_opt
-@repo_name_opt
-def query_cmd(sparql_filename, header, fasta, url, repo):
-    """
-    Submit a SPARQL query to octofludb
-    """
+def fmt_query_cmd(sparql_filename, header, fasta, url, repo):
     import octofludb.formatting as formatting
 
     results = db.sparql_query(sparql_file=sparql_filename, url=url, repo_name=repo)
@@ -162,6 +153,20 @@ def query_cmd(sparql_filename, header, fasta, url, repo):
     else:
         formatting.write_as_table(results, header=header)
     sys.exit(0)
+
+@click.command(
+    name="query",
+)
+@sparql_filename_pos
+@header_opt
+@fasta_opt
+@url_opt
+@repo_name_opt
+def query_cmd(*args):
+    """
+    Submit a SPARQL query to octofludb
+    """
+    fmt_query_cmd(*args)
 
 
 @click.command(
@@ -280,7 +285,7 @@ def prep_ird_cmd(filename):
 def prep_gis_cmd(filename):
     """
     Translate a Gisaid metadata excel file to RDF.
-    
+
     "filename" is a path to a Gisaid metadata excel file
     """
     import octofludb.recipes as recipe
@@ -412,7 +417,7 @@ def prep_table_cmd(filename, tag, include, exclude, levels, na, segment_key):
     Translate a table to RDF
     """
     from octofludb.classes import Table
-    from octofludb.recipes import IrregularSegmentTable;
+    from octofludb.recipes import IrregularSegmentTable
 
     if segment_key:
         constructor = IrregularSegmentTable
@@ -432,6 +437,7 @@ def prep_table_cmd(filename, tag, include, exclude, levels, na, segment_key):
         ).connect(g)
 
     with_graph(_mk_table_cmd, filename)
+
 
 @click.command(
     name="fasta",
@@ -480,7 +486,7 @@ def prep_unpublished_cmd(filename, tag, delimiter, include, exclude, na):
 
     The input is a fasta file where the header is a series of terms separated
     by a delimiter ("|" by default).
-    
+
     The first term MUST be the strain ID. This can be anything. For example,
     "A/swine/12345678/2020' or some arbitrary id.  If the ID is used elsewhere
     in the database to refer to a strain, then all data loaded here will be
@@ -567,9 +573,7 @@ def make_const_cmd(url, repo):
     import octofludb.formatting as formatting
 
     sparql_filename = os.path.join(os.path.dirname(__file__), "data", "segments.rq")
-    results = db.sparql_query(
-        sparql_file=sparql_filename, url=url, repo_name=repo
-    )
+    results = db.sparql_query(sparql_file=sparql_filename, url=url, repo_name=repo)
     formatting.write_constellations(results)
 
 
@@ -586,9 +590,7 @@ def make_subtypes_cmd(url, repo):
 
     sparql_filename = os.path.join(os.path.dirname(__file__), "data", "subtypes.rq")
 
-    results = db.sparql_query(
-        sparql_file=sparql_filename, url=url, repo_name=repo
-    )
+    results = db.sparql_query(sparql_file=sparql_filename, url=url, repo_name=repo)
 
     recipe.mk_subtypes(results)
 
@@ -606,9 +608,7 @@ def make_masterlist_cmd(url, repo):
 
     sparql_filename = os.path.join(os.path.dirname(__file__), "data", "masterlist.rq")
 
-    results = db.sparql_query(
-        sparql_file=sparql_filename, url=url, repo_name=repo
-    )
+    results = db.sparql_query(sparql_file=sparql_filename, url=url, repo_name=repo)
 
     recipe.mk_masterlist(results)
 
@@ -645,16 +645,44 @@ make_grp.add_command(make_motifs_cmd)
 
 # ===== fetch subcommands =====
 
+
 @click.command(
     name="tag",
 )
+@filename_arg
 @url_opt
 @repo_name_opt
-def fetch_tag_cmd(url, repo):
+def fetch_tag_cmd(filename, url, repo):
     """
     Upload list of tags
     """
-    raise NotImplemented
+    from rdflib import Literal
+    from octofludb.nomenclature import make_query_tag_uri, P
+    from tempfile import mkstemp
+
+    g = open_graph()
+    # get all identifiers
+    with open(filename, "r") as fh:
+        identifiers = [s.strip() for s in fh.readlines()]
+
+    # make the turtle file
+    taguri = make_query_tag_uri()
+    g = open_graph()
+    for identifier in identifiers:
+        g.add((taguri, P.query_tag, Literal(identifier)))
+    g.commit()  # just in case we missed anything
+    log("Serializing to turtle format ... ", end="")
+    turtles = g.serialize(format="turtle")
+    log("done")
+    (n, turtle_filename) = mkstemp(suffix=".ttl")
+    with open(turtle_filename, "w") as th:
+        for l in turtles.splitlines():
+            print(l.decode("utf-8"), file=th)
+
+    # upload it to the database
+    upload_cmd([turtle_filename], url, repo)
+    g.close()
+
 
 @click.command(
     name="isolate",
@@ -665,7 +693,11 @@ def fetch_isolate_cmd(url, repo):
     """
     Fetch tagged isolate data
     """
-    raise NotImplemented
+    sparql_filename = os.path.join(
+        os.path.dirname(__file__), "data", "get-tagged-isolate.rq"
+    )
+    fmt_query_cmd(sparql_filename, True, False, url, repo)
+
 
 @click.command(
     name="strain",
@@ -676,7 +708,11 @@ def fetch_strain_cmd(url, repo):
     """
     Fetch tagged strain data
     """
-    raise NotImplemented
+    sparql_filename = os.path.join(
+        os.path.dirname(__file__), "data", "get-tagged-strain.rq"
+    )
+    fmt_query_cmd(sparql_filename, True, False, url, repo)
+
 
 @click.command(
     name="segment",
@@ -687,7 +723,24 @@ def fetch_segment_cmd(url, repo):
     """
     Fetch tagged segment data
     """
-    raise NotImplemented
+    sparql_filename = os.path.join(
+        os.path.dirname(__file__), "data", "get-tagged-segment.rq"
+    )
+    fmt_query_cmd(sparql_filename, True, False, url, repo)
+
+@click.command(
+    name="sequence",
+)
+@url_opt
+@repo_name_opt
+def fetch_sequence_cmd(url, repo):
+    """
+    Fetch tagged sequence data
+    """
+    sparql_filename = os.path.join(
+        os.path.dirname(__file__), "data", "get-tagged-sequence.rq"
+    )
+    fmt_query_cmd(sparql_filename, False, True, url, repo)
 
 @click.command(
     name="clear",
@@ -698,7 +751,11 @@ def fetch_clear_cmd(url, repo):
     """
     Clear all uploaded tags
     """
-    raise NotImplemented
+    sparql_filename = os.path.join(
+        os.path.dirname(__file__), "data", "clear-query-tags.rq"
+    )
+    db.update(sparql_file=sparql_filename, url=url, repo_name=repo)
+
 
 @click.group(
     cls=OrderedGroup,
@@ -723,10 +780,12 @@ def fetch_grp():
     """
     pass
 
+
 fetch_grp.add_command(fetch_tag_cmd)
 fetch_grp.add_command(fetch_isolate_cmd)
 fetch_grp.add_command(fetch_strain_cmd)
 fetch_grp.add_command(fetch_segment_cmd)
+fetch_grp.add_command(fetch_sequence_cmd)
 fetch_grp.add_command(fetch_clear_cmd)
 
 

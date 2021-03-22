@@ -1,65 +1,40 @@
-# get segment level information in long format
+# retrieve just the segment-level information
 
+PREFIX onto: <http://www.ontotext.com/>
 PREFIX f: <https://flu-crew.org/term/>
 
 SELECT DISTINCT
-    ?isolate
-    ?strain
-    ?segment
-    ?gb
-    ?epi
-    ?host
-    ?subtype
-    ?naclade
-    ?haclade
-    ?gl_clade
-    ?constellation
-    ?country
-    ?date
+    ?seqid
+    (GROUP_CONCAT(DISTINCT ?gb;  separator="+") as ?gbs)
+    (GROUP_CONCAT(DISTINCT ?epi;  separator="+") as ?epis)
+    (GROUP_CONCAT(DISTINCT ?segment_name;  separator="+") as ?segment_names)
+    (GROUP_CONCAT(DISTINCT ?strain;  separator="+") as ?strains)
+    (GROUP_CONCAT(DISTINCT ?isolate;  separator="+") as ?isolates)
+    (GROUP_CONCAT(DISTINCT ?clade;  separator="+") as ?clades)
+FROM onto:disable-sameAs
 WHERE {
-    ?s f:query_tag ?tag .
-    # * this will work for strain names, barcodes, epiflu isolate ids, genbank
-    #   ids or epiflu ids
-    # * they may also all be mixed together
-    # * epiflu isolate ids need to be in the format "EPI_ISL_xxxxx", case and
-    #   "_" are important, since I do an exact match.
-    # * like isolate ids, epiflu ids need to be in the format "EPI_xxxxx"
-    FILTER (
-        ?tag = ?barcode ||
-        ?tag = ?isolate ||
-        ?tag = ?seqid ||
-        ?tag = ?strain ||
-        REGEX (?tag, ?strain, "i")
-    ) .
+    ?tag_id f:query_tag ?tag .
+
+    {
+        ?sid f:strain_name ?tag .
+    } UNION {
+        ?sid f:isolate_name ?tag .
+    } UNION {
+        ?sid f:barcode ?tag .
+    } UNION {
+        ?sid f:has_segment ?gid .
+        ?gid f:seqid ?tag .
+    }
 
     ?sid f:strain_name ?strain .
-
-    OPTIONAL { ?sid f:host ?host . }
-    OPTIONAL { ?sid f:date ?date . }
-    OPTIONAL { ?sid f:subtype ?date . }
-    OPTIONAL { ?sid f:constellation ?const . }
-    OPTIONAL { ?sid f:isolate_id ?isolate . }
-    OPTIONAL { ?sid f:barcode ?barcode . }
-
     ?sid f:has_segment ?gid .
+    ?gid f:seqid ?seqid .
+    ?gid f:segment_name ?segment_name .
 
-    OPTIONAL { ?gid f:genbank_id ?gb }
-    OPTIONAL { ?gid f:epi_id ?epi }
-
-    ?gid f:segment_name ?segment .
-
+    OPTIONAL { ?gid f:genbank_id ?gb . }
+    OPTIONAL { ?gid f:epi_id ?epi . }
     OPTIONAL { ?gid f:clade ?clade . }
-
-    OPTIONAL {
-        ?sid f:has_segment ?hagid .
-        ?hagid f:segment_name "HA" .
-        OPTIONAL { ?hagid f:clade ?haclade . }
-        OPTIONAL { ?hagid f:clade ?gl_clade . }
-    }
-
-    OPTIONAL {
-        ?sid f:has_segment ?nagid .
-        ?nagid f:segment_name "NA" .
-        OPTIONAL { ?nagid f:clade ?naclade . }
-    }
+    OPTIONAL { ?sid f:barcode ?barcode . }
+    OPTIONAL { ?sid f:isolate_id ?isolate . }
 }
+GROUP BY ?seqid

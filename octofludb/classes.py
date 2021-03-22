@@ -204,6 +204,7 @@ class Table(ParsedPhraseList):
     The table may be a TAB-delimited file or an excel file. It is assumed to
     have a header.
     """
+
     def cast(self, data):
         return tabularTyping(data, levels=self.levels, na_str=self.na_str)
 
@@ -236,7 +237,9 @@ class Table(ParsedPhraseList):
         self.header = [c.strip() for c in rows[0]]
         indices = range(len(self.header))
         rows = rows[1:]
-        columns = {self.header[i]: [strOrNone(r[i].strip()) for r in rows] for i in indices}
+        columns = {
+            self.header[i]: [strOrNone(r[i].strip()) for r in rows] for i in indices
+        }
         return columns
 
 
