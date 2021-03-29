@@ -162,11 +162,11 @@ def fmt_query_cmd(sparql_filename, header, fasta, url, repo):
 @fasta_opt
 @url_opt
 @repo_name_opt
-def query_cmd(*args):
+def query_cmd(*args, **kwargs):
     """
     Submit a SPARQL query to octofludb
     """
-    fmt_query_cmd(*args)
+    fmt_query_cmd(*args, **kwargs)
 
 
 @click.command(
@@ -613,18 +613,6 @@ def make_masterlist_cmd(url, repo):
     recipe.mk_masterlist(results)
 
 
-@click.command(
-    name="motifs",
-)
-@url_opt
-@repo_name_opt
-def make_motifs_cmd(url, repo):
-    """
-    Generate motifs for H1 and H3
-    """
-    raise NotImplemented
-
-
 @click.group(
     cls=OrderedGroup,
     name="make",
@@ -632,7 +620,7 @@ def make_motifs_cmd(url, repo):
 )
 def make_grp():
     """
-    Derive constellations, subtypes, motifs and such
+    Derive constellations, subtypes and such
     """
     pass
 
@@ -640,7 +628,6 @@ def make_grp():
 make_grp.add_command(make_const_cmd)
 make_grp.add_command(make_subtypes_cmd)
 make_grp.add_command(make_masterlist_cmd)
-make_grp.add_command(make_motifs_cmd)
 
 
 # ===== fetch subcommands =====
@@ -795,13 +782,33 @@ fetch_grp.add_command(fetch_clear_cmd)
 @click.command(
     name="monthly",
 )
+@click.argument("year", type=click.IntRange(min=2009, max=2100))
+@click.argument("month", type=click.IntRange(min=1, max=12))
 @url_opt
 @repo_name_opt
-def report_monthly_cmd(url, repo):
+def report_monthly_cmd(year, month, url, repo):
     """
     Surveillance data for the given month (basis of WGS selections)
     """
-    raise NotImplemented
+    import re
+    from tempfile import mkstemp
+
+    sparql_filename = os.path.join(os.path.dirname(__file__), "data", "wgs.rq")
+
+    (n, tmpfile) = mkstemp(suffix=".rq")
+
+    print(sparql_filename)
+
+    with open(sparql_filename, "r") as template:
+      with open(tmpfile, "w") as query:
+        for line in template.readlines():
+          line = re.sub("__YEAR__", str(year), line)
+          line = re.sub("__MONTH__", str(month), line)
+          print(line, file=query)
+
+    fmt_query_cmd(tmpfile, header=True, fasta=False, url=url, repo=repo)
+
+    os.remove(tempfile)
 
 
 @click.command(

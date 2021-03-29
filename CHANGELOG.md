@@ -1,6 +1,7 @@
 v0.7.0
 ======
 
+ * Add monthly report generator (used for WGS selections)
  * Standardize subtype handling (see runtest `get_subtypes` tests)
  * Replace "VTX98" with "LAIV" in internal gene parser
  * Add header to `octofludb make const` output

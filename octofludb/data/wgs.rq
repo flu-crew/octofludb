@@ -1,0 +1,64 @@
+PREFIX onto: <http://www.ontotext.com/>
+PREFIX f: <https://flu-crew.org/term/>
+PREFIX fid: <https://flu-crew.org/id/>
+PREFIX world: <https://flu-crew.org/geo/country/>
+PREFIX usa: <https://flu-crew.org/geo/country/usa/>
+
+SELECT DISTINCT
+  # required for upload to IRD
+  (GROUP_CONCAT(DISTINCT ?barcode; separator="+") as ?barcode)
+  ?strain
+  ?host
+  (GROUP_CONCAT(DISTINCT ?subtype; separator="+") as ?subtype)
+  ?year
+  ?month
+  (GROUP_CONCAT(DISTINCT ?day; separator="+") as ?day)
+  (GROUP_CONCAT(DISTINCT ?country; separator="+") as ?country)
+  (GROUP_CONCAT(DISTINCT ?state; separator="+") as ?state)
+  (GROUP_CONCAT(DISTINCT ?source; separator="+") as ?source)
+  (GROUP_CONCAT(DISTINCT ?h_genbank; separator="+") as ?h_genbank)
+  (GROUP_CONCAT(DISTINCT ?n_genbank; separator="+") as ?n_genbank)
+  (GROUP_CONCAT(DISTINCT ?const; separator="+") as ?const)
+  (GROUP_CONCAT(DISTINCT ?ha_clade; separator="+") as ?ha_clade)
+  (GROUP_CONCAT(DISTINCT ?na_clade; separator="+") as ?na_clade)
+  (GROUP_CONCAT(DISTINCT ?ha_gl_clade; separator="+") as ?ha_gl_clade)
+FROM onto:disable-sameAs
+WHERE {
+  OPTIONAL { ?sid f:barcode ?barcode . }
+  ?sid f:strain_name ?strain .
+  ?sid f:host ?host .
+  OPTIONAL { ?sid f:country/f:code ?country . }
+  ?sid f:date ?date
+
+  OPTIONAL{ ?sid f:state/f:name ?state . }
+
+  # Keep only the A0 strains (e.g., not the TOSU strains or gisaid crap)
+  FILTER REGEX(?strain, "A/.wine/.*/A0") .
+  FILTER (?host = "swine") .
+  FILTER (?country = "USA") .
+
+  ?sid f:has_segment ?hagid .
+  ?hagid f:segment_name "HA" .
+  ?hagid f:genbank_id ?h_genbank .
+
+  BIND(MONTH(?date) as ?month) .
+  BIND(YEAR(?date) as ?year) .
+  BIND(Day(?date) as ?day) .
+  FILTER BOUND(?month) .
+  FILTER BOUND(?day) .
+  FILTER (?year = __YEAR__ && ?month = __MONTH__) .
+
+  ?sid f:has_segment ?nagid .
+  ?nagid f:segment_name "NA" .
+  ?nagid f:genbank_id ?n_genbank .
+
+  OPTIONAL { ?hagid f:has_feature/f:isolation_source ?source . }
+
+  OPTIONAL { ?hagid f:clade ?ha_clade . }
+  OPTIONAL { ?hagid f:gl_clade ?ha_gl_clade . }
+  OPTIONAL { ?nagid f:clade ?na_clade . }
+
+  OPTIONAL { ?sid f:constellation ?const . }
+  OPTIONAL { ?sid f:subtype ?subtype . }
+}
+GROUP BY ?strain ?host ?year ?month
