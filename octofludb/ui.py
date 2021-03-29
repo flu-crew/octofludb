@@ -819,8 +819,11 @@ def report_monthly_cmd(year, month, url, repo):
 def report_quarter_cmd(url, repo):
     """
     Surveillance data for the quarter (basis of quarterly reports)
+
+    Currently, this just generates the smae masterlist as is used in
+    octoflushow. However, it may eventually be specialized.
     """
-    raise NotImplemented
+    make_masterlist_cmd(url=url, repo=repo):
 
 
 @click.command(
