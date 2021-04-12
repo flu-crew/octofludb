@@ -544,9 +544,10 @@ class TestInternalGeneClade(unittest.TestCase):
         self.assertEqual(ftok.InternalGeneClade("TRIG").clean, "TRIG")
         self.assertEqual(ftok.InternalGeneClade("PDM").clean, "PDM")
         self.assertEqual(ftok.InternalGeneClade("LAIV").clean, "LAIV")
-        self.assertEqual(ftok.InternalGeneClade("trig").clean, "trig")
-        self.assertEqual(ftok.InternalGeneClade("pdm").clean, "pdm")
-        self.assertEqual(ftok.InternalGeneClade("LaIv").clean, "laiv")
+        # convert to uppercase for internals
+        self.assertEqual(ftok.InternalGeneClade("trig").clean, "TRIG")
+        self.assertEqual(ftok.InternalGeneClade("pdm").clean, "PDM")
+        self.assertEqual(ftok.InternalGeneClade("LaIv").clean, "LAIV")
         # don't accept random strings
         self.assertEqual(ftok.InternalGeneClade("bogus").clean, None)
 
@@ -554,6 +555,7 @@ class TestInternalGeneClade(unittest.TestCase):
 class TestH1Clade(unittest.TestCase):
     def test_H1Clade(self):
         self.assertEqual(ftok.H1Clade("alpha").clean, "alpha")
+        # do no alter case
         self.assertEqual(ftok.H1Clade("aLPHa").clean, "aLPHa")
         self.assertEqual(ftok.H1Clade("bogus").clean, None)
 

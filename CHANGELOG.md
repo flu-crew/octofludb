@@ -6,6 +6,7 @@ v0.7.0 [2021-04-12]
  * Replace "VTX98" with "LAIV" in internal gene parser
  * Add header to `octofludb make const` output
  * Add handlers for working with unpublished data
+ * Convert internal gene clades to uppercase
 
 v0.6.0
 ======

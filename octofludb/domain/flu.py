@@ -20,6 +20,7 @@ p_constellation = p.regex("[TPVHX-]{6}|MIXED")
 p_segment_number = p.regex("[1-8]")
 p_segment_subtype = p_segment ^ p_HA ^ p_NA
 
+
 @p.generate
 def p_subtype_unmixed():
     yield p.regex("(A *\/ *)?")
@@ -29,8 +30,10 @@ def p_subtype_unmixed():
     v = yield p.regex("(v)?")
     return ha + host + na + v
 
+
 p_subtype_mixed = p.regex("mixed", re.I).parsecmap(lambda x: "mixed")
-p_subtype = p_subtype_mixed  ^ p_subtype_unmixed
+p_subtype = p_subtype_mixed ^ p_subtype_unmixed
+
 
 def mapreplace(x, pattern, replace):
     if x == pattern:
@@ -123,7 +126,10 @@ p_n2_clade = wordset(
     ],
     label="n3_clade",
 )
-p_internal_gene_clade = wordset(["PDM", "TRIG", "LAIV"], label="internal_gene_clade")
+
+p_internal_gene_clade = wordset(
+    ["PDM", "TRIG", "LAIV"], label="internal_gene_clade"
+).parsecmap(lambda x: x.upper())
 
 
 class Strain:
