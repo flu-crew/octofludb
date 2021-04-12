@@ -91,18 +91,27 @@ function make-tags(){
 }
 
 function make-motifs(){
-    ./find-motifs.sh
-    for motif in Sa Sb Ca1 Ca2 Cb
-    do
-        awk -v name=${motif}_motif 'BEGIN{OFS="\t"}
-            NR == 1 {print "genbank_id", name}
-            {print}' ${motif}.tab > .tmp
-        octofludb prep table .tmp > ${motif}.ttl
-        octofludb upload ${motif}.ttl 
-        mv ${motif}.ttl $ttl/${motif}.ttl
-        rm .tmp
-        rm ${motif}.tab
-    done
+    echo "Aligning H1, this may take awhile ..."
+    # make H1 motifs
+    octofludb query --fasta get-h1-sequences.rq | smof translate -f |
+        flutile trim motif \
+            --conversion=aa2aa \
+            --subtype=H1 \
+            -m "Sa=124-125,153-157,159-164" \
+            -m "Sb=184-195" \
+            -m "Ca1=166-170,203-205,235-237" \
+            -m "Ca2=137-142,221-222" \
+            -m "Cb=70-75" > .h1-motifs.tab
+    octofludb prep table .h1-motifs.tab > $ttl/h1-motifs.ttl
+
+    echo "Aligning H3, this may take awhile ..."
+    # make H3 motifs
+    octofludb query --fasta get-h3-sequences.rq | smof translate -f |
+        flutile trim motif \
+            --conversion=aa2aa \
+            --subtype=H3 \
+            -m "motif=145,155,156,158,159,189" > .h3-motifs.tab
+    octofludb prep table .h3-motifs.tab > $ttl/h3-motifs.ttl
 }
 
 rm -f .gb_*.ttl
@@ -121,26 +130,26 @@ octofludb upload .subtype.ttl
 
 constellate
 
-# # CVV
-# make-tags $dat/CDC_CVV/isolate_ids.txt cdc_cvv
-#
-# # antiserum
-# make-tags $dat/antiserum/antiserum_strain_names.txt antiserum
-#
-# # antigen
-# make-tags $dat/antiserum/antigen_strain_names.txt antigen
-#
-# # octoflu-references
-# make-tags $dat/octoflu-references/segment-ids.txt octoflu_refs
-#
-# # vaccine
-# make-tags $dat/vaccine/isolate_ids.txt vaccine
-#
-# # variants
-# make-tags $dat/variants/isolate_ids.txt variant
-#
-# # wgs submission
-# make-tags $dat/wgs/wgs.txt wgs
-#
-# # add antigenic motifs
-# make-motifs
+# CVV
+make-tags $dat/CDC_CVV/isolate_ids.txt cdc_cvv
+
+# antiserum
+make-tags $dat/antiserum/antiserum_strain_names.txt antiserum
+
+# antigen
+make-tags $dat/antiserum/antigen_strain_names.txt antigen
+
+# octoflu-references
+make-tags $dat/octoflu-references/segment-ids.txt octoflu_refs
+
+# vaccine
+make-tags $dat/vaccine/isolate_ids.txt vaccine
+
+# variants
+make-tags $dat/variants/isolate_ids.txt variant
+
+# wgs submission
+make-tags $dat/wgs/wgs.txt wgs
+
+# add antigenic motifs
+make-motifs

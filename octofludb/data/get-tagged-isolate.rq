@@ -4,7 +4,7 @@ PREFIX onto: <http://www.ontotext.com/>
 PREFIX f: <https://flu-crew.org/term/>
 
 SELECT DISTINCT
-    (GROUP_CONCAT(DISTINCT ?isolate;  separator="+") as ?isolates)
+    ?isolate
     (GROUP_CONCAT(DISTINCT ?strain;  separator="+") as ?strains)
     (GROUP_CONCAT(DISTINCT ?host;  separator="+") as ?hosts)
     (GROUP_CONCAT(DISTINCT ?subtype;  separator="+") as ?subtypes)
@@ -21,37 +21,39 @@ WHERE {
     {
         ?sid f:strain_name ?tag .
     } UNION {
-        ?sid f:isolate_name ?tag .
+        ?lid f:isolate_id ?tag .
     } UNION {
         ?sid f:barcode ?tag .
     } UNION {
-        ?sid f:has_segment ?gid .
+        ?lid f:has_segment ?gid .
         ?gid f:seqid ?tag .
     }
 
+    ?lid f:isolate_id ?isolate .
+    ?lid f:strain_name ?strain . 
+    ?lid f:date ?date .
+    OPTIONAL { ?lid f:host ?host . }
+
     ?sid f:strain_name ?strain .
-    ?sid f:isolate_id ?isolate .
-    ?sid f:date ?date .
 
     OPTIONAL { ?sid f:barcode ?barcode . }
-    OPTIONAL { ?sid f:host ?host . }
     OPTIONAL { ?sid f:subtype ?subtype . }
     OPTIONAL { ?sid f:constellation ?const . }
 
     OPTIONAL {
-        ?sid f:has_segment ?gid .
+        ?lid f:has_segment ?gid .
         ?gid f:seqid ?seqid .
     }
 
     OPTIONAL {
-        ?sid f:has_segment ?hagid .
+        ?lid f:has_segment ?hagid .
         ?hagid f:segment_name "HA" .
         ?hagid f:gl_clade ?gl_clade .
         OPTIONAL { ?hagid f:clade ?haclade }
     }
 
     OPTIONAL {
-        ?sid f:has_segment ?nagid .
+        ?lid f:has_segment ?nagid .
         ?nagid f:segment_name "NA" .
         ?nagid f:clade ?naclade .
     }

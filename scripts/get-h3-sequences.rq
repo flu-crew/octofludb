@@ -1,0 +1,15 @@
+# Get all sequences by segment id and segment name
+
+PREFIX onto: <http://www.ontotext.com/>
+PREFIX f: <https://flu-crew.org/term/>
+
+SELECT DISTINCT ?seqid ?seq
+FROM onto:disable-sameAs
+WHERE {
+  ?sid f:subtype ?subtype .
+  FILTER (REGEX(?subtype, "H3N")) .
+  ?sid f:has_segment ?gid .
+  ?gid f:segment_name "HA" .
+  ?gid f:genbank_id ?seqid .
+  ?gid f:dnaseq ?seq .
+}

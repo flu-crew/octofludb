@@ -1,5 +1,5 @@
-v0.7.0
-======
+v0.7.0 [2021-04-12]
+===================
 
  * Add monthly report generator (used for WGS selections)
  * Standardize subtype handling (see runtest `get_subtypes` tests)
