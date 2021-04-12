@@ -3,13 +3,9 @@
 import click
 import collections
 import os
-import pgraphdb as db
-import requests
 import signal
 import sys
 import textwrap
-
-import octofludb.cli as cli
 from octofludb.util import log
 
 
@@ -122,6 +118,8 @@ def init_cmd(url, repo):
     """
     Initialize an empty octofludb database
     """
+    import pgraphdb as db
+    import requests
     config_file = os.path.join(
         os.path.dirname(__file__), "data", "octofludb-config.ttl"
     )
@@ -146,6 +144,7 @@ def clean_cmd(url, repo):
 
 def fmt_query_cmd(sparql_filename, header, fasta, url, repo):
     import octofludb.formatting as formatting
+    import pgraphdb as db
 
     results = db.sparql_query(sparql_file=sparql_filename, url=url, repo_name=repo)
     if fasta:
@@ -179,6 +178,7 @@ def update_cmd(sparql_filename, url, repo):
     """
     Submit a SPARQL delete or insert query to octofludb
     """
+    import pgraphdb as db
     db.update(sparql_file=sparql_filename, url=url, repo_name=repo)
     return None
 
@@ -194,6 +194,7 @@ def upload_cmd(turtle_filenames, url, repo):
     Upload one or more turtle files to the database
     """
     import shutil
+    import pgraphdb as db
 
     for filename in turtle_filenames:
         new_filename = os.path.join(
@@ -571,6 +572,7 @@ def make_const_cmd(url, repo):
     not US). For mixed strains, the constellation will be recorded as "mixed".
     """
     import octofludb.formatting as formatting
+    import pgraphdb as db
 
     sparql_filename = os.path.join(os.path.dirname(__file__), "data", "segments.rq")
     results = db.sparql_query(sparql_file=sparql_filename, url=url, repo_name=repo)
@@ -587,6 +589,7 @@ def make_subtypes_cmd(url, repo):
     Determine subtypes based on Genbank serotype field, epiflu data, or octoflu HA/NA classifications"
     """
     import octofludb.recipes as recipe
+    import pgraphdb as db
 
     sparql_filename = os.path.join(os.path.dirname(__file__), "data", "subtypes.rq")
 
@@ -605,6 +608,7 @@ def make_masterlist_cmd(url, repo):
     Generate the surveillance masterlist
     """
     import octofludb.recipes as recipe
+    import pgraphdb as db
 
     sparql_filename = os.path.join(os.path.dirname(__file__), "data", "masterlist.rq")
 
@@ -738,6 +742,7 @@ def fetch_clear_cmd(url, repo):
     """
     Clear all uploaded tags
     """
+    import pgraphdb as db
     sparql_filename = os.path.join(
         os.path.dirname(__file__), "data", "clear-query-tags.rq"
     )
@@ -823,7 +828,7 @@ def report_quarter_cmd(url, repo):
     Currently, this just generates the smae masterlist as is used in
     octoflushow. However, it may eventually be specialized.
     """
-    make_masterlist_cmd(url=url, repo=repo):
+    make_masterlist_cmd(url=url, repo=repo)
 
 
 @click.command(
