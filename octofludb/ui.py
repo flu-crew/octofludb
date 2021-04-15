@@ -120,6 +120,7 @@ def init_cmd(url, repo):
     """
     import pgraphdb as db
     import requests
+
     config_file = os.path.join(
         os.path.dirname(__file__), "data", "octofludb-config.ttl"
     )
@@ -153,6 +154,7 @@ def fmt_query_cmd(sparql_filename, header, fasta, url, repo):
         formatting.write_as_table(results, header=header)
     sys.exit(0)
 
+
 @click.command(
     name="query",
 )
@@ -179,6 +181,7 @@ def update_cmd(sparql_filename, url, repo):
     Submit a SPARQL delete or insert query to octofludb
     """
     import pgraphdb as db
+
     db.update(sparql_file=sparql_filename, url=url, repo_name=repo)
     return None
 
@@ -719,6 +722,7 @@ def fetch_segment_cmd(url, repo):
     )
     fmt_query_cmd(sparql_filename, True, False, url, repo)
 
+
 @click.command(
     name="sequence",
 )
@@ -733,6 +737,7 @@ def fetch_sequence_cmd(url, repo):
     )
     fmt_query_cmd(sparql_filename, False, True, url, repo)
 
+
 @click.command(
     name="clear",
 )
@@ -743,6 +748,7 @@ def fetch_clear_cmd(url, repo):
     Clear all uploaded tags
     """
     import pgraphdb as db
+
     sparql_filename = os.path.join(
         os.path.dirname(__file__), "data", "clear-query-tags.rq"
     )
@@ -784,36 +790,60 @@ fetch_grp.add_command(fetch_clear_cmd)
 # ===== report subcommands =====
 
 
+def macro_query(filename, macros, *args, **kwargs):
+    import re
+    from tempfile import mkstemp
+
+    sparql_filename = os.path.join(os.path.dirname(__file__), "data", filename)
+
+    (n, tmpfile) = mkstemp(suffix=".rq")
+
+    with open(sparql_filename, "r") as template:
+        with open(tmpfile, "w") as query:
+            for line in template.readlines():
+                for (macro, replacement) in macros:
+                    line = re.sub(macro, replacement, line)
+                print(line, file=query)
+
+    fmt_query_cmd(tmpfile, *args, **kwargs)
+
+    os.remove(tempfile)
+
 @click.command(
     name="monthly",
 )
 @click.argument("year", type=click.IntRange(min=2009, max=2100))
 @click.argument("month", type=click.IntRange(min=1, max=12))
+@click.option("--context", is_flag=True, help="Get contextualizing sequences")
 @url_opt
 @repo_name_opt
-def report_monthly_cmd(year, month, url, repo):
+def report_monthly_cmd(year, month, context, url, repo):
     """
     Surveillance data for the given month (basis of WGS selections)
     """
-    import re
-    from tempfile import mkstemp
 
-    sparql_filename = os.path.join(os.path.dirname(__file__), "data", "wgs.rq")
+    def pad(x):
+      if x < 10 and x >= 0:
+        return ("0" + str(x))
+      else:
+        return str(x)
 
-    (n, tmpfile) = mkstemp(suffix=".rq")
+    if context:
 
-    print(sparql_filename)
+        macros = [
+            ("__MIN_DATE__", f"{str(year - 1)}-{pad(month)}-01"),
+            ("__MAX_DATE__", f"{str(year + 1)}-{pad(month)}-01"),
+        ]
 
-    with open(sparql_filename, "r") as template:
-      with open(tmpfile, "w") as query:
-        for line in template.readlines():
-          line = re.sub("__YEAR__", str(year), line)
-          line = re.sub("__MONTH__", str(month), line)
-          print(line, file=query)
+        macro_query(
+            "monthly-context.rq", macros, header=True, fasta=True, url=url, repo=repo
+        )
 
-    fmt_query_cmd(tmpfile, header=True, fasta=False, url=url, repo=repo)
+    else:
 
-    os.remove(tempfile)
+        macros = [("__YEAR__", str(year)), ("__MONTH__", str(month))]
+
+        macro_query("wgs.rq", macros, header=True, fasta=False, url=url, repo=repo)
 
 
 @click.command(

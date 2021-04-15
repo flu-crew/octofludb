@@ -115,7 +115,7 @@ function make-motifs(){
 }
 
 rm -f .gb_*.ttl
-octofludb update_gb
+octofludb prep update_gb --nmonths=3
 octofludb upload .gb_*.ttl
 
 parallel "update-epiflu-metadata {} ${ttl}/{/}.ttl" ::: ${dat}/epiflu/h*/*xls

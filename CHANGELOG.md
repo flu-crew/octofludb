@@ -1,3 +1,8 @@
+v0.8.0 [2021-xx-xx]
+===================
+
+ * Add `report monthly --context` to pull sequences for comparisons
+
 v0.7.0 [2021-04-12]
 ===================
 

@@ -10,3 +10,4 @@ include octofludb/data/octofludb-config.ttl
 include octofludb/data/segments.rq
 include octofludb/data/subtypes.rq
 include octofludb/data/wgs.rq
+include octofludb/data/monthly-context.rq

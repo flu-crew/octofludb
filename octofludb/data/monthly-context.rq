@@ -1,0 +1,54 @@
+PREFIX onto: <http://www.ontotext.com/>
+PREFIX f: <https://flu-crew.org/term/>
+PREFIX fid: <https://flu-crew.org/id/>
+PREFIX world: <https://flu-crew.org/geo/country/>
+PREFIX usa: <https://flu-crew.org/geo/country/usa/>
+
+SELECT DISTINCT
+  ?strain
+  (GROUP_CONCAT(DISTINCT ?subtype; separator="+") as ?subtypes)
+  (MIN (?date) as ?earliest_date)
+  (GROUP_CONCAT(DISTINCT ?wgs; separator="+") as ?wgss)
+  (GROUP_CONCAT(DISTINCT ?const; separator="+") as ?consts)
+  (GROUP_CONCAT(DISTINCT ?ha_clade; separator="+") as ?ha_clades)
+  (GROUP_CONCAT(DISTINCT ?na_clade; separator="+") as ?na_clades)
+  ?segment
+  ?seq
+FROM onto:disable-sameAs
+WHERE {
+  ?sid f:barcode ?barcode .
+  ?sid f:strain_name ?strain .
+  ?sid f:host "swine" .
+  ?sid f:country/f:code "USA" .
+  ?sid f:date ?date .
+  ?sid f:subtype ?subtype .
+
+  # Keep only the A0 strains (e.g., not the TOSU strains or gisaid crap)
+  FILTER REGEX(?barcode, "^A0") .
+
+  # keep recent strain, strains with WGS, and a few older strains
+  FILTER (
+    (?date > "__MIN_DATE__"^^xsd:date && ?date < "__MAX_DATE__"^^xsd:date) ||
+    ((YEAR(?date) > 2015) && BOUND(?const) && REGEX(?const, "[PVT]{6}"))
+  ) .
+
+  ?sid f:has_segment ?hagid .
+  ?hagid f:segment_name "HA" .
+
+  ?sid f:has_segment ?nagid .
+  ?nagid f:segment_name "NA" .
+
+  OPTIONAL { ?sid f:constellation ?const }
+  OPTIONAL {
+    ?sid f:tag/f:name $wgs .
+    FILTER($wgs = "wgs") .
+  }
+
+  ?sid f:has_segment ?gid .
+  ?gid f:segment_name ?segment .
+  ?gid f:dnaseq ?seq .
+
+  ?hagid f:clade ?ha_clade .
+  ?nagid f:clade ?na_clade .
+}
+GROUP BY ?strain ?segment ?seq
