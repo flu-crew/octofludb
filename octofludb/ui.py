@@ -171,6 +171,24 @@ def query_cmd(*args, **kwargs):
 
 
 @click.command(
+    name="construct",
+)
+@sparql_filename_pos
+@url_opt
+@repo_name_opt
+def construct_cmd(sparql_filename, url, repo):
+    """
+    Construct new triples
+    """
+    import pgraphdb as db
+
+    results = db.sparql_construct(sparql_file=sparql_filename, url=url, repo_name=repo)
+
+    print(results)
+    sys.exit(0)
+
+
+@click.command(
     name="update",
 )
 @sparql_filename_pos
@@ -971,6 +989,7 @@ cli_grp.add_command(init_cmd)
 cli_grp.add_command(clean_cmd)
 cli_grp.add_command(query_cmd)
 cli_grp.add_command(update_cmd)
+cli_grp.add_command(construct_cmd)
 cli_grp.add_command(upload_cmd)
 cli_grp.add_command(prep_grp)
 cli_grp.add_command(make_grp)
