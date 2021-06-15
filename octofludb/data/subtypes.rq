@@ -11,6 +11,7 @@ FROM onto:disable-sameAs
 WHERE {
     ?gid f:segment_name ?segment_name .
     FILTER (?segment_name = "HA" || ?segment_name = "NA") .
+    FILTER NOT EXISTS { ?sid f:subtype ?subtype . }
     ?sid f:strain_name ?strain_name .
     ?sid f:has_segment ?gid .
     OPTIONAL { ?gid f:segment_subtype ?segment_subtype . }
