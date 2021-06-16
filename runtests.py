@@ -697,7 +697,7 @@ class TestSubtypeSelection(unittest.TestCase):
             recipes._get_subtype(
                 "whatever", [], [], gisaid_subtypes=[], genbank_subtypes=[]
             ),
-            "unknown",
+            None,
         )
 
     def test_get_subtype_from_segments(self):
@@ -725,10 +725,10 @@ class TestSubtypeSelection(unittest.TestCase):
 
         # if either HA or NA is missing, the subtype is unknown
         self.assertEqual(
-            recipes._get_subtype("whatever", ["H1"], [], [], []), "unknown"
+            recipes._get_subtype("whatever", ["H1"], [], [], []), None 
         )
         self.assertEqual(
-            recipes._get_subtype("whatever", [], ["N1"], [], []), "unknown"
+            recipes._get_subtype("whatever", [], ["N1"], [], []), None
         )
 
         # if either HA or NA is missing, but genbank or gisaid have info, use their info

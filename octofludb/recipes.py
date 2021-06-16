@@ -279,7 +279,7 @@ def _get_subtype(strain, has, nas, gisaid_subtypes, genbank_subtypes):
         elif len(gisaid_subtypes) == 1:
             subtype = gisaid_subtypes[0]
         else:
-            subtype = "unknown"
+            subtype = None
 
     return subtype
 
@@ -317,7 +317,8 @@ def mk_subtypes(results):
             gisaid_subtypes=entry["gisaid_subtypes"],
             genbank_subtypes=entry["genbank_subtypes"],
         )
-        print("\t".join([strain, subtype]))
+        if subtype:
+          print("\t".join([strain, subtype]))
 
 
 MASTERLIST_HEADER = [
