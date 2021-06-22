@@ -5,14 +5,14 @@ SELECT DISTINCT
     ?strain_name
     ?segment_name
     (GROUP_CONCAT(DISTINCT ?segment_subtype; separator="+") as ?segment_subtypes)
-    (GROUP_CONCAT(DISTINCT ?gisaid_subtypes; separator="+") as ?gisaid_subtypes)
+    (GROUP_CONCAT(DISTINCT ?gisaid_subtype; separator="+") as ?gisaid_subtypes)
     (GROUP_CONCAT(DISTINCT ?genbank_subtype; separator="+") as ?genbank_subtypes)
 FROM onto:disable-sameAs
 WHERE {
+    ?sid f:strain_name ?strain_name .
+    ?sid f:has_segment ?gid .
     ?gid f:segment_name ?segment_name .
     FILTER (?segment_name = "HA" || ?segment_name = "NA") .
-    ?sid f:has_segment ?gid .
-    ?sid f:strain_name ?strain_name .
     FILTER NOT EXISTS { ?sid f:subtype ?subtype . }
     OPTIONAL { ?gid f:segment_subtype ?segment_subtype . }
     OPTIONAL { ?gid f:has_feature/f:serotype ?genbank_subtype . }
