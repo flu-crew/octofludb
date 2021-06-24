@@ -1,6 +1,20 @@
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX f: <https://flu-crew.org/term/>
 
+# subClassOf - if r is type A, and A is a subClassOf B, then r has type B
+#
+# ?r rdf:type ?A
+# ?A rdf:subClassOf ?B
+# --------------
+# ?r rdf:type ?B
+
+# subPropertyOf - if p relates A to B, and if p is a subPropertyOf q, then q also relates A to B
+#
+# ?A ?p ?B
+# ?p rdf:subPropertyOf ?q
+# ----------------------
+# ?A ?q ?B
+
 f:collection_date rdfs:subPropertyOf f:date .
 
 rdfs:label rdfs:subPropertyOf f:name .

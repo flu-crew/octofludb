@@ -1,0 +1,8 @@
+PREFIX f: <https://flu-crew.org/term/>
+
+delete {
+    ?s f:constellation ?const .
+}
+where {
+    ?s f:constellation ?const .
+}

@@ -11,19 +11,8 @@ nlines() {
     wc -l $1 | sed 's/ *//' | sed 's/ .*//'
 }
 
-log "--" $(date)
-
-test -d octoFLU || git clone https://github.com/flu-crew/octoFLU
-
 dat=DATA
 ttl=turtles
-
-octofludb init
-octofludb upload ../schema/geography.ttl
-octofludb upload ../schema/schema.ttl
-
-mkdir -p "$ttl"
-
 
 function update-epiflu-metadata(){
     data=$1
@@ -114,6 +103,18 @@ function make-motifs(){
     octofludb prep table .h3-motifs.tab > $ttl/h3-motifs.ttl
 }
 
+
+log "--" $(date)
+
+test -d octoFLU || git clone https://github.com/flu-crew/octoFLU
+
+# you only need to run this once, but it should hurt to run it again
+octofludb init
+octofludb upload ../schema/geography.ttl
+octofludb upload ../schema/schema.ttl
+
+mkdir -p "$ttl"
+
 rm -f .gb_*.ttl
 octofludb prep update_gb --nmonths=3
 octofludb upload .gb_*.ttl
@@ -128,6 +129,8 @@ octofludb make subtypes > .subtype.txt
 octofludb prep table .subtype.txt > .subtype.ttl
 octofludb upload .subtype.ttl
 
+# remove existing constellations and create new ones
+octofludb update delete-constellations.rq
 constellate
 
 # CVV

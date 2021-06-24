@@ -3,6 +3,7 @@ v0.8.0 [2021-xx-xx]
 
  * Add `report monthly --context` to pull sequences for comparisons
  * Add support for the the SPARQL CONSTRUCT command
+ * Do not generate "unknown" triples
 
 v0.7.0 [2021-04-12]
 ===================
