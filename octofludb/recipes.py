@@ -291,9 +291,11 @@ def mk_subtypes(results):
         strain = row["strain_name"]["value"]
 
         if strain not in entries:
-            entry = dict(ha_subtypes=[], na_subtypes=[], subtypes=[], serotypes=[])
+            entry = dict(isolates=set(), ha_subtypes=[], na_subtypes=[], subtypes=[], serotypes=[])
         else:
             entry = entries[strain]
+
+        isolates = entry["isolates"].update([i for i in row["isolates"]["value"].split("+") if i])
 
         append_add(entry, "genbank_subtypes", default_access(row, "genbank_subtypes"))
         append_add(entry, "gisaid_subtypes", default_access(row, "gisaid_subtypes"))
@@ -319,6 +321,9 @@ def mk_subtypes(results):
         )
         if subtype:
           print("\t".join([strain, subtype]))
+          for isolate in entry["isolates"]:
+            print("\t".join([isolate, subtype]))
+
 
 
 MASTERLIST_HEADER = [

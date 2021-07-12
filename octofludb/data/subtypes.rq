@@ -3,6 +3,7 @@ PREFIX onto: <http://www.ontotext.com/>
 
 SELECT DISTINCT
     ?strain_name
+    (GROUP_CONCAT(DISTINCT ?isolate; separator="+") as ?isolates)
     ?segment_name
     (GROUP_CONCAT(DISTINCT ?segment_subtype; separator="+") as ?segment_subtypes)
     (GROUP_CONCAT(DISTINCT ?gisaid_subtype; separator="+") as ?gisaid_subtypes)
@@ -11,6 +12,7 @@ FROM onto:disable-sameAs
 WHERE {
     ?sid f:strain_name ?strain_name .
     ?sid f:has_segment ?gid .
+    OPTIONAL { ?sid f:isolate_id ?isolate . }
     ?gid f:segment_name ?segment_name .
     FILTER (?segment_name = "HA" || ?segment_name = "NA") .
     FILTER NOT EXISTS { ?sid f:subtype ?subtype . }

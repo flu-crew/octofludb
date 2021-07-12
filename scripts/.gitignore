@@ -20,3 +20,5 @@ log
 octoFLU/
 turtles/
 z*
+.epiflu-subtype.*
+.genbank-subtype.*

@@ -119,15 +119,21 @@ rm -f .gb_*.ttl
 octofludb prep update_gb --nmonths=3
 octofludb upload .gb_*.ttl
 
-parallel "update-epiflu-metadata {} ${ttl}/{/}.ttl" ::: ${dat}/epiflu/h*/*xls
-parallel "update-epiflu-fasta    {} ${ttl}/{/}.ttl" ::: ${dat}/epiflu/h*/*fasta
+parallel "update-epiflu-metadata {} ${ttl}/{/}.ttl" ::: ${dat}/epiflu/*/*xls
+parallel "update-epiflu-fasta    {} ${ttl}/{/}.ttl" ::: ${dat}/epiflu/*/*fasta
 
 octoflu
 
 # This must be run after octoFLU
 octofludb make subtypes > .subtype.txt
-octofludb prep table .subtype.txt > .subtype.ttl
-octofludb upload .subtype.ttl
+grep -v EPI_ISL .subtype.txt > .genbank-subtype.txt
+grep -E "strain_name|EPI_ISL" .subtype.txt > .epiflu-subtype.txt
+
+octofludb prep table .genbank-subtype.txt > .genbank-subtype.ttl
+octofludb upload .genbank-subtype.ttl
+
+octofludb prep table .epiflu-subtype.txt > .epiflu-subtype.ttl
+octofludb upload .epiflu-subtype.ttl
 
 # remove existing constellations and create new ones
 octofludb update delete-constellations.rq
