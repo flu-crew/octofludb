@@ -47,7 +47,7 @@ export -f update-epiflu-fasta
 function octoflu(){
     octofludb query --fasta fetch-unclassified-swine.rq | smof uniq -f > .all.fna
     rm -f .xxx*
-    smof split --number=5000 --seqs --prefix=".xxx"  .all.fna
+    smof split --number=5000 --seqs --prefix=".xxx" .all.fna
     rm -rf octoFLU/.xxx*
     mv .xxx* octoFLU
     cd octoFLU
@@ -75,7 +75,7 @@ function constellate(){
 function make-tags(){
     list=$1
     tag=$2
-    octofludb prep tag $list $tag > $ttl/$tag.ttl
+    octofludb prep tag $tag $list > $ttl/$tag.ttl
     octofludb upload $ttl/$tag.ttl
 }
 
@@ -108,7 +108,7 @@ log "--" $(date)
 
 test -d octoFLU || git clone https://github.com/flu-crew/octoFLU
 
-# you only need to run this once, but it should hurt to run it again
+# # you only need to run this once, but it should hurt to run it again
 octofludb init
 octofludb upload ../schema/geography.ttl
 octofludb upload ../schema/schema.ttl
@@ -135,30 +135,30 @@ octofludb upload .genbank-subtype.ttl
 octofludb prep table .epiflu-subtype.txt > .epiflu-subtype.ttl
 octofludb upload .epiflu-subtype.ttl
 
-# remove existing constellations and create new ones
-octofludb update delete-constellations.rq
-constellate
-
-# CVV
-make-tags $dat/CDC_CVV/isolate_ids.txt cdc_cvv
-
-# antiserum
-make-tags $dat/antiserum/antiserum_strain_names.txt antiserum
-
-# antigen
-make-tags $dat/antiserum/antigen_strain_names.txt antigen
-
-# octoflu-references
-make-tags $dat/octoflu-references/segment-ids.txt octoflu_refs
-
-# vaccine
-make-tags $dat/vaccine/isolate_ids.txt vaccine
-
-# variants
-make-tags $dat/variants/isolate_ids.txt variant
-
-# wgs submission
-make-tags $dat/wgs/wgs.txt wgs
-
-# add antigenic motifs
-make-motifs
+# # remove existing constellations and create new ones
+# octofludb update delete-constellations.rq
+# constellate
+#
+# # CVV
+# make-tags $dat/CDC_CVV/isolate_ids.txt cdc_cvv
+#
+# # antiserum
+# make-tags $dat/antiserum/antiserum_strain_names.txt antiserum
+#
+# # antigen
+# make-tags $dat/antiserum/antigen_strain_names.txt antigen
+#
+# # octoflu-references
+# make-tags $dat/octoflu-references/segment-ids.txt octoflu_refs
+#
+# # vaccine
+# make-tags $dat/vaccine/isolate_ids.txt vaccine
+#
+# # variants
+# make-tags $dat/variants/isolate_ids.txt variant
+#
+# # wgs submission
+# make-tags $dat/wgs/wgs.txt wgs
+#
+# # add antigenic motifs
+# make-motifs
