@@ -127,7 +127,7 @@ def init_cmd(url, repo):
     try:
         db.make_repo(config=config_file, url=url)
     except requests.exceptions.ConnectionError:
-        print(f"Could not connect to a GraphDB database at {args.url}", file=sys.stderr)
+        print(f"Could not connect to a GraphDB database at {url}", file=sys.stderr)
         sys.exit(1)
 
 
