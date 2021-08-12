@@ -5,6 +5,7 @@ v0.8.0 [2021-xx-xx]
  * Add support for the the SPARQL CONSTRUCT command
  * Do not generate "unknown" triples
  * Fix subtype generation
+ * Fix bugs in init
 
 v0.7.0 [2021-04-12]
 ===================
