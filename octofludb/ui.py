@@ -218,8 +218,10 @@ def upload_cmd(turtle_filenames, url, repo):
     import pgraphdb as db
 
     for filename in turtle_filenames:
-        new_filename = os.path.join(
-            os.path.expanduser("~"), "graphdb-import", os.path.basename(filename)
+        dbdir = os.path.join(os.path.expanduser("~"), "graphdb-import")
+        if not os.path.exists(dbdir):
+          os.mkdir(dbdir)
+        new_filename = os.path.join(dbdir, os.path.basename(filename)
         )
         if filename == new_filename:
             continue
