@@ -235,7 +235,8 @@ def upload_cmd(turtle_filenames, url, repo):
                 )
                 sys.exit(1)
     server_files = [os.path.basename(f) for f in turtle_filenames]
-    db.load_data(url=url, repo_name=repo, turtle_files=server_files)
+    for server_file in server_files:
+      db.load_data(url=url, repo_name=repo, turtle_file=server_file)
     sys.exit(0)
 
 
