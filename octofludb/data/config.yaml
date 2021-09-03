@@ -1,3 +1,6 @@
+# This is a template for a config file specifying octofludb database
+# configuration and data sources.
+
 # This is the name of the GraphDB repository. You normally should not have to
 # change this since the `octofludb init` command will create a repo with the
 # expected name ("octofludb"). The only reason why you might need to change

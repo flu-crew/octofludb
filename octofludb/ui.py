@@ -120,6 +120,7 @@ def init_cmd(url, repo):
     """
     import pgraphdb as db
     import requests
+    import shutil
 
     config_file = os.path.join(
         os.path.dirname(__file__), "data", "octofludb-config.ttl"
@@ -129,6 +130,81 @@ def init_cmd(url, repo):
     except requests.exceptions.ConnectionError:
         print(f"Could not connect to a GraphDB database at {url}", file=sys.stderr)
         sys.exit(1)
+
+    octofludb_home = os.path.join(os.path.expanduser("~"), ".octofludb")
+
+    if not os.path.exists(octofludb_home): 
+        try:
+            print(
+                f" - Creating local configuration folder at '{octofludb_home}'",
+                file=sys.stderr,
+            )
+            os.mkdir(octofludb_home)
+        except FileExistsError:
+            print(
+                f" Failed to create {octofludb_home}",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+
+
+    config_template_file = os.path.join(
+        os.path.dirname(__file__), "data", "config.yaml"
+    )
+    config_local_file = os.path.join(octofludb_home, "config.yaml")
+
+    if not os.path.exists(config_local_file):
+        print(f" - Creating config template at '{config_local_file}'", file=sys.stderr)
+        shutil.copyfile(config_template_file, config_local_file)
+
+
+@click.command(
+    name="pull",
+)
+@click.option(
+    "--nmonths",
+    help="Update Genbank files for the last N months",
+    default=3,
+    type=click.IntRange(min=1, max=9999),
+)
+@url_opt
+@repo_name_opt
+def pull_cmd(nmonths, url, repo):
+    """
+    Update data. Pull from genbank, process any new data in the data folder,
+    assign clades to swine data, assign subtypes to all data, and extract
+    motifs
+    """
+    import pgraphdb as db
+    import yaml
+
+    config_local_file = os.path.exists(os.path.join(octofludb_home, "config.yaml"))
+
+    if not os.path.exists(config_local_file):
+        print(
+            f"Could not find configuration file, expected it to be at {config_local_file}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    else:
+        with open(config_local_file, "r") as f:
+            try:
+                config = yaml.safe_load(f)
+            except yaml.YAMLError as exc:
+                print(exc, file=sys.stderr)
+                sys.exit(1)
+
+    print(config)
+
+    #  # upload ontological schema
+    #  scheme_turtle = os.path.join(os.path.dirname(__file__), "data", "schema.ttl")
+    #  upload_cmd(scheme_turtle, url, repo)
+    #
+    #  # upload geological relationships
+    #  geography_turtle = os.path.join(os.path.dirname(__file__), "data", "geography.ttl")
+    #  upload_cmd(geography_turtle, url, repo)
+    #
+    #  return None
 
 
 @click.command(
@@ -989,6 +1065,7 @@ def cli_grp():
 
 
 cli_grp.add_command(init_cmd)
+cli_grp.add_command(pull_cmd)
 cli_grp.add_command(clean_cmd)
 cli_grp.add_command(query_cmd)
 cli_grp.add_command(update_cmd)
