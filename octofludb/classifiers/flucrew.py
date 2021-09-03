@@ -301,7 +301,10 @@ class SegmentToken(Token):
                 and other.typename != self.typename
             ):
                 g.add((uri, P.sameAs, other.as_uri()))
-            elif not other.choose_field_name() in STRAIN_FIELDS and other.typename is not None:
+            elif (
+                not other.choose_field_name() in STRAIN_FIELDS
+                and other.typename is not None
+            ):
                 other.object_of(g, uri)
 
 
@@ -343,6 +346,7 @@ class SegmentAttribute(Token):
 class SegmentName(SegmentAttribute):
     typename = "segment_name"
     parser = p_segment
+
 
 class SegmentSubtype(SegmentAttribute):
     typename = "segment_subtype"

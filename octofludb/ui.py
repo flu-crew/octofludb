@@ -220,9 +220,8 @@ def upload_cmd(turtle_filenames, url, repo):
     for filename in turtle_filenames:
         dbdir = os.path.join(os.path.expanduser("~"), "graphdb-import")
         if not os.path.exists(dbdir):
-          os.mkdir(dbdir)
-        new_filename = os.path.join(dbdir, os.path.basename(filename)
-        )
+            os.mkdir(dbdir)
+        new_filename = os.path.join(dbdir, os.path.basename(filename))
         if filename == new_filename:
             continue
         else:
@@ -236,7 +235,7 @@ def upload_cmd(turtle_filenames, url, repo):
                 sys.exit(1)
     server_files = [os.path.basename(f) for f in turtle_filenames]
     for server_file in server_files:
-      db.load_data(url=url, repo_name=repo, turtle_file=new_filename)
+        db.load_data(url=url, repo_name=repo, turtle_file=new_filename)
     sys.exit(0)
 
 
@@ -830,6 +829,7 @@ def macro_query(filename, macros, *args, **kwargs):
 
     os.remove(tempfile)
 
+
 @click.command(
     name="monthly",
 )
@@ -844,10 +844,10 @@ def report_monthly_cmd(year, month, context, url, repo):
     """
 
     def pad(x):
-      if x < 10 and x >= 0:
-        return ("0" + str(x))
-      else:
-        return str(x)
+        if x < 10 and x >= 0:
+            return "0" + str(x)
+        else:
+            return str(x)
 
     if context:
 

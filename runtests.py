@@ -724,12 +724,8 @@ class TestSubtypeSelection(unittest.TestCase):
         )
 
         # if either HA or NA is missing, the subtype is unknown
-        self.assertEqual(
-            recipes._get_subtype("whatever", ["H1"], [], [], []), None 
-        )
-        self.assertEqual(
-            recipes._get_subtype("whatever", [], ["N1"], [], []), None
-        )
+        self.assertEqual(recipes._get_subtype("whatever", ["H1"], [], [], []), None)
+        self.assertEqual(recipes._get_subtype("whatever", [], ["N1"], [], []), None)
 
         # if either HA or NA is missing, but genbank or gisaid have info, use their info
         # these subtype annotations could have been derived from PCR
@@ -888,7 +884,7 @@ class TestConstellations(unittest.TestCase):
             ("A", "NP", "pdm"),
             ("A", "M", "pdm"),
             ("A", "NS", "TRIG"),
-            ("A", "NS", "TRIG"), # duplicates are fine
+            ("A", "NS", "TRIG"),  # duplicates are fine
         ]
         out = [("A", "PPPPPT")]
         self.assertEqual(formatter._make_constellations(data), out)
