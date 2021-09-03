@@ -1,8 +1,0 @@
-# CDC CVV
-
-There may be many isolates for each CVV. Usually we only want one isolate for
-each CVV in our pipelines. Therefore, I use epiflu ids (e.g., EPI_ISL_179403)
-since strain names would be potentially be associated with many isolates.
-
-files:
-    isolate-ids.txt - a non-redundant list of epiflu isolate ids, one per CVV

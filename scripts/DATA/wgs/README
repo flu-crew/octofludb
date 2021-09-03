@@ -1,5 +1,0 @@
-wgs.txt is a list of strains that have been submitted for WGS
-sequencing. They may not yet have been released to genbank and, if
-sequencing is not successful, they may never be.
-
-The list so far also contains only the strains since 2020-03, but this may be extended by copying over the strains in the USDA WGS reports.

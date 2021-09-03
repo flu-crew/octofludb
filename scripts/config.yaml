@@ -1,0 +1,43 @@
+# This is the name of the GraphDB repository. You normally should not have to
+# change this since the `octofludb init` command will create a repo with the
+# expected name ("octofludb"). The only reason why you might need to change
+# this is if you want to build multiple repositories (for example, one that
+# contains private data for internal use and one that is publicly exposed
+# through a SPARQL endpoint). `octofludb init` may be bypassed by explictly
+# creating a GraphDB repo with `pgraphdb make`.
+repo: 'octofludb'
+
+# The url where GraphDB is hosted.
+host: 'http://localhost:7200'
+
+# An absolute path to location of the top folder that stores octofludb data
+home: '~/octofludb-data'
+
+# The path relative to `home` to epiflu (gisaid) fasta files
+epiflu_fasta: 'epiflu/*/*.fasta'
+
+# The path relative to `home` to epiflu (gisaid) metadata files
+epiflu_meta: 'epiflu/*/*.xls'
+
+# The relative paths to files containing tags. Each tag (for example,
+# 'cdc_cvv') is associated with one or more files of ids. Each file should
+# contain no header and a single column of identifies. Identifiers may be any
+# term that octofludb can consistently recognize, including strain names,
+# genbank ids, USDA surveillance barcodes, epiflu ids, and epiflu isolate ids.
+tags:
+  cdc_cvv: 'CDC_CVV/isolate_ids.txt'
+  antiserum: 'antiserum/antiserum_strain_names.txt'
+  antigen: 'antiserum/antiserum_strain_names.txt'
+  vaccine: 'vaccine/isolate_ids.txt'
+  variants: 'variants/isolate_ids.txt'
+  wgs: 'wgs/wgs.txt'
+
+# optional list of other files that contain raw turtles files
+other_turtles: null
+
+# optional location for backing up genbank data
+genbank_backup: null
+
+# the octoflu reference file use to classify swine strains
+# if null, then use the default file in the octoflu repo
+octoflu_references: null
