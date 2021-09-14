@@ -80,7 +80,7 @@ def make_maybe_add(g, meta, sid):
 
 
 def rmNone(xs):
-    """ Remove all 'None' elements from a list"""
+    """Remove all 'None' elements from a list"""
     return list(filter(lambda x: x != None, xs))
 
 

@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import click
 import collections
 import os
@@ -121,6 +119,7 @@ def init_cmd(url, repo):
     import pgraphdb as db
     import requests
     import shutil
+    import octofludb.script as script
 
     config_file = os.path.join(
         os.path.dirname(__file__), "data", "octofludb-config.ttl"
@@ -133,7 +132,7 @@ def init_cmd(url, repo):
 
     octofludb_home = os.path.join(os.path.expanduser("~"), ".octofludb")
 
-    if not os.path.exists(octofludb_home): 
+    if not os.path.exists(octofludb_home):
         try:
             print(
                 f" - Creating local configuration folder at '{octofludb_home}'",
@@ -147,15 +146,7 @@ def init_cmd(url, repo):
             )
             sys.exit(1)
 
-
-    config_template_file = os.path.join(
-        os.path.dirname(__file__), "data", "config.yaml"
-    )
-    config_local_file = os.path.join(octofludb_home, "config.yaml")
-
-    if not os.path.exists(config_local_file):
-        print(f" - Creating config template at '{config_local_file}'", file=sys.stderr)
-        shutil.copyfile(config_template_file, config_local_file)
+    script.initialize_config_file()
 
 
 @click.command(
@@ -175,36 +166,77 @@ def pull_cmd(nmonths, url, repo):
     assign clades to swine data, assign subtypes to all data, and extract
     motifs
     """
-    import pgraphdb as db
-    import yaml
+    import octofludb.script as script
 
-    config_local_file = os.path.exists(os.path.join(octofludb_home, "config.yaml"))
+    config = load_config_file(config_local_file)
 
-    if not os.path.exists(config_local_file):
-        print(
-            f"Could not find configuration file, expected it to be at {config_local_file}",
-            file=sys.stderr,
-        )
-        sys.exit(1)
-    else:
-        with open(config_local_file, "r") as f:
-            try:
-                config = yaml.safe_load(f)
-            except yaml.YAMLError as exc:
-                print(exc, file=sys.stderr)
-                sys.exit(1)
+    # upload ontological schema
+    upload_cmd(script.get_data_file("schema.ttl"), url, repo)
 
-    print(config)
+    # upload geological relationships
+    upload_cmd(script.get_data_file("geography.ttl"), url, repo)
 
-    #  # upload ontological schema
-    #  scheme_turtle = os.path.join(os.path.dirname(__file__), "data", "schema.ttl")
-    #  upload_cmd(scheme_turtle, url, repo)
-    #
-    #  # upload geological relationships
-    #  geography_turtle = os.path.join(os.path.dirname(__file__), "data", "geography.ttl")
-    #  upload_cmd(geography_turtle, url, repo)
-    #
-    #  return None
+    cwd = os.getcwd()
+
+    script.gotoBuildDir()
+
+    manifest = script.read_manifest(config["manifest"])
+
+    # update genbank (take a parameter telling how far back to go)
+    # this command fills the current directory with .gb* files
+    gb_turtles = prep_update_gb_cmd(1900, 2121, nmonths)
+    upload_cmd(gb_turtles, url, repo)
+
+    for epiflu_metafile in script.expandpath(config["epiflu_meta"]):
+        # calculate the md5sum of the file
+        metadata_hash = script.file_md5sum(epiflu_metafile)
+        if metadata_hash not in manifest:
+            outfile = epiflu_metafile + ".ttl"
+            with open(outfile, "w") as f:
+                with_graph(recipe.mk_gis, filename, outfile=f)
+            upload_cmd([outfile], url, repo)
+            manifest.update(metadata_hash)
+            os.remove(outfile)
+
+    for epiflu_fastafile in script.expandpath(config["epiflu_fasta"]):
+        # calculate the md5sum of the fasta file
+        fasta_hash = script.file_md5sum(epiflu_fastafile)
+        if fasta_hash not in manifest:
+            outfile = epiflu_fastafile + ".ttl"
+            with open(outfile, "w") as f:
+                _prep_fasta_cmd(filename, f)
+            upload_cmd([outfile], url, repo)
+            manifest.update(fasta_hash)
+            os.remove(outfile)
+
+    # octoflu classifications of unclassified swine
+    script.runOctoFLU()
+
+    # infer subtypes
+    with_graph(script.inferSubtypes, url, repo, outfile=".subtypes.ttl")
+    upload_cmd([".subtypes.ttl"], url, repo)
+
+    # infer constellations
+    script.inferConstellations()
+
+    # load all tags
+    for (tag, basename) in config["tags"].items():
+        path = os.path.join(script.octofludbHome(), basename)
+        for filename in script.expandpath(path):
+            outfile = filename + ".ttl"
+            with open(outfile, "w") as f:
+                prep_tag_cmd(tag, filename, outfile=f)
+                upload_cmd([outfile], url, repo)
+                os.remove(outfile)
+
+    os.chdir(cwd)
+
+    # rewrite the manifest
+    with open(config["manifest"], "w") as f:
+        for h in manifest:
+            f.write(h)
+
+    return None
 
 
 @click.command(
@@ -290,29 +322,13 @@ def upload_cmd(turtle_filenames, url, repo):
     """
     Upload one or more turtle files to the database
     """
-    import shutil
     import pgraphdb as db
+    import octofludb.script as script
 
-    for filename in turtle_filenames:
-        dbdir = os.path.join(os.path.expanduser("~"), "graphdb-import")
-        if not os.path.exists(dbdir):
-            os.mkdir(dbdir)
-        new_filename = os.path.join(dbdir, os.path.basename(filename))
-        if filename == new_filename:
-            continue
-        else:
-            try:
-                shutil.copyfile(filename, new_filename)
-            except AttributeError as e:
-                print(
-                    f"Could not move {filename} to {new_filename}: {str(e)}",
-                    file=sys.stderr,
-                )
-                sys.exit(1)
-    server_files = [os.path.basename(f) for f in turtle_filenames]
-    for server_file in server_files:
-        db.load_data(url=url, repo_name=repo, turtle_file=new_filename)
-    sys.exit(0)
+    server_files = []
+    for filenames in turtle_filenames:
+        for filename in script.expandpath(filenames):
+            db.load_data(url=url, repo_name=repo, turtle_file=filename)
 
 
 # ===== prep subcommands ====
@@ -323,7 +339,7 @@ def upload_cmd(turtle_filenames, url, repo):
 )
 @click.argument("tag", type=str)
 @filename_arg
-def prep_tag_cmd(tag, filename):
+def prep_tag_cmd(tag, filename, outfile=sys.stdout):
     """
     Associate list of IDs with a tag
     """
@@ -346,7 +362,7 @@ def prep_tag_cmd(tag, filename):
         turtles = g.serialize(format="turtle")
         log("done")
         for l in turtles.splitlines():
-            print(l.decode("utf-8"))
+            print(l.decode("utf-8"), file=outfile)
     g.close()
 
 
@@ -448,6 +464,8 @@ def prep_update_gb_cmd(minyear, maxyear, nmonths):
     from octofludb.entrez import missing_acc_by_date
     import octofludb.colors as colors
 
+    outfiles = []
+
     for date, missing_acc in missing_acc_by_date(
         min_year=minyear, max_year=maxyear, nmonths=nmonths
     ):
@@ -456,8 +474,11 @@ def prep_update_gb_cmd(minyear, maxyear, nmonths):
             outfile = ".gb_" + date.replace("/", "-") + ".ttl"
             with open(outfile, "w") as fh:
                 with_graph(_mk_gbids_cmd, gbids=missing_acc, outfile=fh)
+            outfiles.append(outfile)
         else:
             log(colors.good(f"Up-to-date for {date}"))
+
+    return outfiles
 
 
 @click.command(
@@ -512,7 +533,9 @@ na_opt = click.option("--na", help="The string that represents a missing value")
 @click.option("--levels", help="levels")
 @na_opt
 @segment_key_opt
-def prep_table_cmd(filename, tag, include, exclude, levels, na, segment_key):
+def prep_table_cmd(
+    filename, tag, include, exclude, levels, na, segment_key, outfile=sys.stdout
+):
     """
     Translate a table to RDF
     """
@@ -536,7 +559,7 @@ def prep_table_cmd(filename, tag, include, exclude, levels, na, segment_key):
             na_str=make_na(na),
         ).connect(g)
 
-    with_graph(_mk_table_cmd, filename)
+    with_graph(_mk_table_cmd, filename, outfile=outfile)
 
 
 @click.command(
@@ -548,12 +571,25 @@ def prep_table_cmd(filename, tag, include, exclude, levels, na, segment_key):
 @include_opt
 @exclude_opt
 @na_opt
-def prep_fasta_cmd(filename, tag, delimiter, include, exclude, na):
+def prep_fasta_cmd(*args, **kwargs):
     """
     Translate a fasta file to RDF.
 
     <filename> Path to a TAB-delimited or excel table
     """
+
+    return _prep_fasta_cmd(*args, **kwargs)
+
+
+def _prep_fasta_cmd(
+    filename,
+    tag=None,
+    delimiter=None,
+    include=None,
+    exclude=None,
+    na=None,
+    outfile=sys.stdout,
+):
     import octofludb.classes as classes
 
     def _mk_fasta_cmd(g, fh):
@@ -568,7 +604,9 @@ def prep_fasta_cmd(filename, tag, delimiter, include, exclude, na):
             na_str=make_na(na),
         ).connect(g)
 
-    with_graph(_mk_fasta_cmd, filename)
+    with_graph(_mk_fasta_cmd, filename, outfile=outfile)
+
+    return outfile
 
 
 @click.command(
@@ -683,10 +721,19 @@ def make_const_cmd(url, repo):
 )
 @url_opt
 @repo_name_opt
-def make_subtypes_cmd(url, repo):
+def make_subtypes_cmd(url, repo, outfile=sys.stdout):
     """
     Determine subtypes based on Genbank serotype field, epiflu data, or octoflu HA/NA classifications"
     """
+
+    strains, isolates = get_missing_subtypes(url, repo)
+
+    print("strain_name\tsubtype", file=outfile)
+    for identifier, subtype in strains + isolates:
+        print(f"{identifier}\t{subtype}", file=outfile)
+
+
+def get_missing_subtypes(url, repo):
     import octofludb.recipes as recipe
     import pgraphdb as db
 
@@ -694,7 +741,7 @@ def make_subtypes_cmd(url, repo):
 
     results = db.sparql_query(sparql_file=sparql_filename, url=url, repo_name=repo)
 
-    recipe.mk_subtypes(results)
+    return recipe.mk_subtypes(results)
 
 
 @click.command(

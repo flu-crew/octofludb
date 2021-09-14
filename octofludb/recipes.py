@@ -318,7 +318,8 @@ def mk_subtypes(results):
 
         entries[strain] = entry
 
-    print("strain_name\tsubtype")
+    strain_entries = []
+    isolate_entries = []
     for strain, entry in entries.items():
         subtype = _get_subtype(
             strain,
@@ -328,9 +329,11 @@ def mk_subtypes(results):
             genbank_subtypes=entry["genbank_subtypes"],
         )
         if subtype:
-            print("\t".join([strain, subtype]))
+            strain_entries.append((strain, subtype))
             for isolate in entry["isolates"]:
-                print("\t".join([isolate, subtype]))
+                isolate_entries.append((isolate, subtype))
+
+    return (strain_entries, isolate_entries)
 
 
 MASTERLIST_HEADER = [

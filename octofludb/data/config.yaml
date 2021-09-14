@@ -44,3 +44,9 @@ genbank_backup: null
 # the octoflu reference file use to classify swine strains
 # if null, then use the default file in the octoflu repo
 octoflu_references: null
+
+# The manifest file that stores hash sums of objects. The path must be relative
+# to the build folder (don't worry about it, this is mostly automated for you,
+# but you may want to delete this file if you want to ensure everything is
+# rebuilt without caches)
+manifest: "MANIFEST"

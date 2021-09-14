@@ -4,6 +4,7 @@ import octofludb.classifiers.flucrew as ftok
 import octofludb.recipes as recipes
 import octofludb.formatting as formatter
 import octofludb.token as tok
+import octofludb.script as script
 from octofludb.nomenclature import (
     make_uri,
     make_usa_state_uri,
@@ -904,6 +905,24 @@ class TestConstellations(unittest.TestCase):
         out = [("A", "PX-P-T")]
         self.assertEqual(formatter._make_constellations(data), out)
 
+class TestScripts(unittest.TestCase):
+    def test_evenly_divide(self):
+        self.assertEqual(script.evenly_divide(0, 10), [0])
+        self.assertEqual(script.evenly_divide(1, 10), [1])
+        self.assertEqual(script.evenly_divide(2, 10), [2])
+        self.assertEqual(script.evenly_divide(10, 10), [10])
+        self.assertEqual(script.evenly_divide(11, 10), [6,5])
+        self.assertEqual(script.evenly_divide(13, 10), [7,6])
+        self.assertEqual(script.evenly_divide(21, 10), [7,7,7])
+        self.assertEqual(script.evenly_divide(23, 10), [8,8,7])
+        self.assertEqual(script.evenly_divide(3, 1), [1,1,1])
+
+    def test_partition(self):
+        self.assertEqual(script.partition(range(10), [0,7,3]), [[], [0,1,2,3,4,5,6], [7,8,9]])
+        self.assertEqual(script.partition(range(10), [0,7,3]), script.partition(range(10), [0,7,4]))
+        self.assertEqual(script.partition(range(10), [0,3,3]), [[], [0,1,2], [3,4,5]])
+        self.assertEqual(script.partition([], [0,3,3]), [])
+    
 
 if __name__ == "__main__":
     unittest.main()

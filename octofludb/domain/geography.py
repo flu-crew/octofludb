@@ -60,7 +60,7 @@ state_correction = make_flat_wordfinder(STATE_NAME2ABBR.keys())
 
 
 def state_to_code(name):
-    """ Get the two letter code from a state name. Return None on failure. """
+    """Get the two letter code from a state name. Return None on failure."""
     try:
         name = name.strip()
     except:
@@ -391,7 +391,7 @@ country_correction = make_flat_wordfinder(COUNTRY_NAMES)
 
 
 def country_to_code(name):
-    """ Get the ISO 3-letter codes for a country. Return None on failure. """
+    """Get the ISO 3-letter codes for a country. Return None on failure."""
     try:
         name = name.strip()
     except:
@@ -457,7 +457,7 @@ LOCATIONS_IN = {
 
 
 def location_to_country_code(name):
-    """ Map locations to countries """
+    """Map locations to countries"""
     code = country_to_code(name)
     if not code:
         try:

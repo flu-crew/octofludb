@@ -177,7 +177,7 @@ class Ignore(Token):
 
 
 class Empty(Token):
-    """ If you want to throw out any field that is not recognized, make this the default """
+    """If you want to throw out any field that is not recognized, make this the default"""
 
     typename = "empty"
     parser = p.regex(".*")

@@ -8,3 +8,5 @@ xlrd
 termcolor
 requests
 click
+pyyaml
+smof
