@@ -168,73 +168,77 @@ def pull_cmd(nmonths, url, repo):
     """
     import octofludb.script as script
 
-    config = load_config_file(config_local_file)
-
-    # upload ontological schema
-    upload_cmd(script.get_data_file("schema.ttl"), url, repo)
-
-    # upload geological relationships
-    upload_cmd(script.get_data_file("geography.ttl"), url, repo)
-
     cwd = os.getcwd()
 
-    script.gotoBuildDir()
+    script.gotoBuildHome()
 
-    manifest = script.read_manifest(config["manifest"])
+    config = script.load_config_file()
 
-    # update genbank (take a parameter telling how far back to go)
-    # this command fills the current directory with .gb* files
-    gb_turtles = prep_update_gb_cmd(1900, 2121, nmonths)
-    upload_cmd(gb_turtles, url, repo)
+    # upload ontological schema
+    schema_file = script.get_data_file("schema.ttl")  #
+    upload_cmd([schema_file], url, repo)
+    print("b", file=sys.stderr)
+    print(f"Uploaded schema file: {schema_file}", file=sys.stderr)
 
-    for epiflu_metafile in script.expandpath(config["epiflu_meta"]):
-        # calculate the md5sum of the file
-        metadata_hash = script.file_md5sum(epiflu_metafile)
-        if metadata_hash not in manifest:
-            outfile = epiflu_metafile + ".ttl"
-            with open(outfile, "w") as f:
-                with_graph(recipe.mk_gis, filename, outfile=f)
-            upload_cmd([outfile], url, repo)
-            manifest.update(metadata_hash)
-            os.remove(outfile)
+    #  # upload geological relationships
+    #  geog_file = upload_cmd([script.get_data_file("geography.ttl")], url, repo)
+    #  print(f"Uploaded geography file: {geog_file}", file=sys.stderr)
+    #
+    #  manifest = script.read_manifest(config["manifest"])
 
-    for epiflu_fastafile in script.expandpath(config["epiflu_fasta"]):
-        # calculate the md5sum of the fasta file
-        fasta_hash = script.file_md5sum(epiflu_fastafile)
-        if fasta_hash not in manifest:
-            outfile = epiflu_fastafile + ".ttl"
-            with open(outfile, "w") as f:
-                _prep_fasta_cmd(filename, f)
-            upload_cmd([outfile], url, repo)
-            manifest.update(fasta_hash)
-            os.remove(outfile)
-
-    # octoflu classifications of unclassified swine
-    script.runOctoFLU()
-
-    # infer subtypes
-    with_graph(script.inferSubtypes, url, repo, outfile=".subtypes.ttl")
-    upload_cmd([".subtypes.ttl"], url, repo)
-
-    # infer constellations
-    script.inferConstellations()
-
-    # load all tags
-    for (tag, basename) in config["tags"].items():
-        path = os.path.join(script.octofludbHome(), basename)
-        for filename in script.expandpath(path):
-            outfile = filename + ".ttl"
-            with open(outfile, "w") as f:
-                prep_tag_cmd(tag, filename, outfile=f)
-                upload_cmd([outfile], url, repo)
-                os.remove(outfile)
+    #  # update genbank (take a parameter telling how far back to go)
+    #  # this command fills the current directory with .gb* files
+    #  gb_turtles = prep_update_gb_cmd(1900, 2121, nmonths)
+    #  upload_cmd(gb_turtles, url, repo)
+    #
+    #  for epiflu_metafile in script.expandpath(config["epiflu_meta"]):
+    #      # calculate the md5sum of the file
+    #      metadata_hash = script.file_md5sum(epiflu_metafile)
+    #      if metadata_hash not in manifest:
+    #          outfile = epiflu_metafile + ".ttl"
+    #          with open(outfile, "w") as f:
+    #              with_graph(recipe.mk_gis, filename, outfile=f)
+    #          upload_cmd([outfile], url, repo)
+    #          manifest.update(metadata_hash)
+    #          os.remove(outfile)
+    #
+    #  for epiflu_fastafile in script.expandpath(config["epiflu_fasta"]):
+    #      # calculate the md5sum of the fasta file
+    #      fasta_hash = script.file_md5sum(epiflu_fastafile)
+    #      if fasta_hash not in manifest:
+    #          outfile = epiflu_fastafile + ".ttl"
+    #          with open(outfile, "w") as f:
+    #              _prep_fasta_cmd(filename, f)
+    #          upload_cmd([outfile], url, repo)
+    #          manifest.update(fasta_hash)
+    #          os.remove(outfile)
+    #
+    #  # octoflu classifications of unclassified swine
+    #  script.runOctoFLU()
+    #
+    #  # infer subtypes
+    #  with_graph(script.inferSubtypes, url, repo, outfile=".subtypes.ttl")
+    #  upload_cmd([".subtypes.ttl"], url, repo)
+    #
+    #  # infer constellations
+    #  script.inferConstellations()
+    #
+    #  # load all tags
+    #  for (tag, basename) in config["tags"].items():
+    #      path = os.path.join(script.octofludbHome(), basename)
+    #      for filename in script.expandpath(path):
+    #          outfile = filename + ".ttl"
+    #          with open(outfile, "w") as f:
+    #              prep_tag_cmd(tag, filename, outfile=f)
+    #              upload_cmd([outfile], url, repo)
+    #              os.remove(outfile)
+    #
+    #  # rewrite the manifest
+    #  with open(config["manifest"], "w") as f:
+    #      for h in manifest:
+    #          f.write(h)
 
     os.chdir(cwd)
-
-    # rewrite the manifest
-    with open(config["manifest"], "w") as f:
-        for h in manifest:
-            f.write(h)
 
     return None
 
@@ -260,7 +264,8 @@ def fmt_query_cmd(sparql_filename, header, fasta, url, repo):
         formatting.write_as_fasta(results)
     else:
         formatting.write_as_table(results, header=header)
-    sys.exit(0)
+
+    return None
 
 
 @click.command(
@@ -293,7 +298,8 @@ def construct_cmd(sparql_filename, url, repo):
     results = db.sparql_construct(sparql_file=sparql_filename, url=url, repo_name=repo)
 
     print(results)
-    sys.exit(0)
+
+    return None
 
 
 @click.command(
@@ -325,10 +331,11 @@ def upload_cmd(turtle_filenames, url, repo):
     import pgraphdb as db
     import octofludb.script as script
 
-    server_files = []
     for filenames in turtle_filenames:
         for filename in script.expandpath(filenames):
+            print(f"loading file: {filename}", file=sys.stderr, end=" ... ")
             db.load_data(url=url, repo_name=repo, turtle_file=filename)
+            print("done", file=sys.stderr)
 
 
 # ===== prep subcommands ====
@@ -819,6 +826,8 @@ def fetch_tag_cmd(filename, url, repo):
     # upload it to the database
     upload_cmd([turtle_filename], url, repo)
     g.close()
+
+    return None
 
 
 @click.command(

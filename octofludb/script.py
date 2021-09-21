@@ -5,6 +5,7 @@ import pgraphdb
 import smof
 import glob
 import os
+import sys
 from octofludb.classes import Table
 
 
@@ -46,6 +47,7 @@ def load_config_file():
         except yaml.YAMLError as exc:
             print(exc, file=sys.stderr)
             sys.exit(1)
+    return config
 
 
 def file_md5sum(path):
@@ -55,8 +57,15 @@ def file_md5sum(path):
 
 
 def read_manifest(manifest):
-    with open(manifest, "rb") as f:
-        hashes = {x.strip() for x in f.readlines()}
+    try:
+        with open(manifest, "rb") as f:
+            hashes = {x.strip() for x in f.readlines()}
+    except:
+        print(
+            "No suitable manifest found, so proceeding without using cached values",
+            file=sys.stderr,
+        )
+        hashes = set()
     return hashes
 
 
@@ -135,9 +144,9 @@ def runOctoFLU(path, reference=None):
                 )
                 # add the absolute path to this table to the created file list
                 created_files.append(expandpath(table_path))
-    except:
-        # Ignore any errors? WTF?
-        pass
+    except Exception as e:
+        print(e, file=sys.stderr)
+        sys.exit(1)
 
     results = []
     for filename in created_files:
@@ -177,9 +186,10 @@ def buildHome():
 
 def gotoBuildHome():
     # move to octofludb build home
-    build_dir = buildDir()
+    build_dir = buildHome()
     if not os.path.exists(build_dir):
         os.mkdir(build_dir)
+    print(f"Moving to {build_dir}", file=sys.stderr)
     os.chdir(build_dir)
 
 
