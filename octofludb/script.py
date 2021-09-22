@@ -8,6 +8,7 @@ import os
 import sys
 import shutil
 from octofludb.classes import Table
+from octofludb.util import log, die
 
 
 def get_data_file(filename):
@@ -16,6 +17,27 @@ def get_data_file(filename):
 
 def octofludbHome():
     return os.path.join(os.path.expanduser("~"), ".octofludb")
+
+
+def epiflu_fasta_files(config):
+    try:
+        data_home = expandpath(config["datadir"])[0]
+    except KeyError:
+        die("The config file is missing a `datadir` entry")
+    except IndexError:
+        die("The path to the `datadir` entry in config does not exist")
+    return expandpath(os.path.join(data_home, config["epiflu_fasta"]))
+
+
+def epiflu_meta_files(config):
+    try:
+        data_home = expandpath(config["datadir"])[0]
+        log(data_home)
+    except KeyError:
+        die("The config file is missing a `datadir` entry")
+    except IndexError:
+        die("The path to the `datadir` entry in config does not exist")
+    return expandpath(os.path.join(data_home, config["epiflu_meta"]))
 
 
 def initialize_config_file():
@@ -200,4 +222,4 @@ def expandpath(path):
 
     This command NEVER fails. If nothing in a path exists, an empty list is returned.
     """
-    return [os.path.abspath(os.path.expanduser(f)) for f in glob.glob(path)]
+    return glob.glob(os.path.expanduser(path))

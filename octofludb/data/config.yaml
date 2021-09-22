@@ -14,7 +14,7 @@ repo: 'octofludb'
 host: 'http://localhost:7200'
 
 # An absolute path to location of the top folder that stores octofludb data
-home: '~/octofludb-data'
+datadir: '~/octofludb-data'
 
 # The path relative to `home` to epiflu (gisaid) fasta files
 epiflu_fasta: 'epiflu/*/*.fasta'

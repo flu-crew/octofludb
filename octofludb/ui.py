@@ -5,6 +5,7 @@ import signal
 import sys
 import textwrap
 from octofludb.util import log
+import octofludb.classes as classes
 
 
 def open_graph():
@@ -167,6 +168,7 @@ def pull_cmd(nmonths, url, repo):
     motifs
     """
     import octofludb.script as script
+    import octofludb.recipes as recipe
 
     cwd = os.getcwd()
 
@@ -181,40 +183,48 @@ def pull_cmd(nmonths, url, repo):
     # upload geological relationships
     geog_file = upload([script.get_data_file("geography.ttl")], url, repo)[0]
 
-    log(f"Uploaded geography file: {geog_file}")
-
-    manifest = script.read_manifest(config["manifest"])
-
     # update genbank (take a parameter telling how far back to go)
     # this command fills the current directory with .gb* files
     gb_turtles = prep_update_gb(minyear=1900, maxyear=2121, nmonths=nmonths)
     upload(gb_turtles, url, repo)
 
-    #  for epiflu_metafile in script.expandpath(config["epiflu_meta"]):
-    #      # calculate the md5sum of the file
-    #      metadata_hash = script.file_md5sum(epiflu_metafile)
-    #      if metadata_hash not in manifest:
-    #          outfile = epiflu_metafile + ".ttl"
-    #          with open(outfile, "w") as f:
-    #              with_graph(recipe.mk_gis, filename, outfile=f)
-    #          upload_cmd([outfile], url, repo)
-    #          manifest.update(metadata_hash)
-    #          os.remove(outfile)
-    #
-    #  for epiflu_fastafile in script.expandpath(config["epiflu_fasta"]):
-    #      # calculate the md5sum of the fasta file
-    #      fasta_hash = script.file_md5sum(epiflu_fastafile)
-    #      if fasta_hash not in manifest:
-    #          outfile = epiflu_fastafile + ".ttl"
-    #          with open(outfile, "w") as f:
-    #              _prep_fasta_cmd(filename, f)
-    #          upload_cmd([outfile], url, repo)
-    #          manifest.update(fasta_hash)
-    #          os.remove(outfile)
-    #
+    epiflu_metafiles = script.epiflu_meta_files(config)
+    skipped_meta = 0
+    if epiflu_metafiles:
+        for epiflu_metafile in epiflu_metafiles:
+            outfile = os.path.basename(epiflu_metafile) + ".ttl"
+            if os.path.exists(outfile) and os.path.getsize(outfile) > 0:
+              skipped_meta += 1
+            else:
+                with open(outfile, "w") as f:
+                    with_graph(recipe.mk_gis, epiflu_metafile, outfile=f)
+                upload([outfile], url, repo)
+    else:
+        log("No epiflu metafiles found")
+
+    if skipped_meta > 0:
+      log(f"Skipped {str(skipped_meta)} epiflu meta files where existing non-empty turtle files were found in the build directory")
+
+    epiflu_fastafiles = script.epiflu_fasta_files(config)
+    skipped_fasta = 0
+    if epiflu_fastafiles:
+        for infile in epiflu_fastafiles:
+            outfile = os.path.basename(infile) + ".ttl"
+            if os.path.exists(outfile) and os.path.getsize(outfile) > 0:
+                skipped_fasta += 1
+            else:
+                with open(outfile, "w") as f:
+                    prep_fasta(filename=infile, outfile=f)
+                    upload([outfile], url, repo)
+    else:
+        log("No epiflu fasta found")
+
+    if skipped_fasta > 0:
+      log(f"Skipped {str(skipped_fasta)} epiflu fasta files where existing non-empty turtle files were found in the build directory")
+
     #  # octoflu classifications of unclassified swine
     #  script.runOctoFLU()
-    #
+
     #  # infer subtypes
     #  with_graph(script.inferSubtypes, url, repo, outfile=".subtypes.ttl")
     #  upload_cmd([".subtypes.ttl"], url, repo)
@@ -328,6 +338,7 @@ def upload_cmd(turtle_filenames, url, repo):
     Upload one or more turtle files to the database
     """
     upload(turtle_filenames, url, repo)
+
 
 def upload(turtle_filenames, url, repo):
     import pgraphdb as db
@@ -475,6 +486,7 @@ def prep_update_gb_cmd(minyear, maxyear, nmonths):
     """
     return prep_update_gb(minyear, maxyear, nmonths)
 
+
 def prep_update_gb(minyear, maxyear, nmonths):
     from octofludb.entrez import missing_acc_by_date
     import octofludb.colors as colors
@@ -487,12 +499,12 @@ def prep_update_gb(minyear, maxyear, nmonths):
         if missing_acc:
             outfile = ".gb_" + date.replace("/", "-") + ".ttl"
             if os.path.exists(outfile):
-              log(f"GenBank turtle file for '{str(date)}' already exists, skipping")
+                log(f"GenBank turtle file for '{str(date)}' already exists, skipping")
             else:
-              log(colors.good(f"Updating {date} ..."))
-              with open(outfile, "w") as fh:
-                  with_graph(_mk_gbids_cmd, gbids=missing_acc, outfile=fh)
-              outfiles.append(outfile)
+                log(colors.good(f"Updating {date} ..."))
+                with open(outfile, "w") as fh:
+                    with_graph(_mk_gbids_cmd, gbids=missing_acc, outfile=fh)
+                outfiles.append(outfile)
         else:
             log(colors.good(f"Up-to-date for {date}"))
 
@@ -557,13 +569,12 @@ def prep_table_cmd(
     """
     Translate a table to RDF
     """
-    from octofludb.classes import Table
     from octofludb.recipes import IrregularSegmentTable
 
     if segment_key:
         constructor = IrregularSegmentTable
     else:
-        constructor = Table
+        constructor = classes.Table
 
     def _mk_table_cmd(g, fh):
         (inc, exc, levelsProc) = process_tablelike(include, exclude, levels)
@@ -596,10 +607,10 @@ def prep_fasta_cmd(*args, **kwargs):
     <filename> Path to a TAB-delimited or excel table
     """
 
-    return _prep_fasta_cmd(*args, **kwargs)
+    return prep_fasta(*args, **kwargs)
 
 
-def _prep_fasta_cmd(
+def prep_fasta(
     filename,
     tag=None,
     delimiter=None,
@@ -608,8 +619,6 @@ def _prep_fasta_cmd(
     na=None,
     outfile=sys.stdout,
 ):
-    import octofludb.classes as classes
-
     def _mk_fasta_cmd(g, fh):
         (inc, exc, levels) = process_tablelike(include, exclude, None)
         classes.Ragged(

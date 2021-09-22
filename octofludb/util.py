@@ -8,6 +8,11 @@ def log(msg, end="\n"):
     print(msg, file=sys.stderr, flush=True, end=end)
 
 
+def die(msg):
+    print(msg, file=sys.stderr, flush=True)
+    sys.exit(1)
+
+
 def file_str(f):
     if isinstance(f, str):
         return f
