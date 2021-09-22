@@ -6,6 +6,7 @@ import smof
 import glob
 import os
 import sys
+import shutil
 from octofludb.classes import Table
 
 

@@ -176,21 +176,20 @@ def pull_cmd(nmonths, url, repo):
 
     # upload ontological schema
     schema_file = script.get_data_file("schema.ttl")  #
-    upload_cmd([schema_file], url, repo)
-    print("b", file=sys.stderr)
-    print(f"Uploaded schema file: {schema_file}", file=sys.stderr)
+    upload([schema_file], url, repo)
 
-    #  # upload geological relationships
-    #  geog_file = upload_cmd([script.get_data_file("geography.ttl")], url, repo)
-    #  print(f"Uploaded geography file: {geog_file}", file=sys.stderr)
-    #
-    #  manifest = script.read_manifest(config["manifest"])
+    # upload geological relationships
+    geog_file = upload([script.get_data_file("geography.ttl")], url, repo)[0]
 
-    #  # update genbank (take a parameter telling how far back to go)
-    #  # this command fills the current directory with .gb* files
-    #  gb_turtles = prep_update_gb_cmd(1900, 2121, nmonths)
-    #  upload_cmd(gb_turtles, url, repo)
-    #
+    log(f"Uploaded geography file: {geog_file}")
+
+    manifest = script.read_manifest(config["manifest"])
+
+    # update genbank (take a parameter telling how far back to go)
+    # this command fills the current directory with .gb* files
+    gb_turtles = prep_update_gb(minyear=1900, maxyear=2121, nmonths=nmonths)
+    upload(gb_turtles, url, repo)
+
     #  for epiflu_metafile in script.expandpath(config["epiflu_meta"]):
     #      # calculate the md5sum of the file
     #      metadata_hash = script.file_md5sum(epiflu_metafile)
@@ -328,14 +327,20 @@ def upload_cmd(turtle_filenames, url, repo):
     """
     Upload one or more turtle files to the database
     """
+    upload(turtle_filenames, url, repo)
+
+def upload(turtle_filenames, url, repo):
     import pgraphdb as db
     import octofludb.script as script
 
+    files = []
     for filenames in turtle_filenames:
         for filename in script.expandpath(filenames):
             print(f"loading file: {filename}", file=sys.stderr, end=" ... ")
             db.load_data(url=url, repo_name=repo, turtle_file=filename)
             print("done", file=sys.stderr)
+            files.append(filename)
+    return files
 
 
 # ===== prep subcommands ====
@@ -468,6 +473,9 @@ def prep_update_gb_cmd(minyear, maxyear, nmonths):
     """
     Retrieve any missing genbank records. Results are stored in files with the prefix '.gb_###.ttl'
     """
+    return prep_update_gb(minyear, maxyear, nmonths)
+
+def prep_update_gb(minyear, maxyear, nmonths):
     from octofludb.entrez import missing_acc_by_date
     import octofludb.colors as colors
 
@@ -477,11 +485,14 @@ def prep_update_gb_cmd(minyear, maxyear, nmonths):
         min_year=minyear, max_year=maxyear, nmonths=nmonths
     ):
         if missing_acc:
-            log(colors.good(f"Updating {date} ..."))
             outfile = ".gb_" + date.replace("/", "-") + ".ttl"
-            with open(outfile, "w") as fh:
-                with_graph(_mk_gbids_cmd, gbids=missing_acc, outfile=fh)
-            outfiles.append(outfile)
+            if os.path.exists(outfile):
+              log(f"GenBank turtle file for '{str(date)}' already exists, skipping")
+            else:
+              log(colors.good(f"Updating {date} ..."))
+              with open(outfile, "w") as fh:
+                  with_graph(_mk_gbids_cmd, gbids=missing_acc, outfile=fh)
+              outfiles.append(outfile)
         else:
             log(colors.good(f"Up-to-date for {date}"))
 
