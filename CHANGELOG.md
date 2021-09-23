@@ -1,6 +1,10 @@
 v0.8.0 [2021-xx-xx]
 ===================
 
+ * Remove `script` folder and all bash scripting
+ * Add `pull` subcommand for updating the database
+ * Add `classify` subcommand as a wrapper around octoFLU
+ * Add a config file that contains links to all data and the octoFLU reference
  * Add `report monthly --context` to pull sequences for comparisons
  * Add support for the the SPARQL CONSTRUCT command
  * Do not generate "unknown" triples
