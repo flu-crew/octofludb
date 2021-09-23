@@ -175,86 +175,111 @@ def pull_cmd(nmonths, url, repo):
 
     config = script.load_config_file()
 
-    # upload ontological schema
-    schema_file = script.get_data_file("schema.ttl")  #
-    upload([schema_file], url, repo)
-
-    # upload geological relationships
-    geog_file = upload([script.get_data_file("geography.ttl")], url, repo)[0]
-
-    # update genbank (take a parameter telling how far back to go)
-    # this command fills the current directory with .gb* files
-    gb_turtles = prep_update_gb(minyear=1900, maxyear=2121, nmonths=nmonths)
-    upload(gb_turtles, url, repo)
-
-    epiflu_metafiles = script.epiflu_meta_files(config)
-    skipped_meta = 0
-    if epiflu_metafiles:
-        for epiflu_metafile in epiflu_metafiles:
-            outfile = os.path.basename(epiflu_metafile) + ".ttl"
-            if os.path.exists(outfile) and os.path.getsize(outfile) > 0:
-                skipped_meta += 1
-            else:
-                with open(outfile, "w") as f:
-                    with_graph(recipe.mk_gis, epiflu_metafile, outfile=f)
-                upload([outfile], url, repo)
-    else:
-        log("No epiflu metafiles found")
-    if skipped_meta > 0:
-        log(
-            f"Skipped {str(skipped_meta)} epiflu meta files where existing non-empty turtle files were found in the build directory"
-        )
-
-    epiflu_fastafiles = script.epiflu_fasta_files(config)
-    skipped_fasta = 0
-    if epiflu_fastafiles:
-        for infile in epiflu_fastafiles:
-            outfile = os.path.basename(infile) + ".ttl"
-            if os.path.exists(outfile) and os.path.getsize(outfile) > 0:
-                skipped_fasta += 1
-            else:
-                with open(outfile, "w") as f:
-                    prep_fasta(filename=infile, outfile=f)
-                    upload([outfile], url, repo)
-    else:
-        log("No epiflu fasta found")
-
-    if skipped_fasta > 0:
-        log(
-            f"Skipped {str(skipped_fasta)} epiflu fasta files where existing non-empty turtle files were found in the build directory"
-        )
-
-    # octoflu classifications of unclassified swine
-    # * retrieve unclassified strains
-    unclassified_fasta = "unclassified-swine.fna"
-    unclassified_classes = "unclassified-swine.txt"
-    unclassified_turtle = "unclassified-swine.ttl"
-
-    sparql_file = script.get_data_file("fetch-unclassified-swine.rq")
-    with open(unclassified_fasta, "w") as fastaout:
-        fmt_query_cmd(
-            sparql_filename=sparql_file,
-            header=False,
-            fasta=True,
-            url=url,
-            repo=repo,
-            outfile=fastaout,
-        )
-
-    with open(unclassified_classes, "w") as classout:
-        # feed them into runOctoFLU
-        classify_and_write(unclassified_fasta, outfile=classout)
-
-    with open(unclassified_turtle, "w") as turtleout:
-        # print the results
-        prep_table(unclassified_classes, outfile=turtleout)
-
-    upload(unclassified_turtle)
-
-    #  # infer subtypes
-    #  with_graph(script.inferSubtypes, url, repo, outfile=".subtypes.ttl")
-    #  upload_cmd([".subtypes.ttl"], url, repo)
+    #  # upload ontological schema
+    #  schema_file = script.get_data_file("schema.ttl")  #
+    #  upload([schema_file], url, repo)
     #
+    #  # upload geological relationships
+    #  geog_file = upload([script.get_data_file("geography.ttl")], url, repo)[0]
+    #
+    #  # update genbank (take a parameter telling how far back to go)
+    #  # this command fills the current directory with .gb* files
+    #  gb_turtles = prep_update_gb(minyear=1900, maxyear=2121, nmonths=nmonths)
+    #  upload(gb_turtles, url, repo)
+    #
+    #  epiflu_metafiles = script.epiflu_meta_files(config)
+    #  skipped_meta = 0
+    #  if epiflu_metafiles:
+    #      for epiflu_metafile in epiflu_metafiles:
+    #          outfile = os.path.basename(epiflu_metafile) + ".ttl"
+    #          if os.path.exists(outfile) and os.path.getsize(outfile) > 0:
+    #              skipped_meta += 1
+    #          else:
+    #              with open(outfile, "w") as f:
+    #                  with_graph(recipe.mk_gis, epiflu_metafile, outfile=f)
+    #              upload([outfile], url, repo)
+    #  else:
+    #      log("No epiflu metafiles found")
+    #  if skipped_meta > 0:
+    #      log(
+    #          f"Skipped {str(skipped_meta)} epiflu meta files where existing non-empty turtle files were found in the build directory"
+    #      )
+    #
+    #  epiflu_fastafiles = script.epiflu_fasta_files(config)
+    #  skipped_fasta = 0
+    #  if epiflu_fastafiles:
+    #      for infile in epiflu_fastafiles:
+    #          outfile = os.path.basename(infile) + ".ttl"
+    #          if os.path.exists(outfile) and os.path.getsize(outfile) > 0:
+    #              skipped_fasta += 1
+    #          else:
+    #              with open(outfile, "w") as f:
+    #                  prep_fasta(filename=infile, outfile=f)
+    #                  upload([outfile], url, repo)
+    #  else:
+    #      log("No epiflu fasta found")
+    #
+    #  if skipped_fasta > 0:
+    #      log(
+    #          f"Skipped {str(skipped_fasta)} epiflu fasta files where existing non-empty turtle files were found in the build directory"
+    #      )
+    #
+    #  # octoflu classifications of unclassified swine
+    #  # * retrieve unclassified strains
+    #  unclassified_fasta = "unclassified-swine.fna"
+    #  unclassified_classes = "unclassified-swine.txt"
+    #  unclassified_turtle = "unclassified-swine.ttl"
+    #
+    #  sparql_file = script.get_data_file("fetch-unclassified-swine.rq")
+    #  with open(unclassified_fasta, "w") as fastaout:
+    #      fmt_query_cmd(
+    #          sparql_filename=sparql_file,
+    #          header=False,
+    #          fasta=True,
+    #          url=url,
+    #          repo=repo,
+    #          outfile=fastaout,
+    #      )
+    #
+    #  with open(unclassified_classes, "w") as classout:
+    #      # feed them into runOctoFLU
+    #      classify_and_write(unclassified_fasta, outfile=classout)
+    #
+    #  with open(unclassified_turtle, "w") as turtleout:
+    #      # print the results
+    #      prep_table(unclassified_classes, outfile=turtleout)
+    #
+    #  upload(unclassified_turtle)
+
+    # infer subtypes
+    subtypes_table = "subtypes.txt"
+    with open(subtypes_table, "w") as subtypesout:
+        make_subtypes(url=url, repo=repo, outfile=subtypesout)
+
+    genbank_subtypes = "subtypes-genbank.txt"
+    epiflu_subtypes = "subtypes-epiflu.txt"
+    with open(subtypes_table, "r") as subtypesin:
+        with open(genbank_subtypes, "w") as gh:
+            with open(epiflu_subtypes, "w") as eh:
+                for (i, row) in enumerate(subtypesin.readlines()):
+                    row = row.strip()
+                    if i == 0:
+                        print("strain_name\tsubtype", file=gh)
+                        print("isolate_id\tsubtype", file=eh)
+                    else:
+                        if "EPI_ISL" in row:
+                            print(row, file=eh)
+                        else:
+                            print(row, file=gh)
+
+    gturtles = "subtypes-genbank.ttl"
+    eturtles = "subtypes-epiflu.ttl"
+    with open(gturtles, "w") as gturtleout:
+        prep_table(genbank_subtypes, outfile=gturtleout)
+    with open(eturtles, "w") as eturtleout:
+        prep_table(epiflu_subtypes, outfile=eturtleout)
+    upload_cmd([gturtles, eturtles], url, repo)
+
     #  # infer constellations
     #  script.inferConstellations()
     #
@@ -633,7 +658,14 @@ def prep_table_cmd(*args, **kwargs):
 
 
 def prep_table(
-    filename, tag=None, include=None, exclude=None, levels=None, na=None, segment_key=None, outfile=sys.stdout
+    filename,
+    tag=None,
+    include=None,
+    exclude=None,
+    levels=None,
+    na=None,
+    segment_key=None,
+    outfile=sys.stdout,
 ):
     """
     Translate a table to RDF
@@ -821,9 +853,11 @@ def make_subtypes_cmd(url, repo, outfile=sys.stdout):
     """
     Determine subtypes based on Genbank serotype field, epiflu data, or octoflu HA/NA classifications"
     """
+    make_subtypes(url=url, repo=repo, outfile=outfile)
 
+
+def make_subtypes(url, repo, outfile=sys.stdout):
     strains, isolates = get_missing_subtypes(url, repo)
-
     print("strain_name\tsubtype", file=outfile)
     for identifier, subtype in strains + isolates:
         print(f"{identifier}\t{subtype}", file=outfile)
