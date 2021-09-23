@@ -168,6 +168,7 @@ def pull_cmd(nmonths, url, repo):
     motifs
     """
     import octofludb.recipes as recipe
+    import pgraphdb as db
 
     cwd = os.getcwd()
 
@@ -175,81 +176,81 @@ def pull_cmd(nmonths, url, repo):
 
     config = script.load_config_file()
 
-    #  # upload ontological schema
-    #  schema_file = script.get_data_file("schema.ttl")  #
-    #  upload([schema_file], url, repo)
-    #
-    #  # upload geological relationships
-    #  geog_file = upload([script.get_data_file("geography.ttl")], url, repo)[0]
-    #
-    #  # update genbank (take a parameter telling how far back to go)
-    #  # this command fills the current directory with .gb* files
-    #  gb_turtles = prep_update_gb(minyear=1900, maxyear=2121, nmonths=nmonths)
-    #  upload(gb_turtles, url, repo)
-    #
-    #  epiflu_metafiles = script.epiflu_meta_files(config)
-    #  skipped_meta = 0
-    #  if epiflu_metafiles:
-    #      for epiflu_metafile in epiflu_metafiles:
-    #          outfile = os.path.basename(epiflu_metafile) + ".ttl"
-    #          if os.path.exists(outfile) and os.path.getsize(outfile) > 0:
-    #              skipped_meta += 1
-    #          else:
-    #              with open(outfile, "w") as f:
-    #                  with_graph(recipe.mk_gis, epiflu_metafile, outfile=f)
-    #              upload([outfile], url, repo)
-    #  else:
-    #      log("No epiflu metafiles found")
-    #  if skipped_meta > 0:
-    #      log(
-    #          f"Skipped {str(skipped_meta)} epiflu meta files where existing non-empty turtle files were found in the build directory"
-    #      )
-    #
-    #  epiflu_fastafiles = script.epiflu_fasta_files(config)
-    #  skipped_fasta = 0
-    #  if epiflu_fastafiles:
-    #      for infile in epiflu_fastafiles:
-    #          outfile = os.path.basename(infile) + ".ttl"
-    #          if os.path.exists(outfile) and os.path.getsize(outfile) > 0:
-    #              skipped_fasta += 1
-    #          else:
-    #              with open(outfile, "w") as f:
-    #                  prep_fasta(filename=infile, outfile=f)
-    #                  upload([outfile], url, repo)
-    #  else:
-    #      log("No epiflu fasta found")
-    #
-    #  if skipped_fasta > 0:
-    #      log(
-    #          f"Skipped {str(skipped_fasta)} epiflu fasta files where existing non-empty turtle files were found in the build directory"
-    #      )
-    #
-    #  # octoflu classifications of unclassified swine
-    #  # * retrieve unclassified strains
-    #  unclassified_fasta = "unclassified-swine.fna"
-    #  unclassified_classes = "unclassified-swine.txt"
-    #  unclassified_turtle = "unclassified-swine.ttl"
-    #
-    #  sparql_file = script.get_data_file("fetch-unclassified-swine.rq")
-    #  with open(unclassified_fasta, "w") as fastaout:
-    #      fmt_query_cmd(
-    #          sparql_filename=sparql_file,
-    #          header=False,
-    #          fasta=True,
-    #          url=url,
-    #          repo=repo,
-    #          outfile=fastaout,
-    #      )
-    #
-    #  with open(unclassified_classes, "w") as classout:
-    #      # feed them into runOctoFLU
-    #      classify_and_write(unclassified_fasta, outfile=classout)
-    #
-    #  with open(unclassified_turtle, "w") as turtleout:
-    #      # print the results
-    #      prep_table(unclassified_classes, outfile=turtleout)
-    #
-    #  upload(unclassified_turtle)
+    # upload ontological schema
+    schema_file = script.get_data_file("schema.ttl")  #
+    upload([schema_file], url=url, repo=repo)
+
+    # upload geological relationships
+    geog_file = upload([script.get_data_file("geography.ttl")], url=url, repo=repo)[0]
+
+    # update genbank (take a parameter telling how far back to go)
+    # this command fills the current directory with .gb* files
+    gb_turtles = prep_update_gb(minyear=1900, maxyear=2121, nmonths=nmonths)
+    upload(gb_turtles, url=url, repo=repo)
+
+    epiflu_metafiles = script.epiflu_meta_files(config)
+    skipped_meta = 0
+    if epiflu_metafiles:
+        for epiflu_metafile in epiflu_metafiles:
+            outfile = os.path.basename(epiflu_metafile) + ".ttl"
+            if os.path.exists(outfile) and os.path.getsize(outfile) > 0:
+                skipped_meta += 1
+            else:
+                with open(outfile, "w") as f:
+                    with_graph(recipe.mk_gis, epiflu_metafile, outfile=f)
+                upload([outfile], url=url, repo=repo)
+    else:
+        log("No epiflu metafiles found")
+    if skipped_meta > 0:
+        log(
+            f"Skipped {str(skipped_meta)} epiflu meta files where existing non-empty turtle files were found in the build directory"
+        )
+
+    epiflu_fastafiles = script.epiflu_fasta_files(config)
+    skipped_fasta = 0
+    if epiflu_fastafiles:
+        for infile in epiflu_fastafiles:
+            outfile = os.path.basename(infile) + ".ttl"
+            if os.path.exists(outfile) and os.path.getsize(outfile) > 0:
+                skipped_fasta += 1
+            else:
+                with open(outfile, "w") as f:
+                    prep_fasta(filename=infile, outfile=f)
+                    upload([outfile], url=url, repo=repo)
+    else:
+        log("No epiflu fasta found")
+
+    if skipped_fasta > 0:
+        log(
+            f"Skipped {str(skipped_fasta)} epiflu fasta files where existing non-empty turtle files were found in the build directory"
+        )
+
+    # octoflu classifications of unclassified swine
+    # * retrieve unclassified strains
+    unclassified_fasta = "unclassified-swine.fna"
+    unclassified_classes = "unclassified-swine.txt"
+    unclassified_turtle = "unclassified-swine.ttl"
+
+    sparql_file = script.get_data_file("fetch-unclassified-swine.rq")
+    with open(unclassified_fasta, "w") as fastaout:
+        fmt_query_cmd(
+            sparql_filename=sparql_file,
+            header=False,
+            fasta=True,
+            url=url,
+            repo=repo,
+            outfile=fastaout,
+        )
+
+    with open(unclassified_classes, "w") as classout:
+        # feed them into runOctoFLU
+        classify_and_write(unclassified_fasta, outfile=classout)
+
+    with open(unclassified_turtle, "w") as turtleout:
+        # print the results
+        prep_table(unclassified_classes, outfile=turtleout)
+
+    upload([unclassified_turtle], url=url, repo=repo)
 
     # infer subtypes
     subtypes_table = "subtypes.txt"
@@ -278,25 +279,30 @@ def pull_cmd(nmonths, url, repo):
         prep_table(genbank_subtypes, outfile=gturtleout)
     with open(eturtles, "w") as eturtleout:
         prep_table(epiflu_subtypes, outfile=eturtleout)
-    upload_cmd([gturtles, eturtles], url, repo)
+    upload([gturtles, eturtles], url=url, repo=repo)
 
-    #  # infer constellations
-    #  script.inferConstellations()
-    #
-    #  # load all tags
-    #  for (tag, basename) in config["tags"].items():
-    #      path = os.path.join(script.octofludbHome(), basename)
-    #      for filename in script.expandpath(path):
-    #          outfile = filename + ".ttl"
-    #          with open(outfile, "w") as f:
-    #              prep_tag_cmd(tag, filename, outfile=f)
-    #              upload_cmd([outfile], url, repo)
-    #              os.remove(outfile)
-    #
-    #  # rewrite the manifest
-    #  with open(config["manifest"], "w") as f:
-    #      for h in manifest:
-    #          f.write(h)
+    # infer constellations
+    constellation_table = "constellations.txt"
+    constellation_turtles = "constellations.ttl"
+
+    delete_constellations = script.get_data_file("delete-constellations.rq")
+    db.update(sparql_file=delete_constellations, url=url, repo_name=repo)
+
+    with open(constellation_table, "w") as constout:
+        make_const(url=url, repo=repo, outfile=constout)
+
+    with open(constellation_turtles, "w") as turtleout:
+        prep_table(constellation_table, outfile=turtleout)
+
+    upload([constellation_turtles], url=url, repo=repo)
+
+    # load all tags
+    for (tag, basename) in config["tags"].items():
+        for filename in script.tag_files(config, tag):
+            outfile = filename + ".ttl"
+            with open(outfile, "w") as f:
+                prep_tag(tag, filename, outfile=f)
+            upload([outfile], url=url, repo=repo)
 
     os.chdir(cwd)
 
@@ -434,9 +440,8 @@ def upload(turtle_filenames, url, repo):
     files = []
     for filenames in turtle_filenames:
         for filename in script.expandpath(filenames):
-            print(f"loading file: {filename}", file=sys.stderr, end=" ... ")
+            log(f"loading file: {filename}")
             db.load_data(url=url, repo_name=repo, turtle_file=filename)
-            print("done", file=sys.stderr)
             files.append(filename)
     return files
 
@@ -453,6 +458,10 @@ def prep_tag_cmd(tag, filename, outfile=sys.stdout):
     """
     Associate list of IDs with a tag
     """
+    prep_tag(tag, filename, outfile=outfile)
+
+
+def prep_tag(tag, filename, outfile=sys.stdout):
     from rdflib import Literal
     import datetime as datetime
     from octofludb.nomenclature import make_uri, make_tag_uri, P
@@ -836,12 +845,16 @@ def make_const_cmd(url, repo):
     only a few of these in the US. "X" represents something else exotic (e.g.,
     not US). For mixed strains, the constellation will be recorded as "mixed".
     """
+    make_const(url, repo)
+
+
+def make_const(url, repo, outfile=sys.stdout):
     import octofludb.formatting as formatting
     import pgraphdb as db
 
     sparql_filename = os.path.join(os.path.dirname(__file__), "data", "segments.rq")
     results = db.sparql_query(sparql_file=sparql_filename, url=url, repo_name=repo)
-    formatting.write_constellations(results)
+    formatting.write_constellations(results, outfile=outfile)
 
 
 @click.command(

@@ -55,6 +55,22 @@ def get_octoflu_reference(config):
     return reference
 
 
+def tag_files(config, tag):
+    try:
+        data_home = expandpath(config["datadir"])[0]
+    except KeyError:
+        die("The config file is missing a `datadir` entry")
+    except IndexError:
+        die("The path to the `datadir` entry in config does not exist")
+
+    try:
+        tagfile = config["tags"][tag]
+    except KeyError:
+        die(f"Could not find tag {tag} in config")
+
+    return expandpath(os.path.join(data_home, tagfile))
+
+
 def initialize_config_file():
     """
     Create a default config file is none is present in the octofludb home directory
@@ -92,19 +108,6 @@ def file_md5sum(path):
     with open(path, "rb") as f:
         file_hash = hashlib.md5(f.read()).hexdigest()
     return file_hash
-
-
-def read_manifest(manifest):
-    try:
-        with open(manifest, "rb") as f:
-            hashes = {x.strip() for x in f.readlines()}
-    except:
-        print(
-            "No suitable manifest found, so proceeding without using cached values",
-            file=sys.stderr,
-        )
-        hashes = set()
-    return hashes
 
 
 def evenly_divide(total, preferred_size):
@@ -216,15 +219,6 @@ def runOctoFLU(path, reference=None):
     cleanup()
 
     return results
-
-
-def inferSubtypes(g, url, repo):
-    pass
-    #  strains, isolates = get_missing_subtypes(url, repo)
-    #
-    #  for strain_name, subtype in strains:
-    #
-    #  for isolate_id, subtype in isolates:
 
 
 def cloneGithubRepo(user, repo):
