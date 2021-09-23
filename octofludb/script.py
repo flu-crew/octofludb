@@ -9,6 +9,7 @@ import sys
 import shutil
 from octofludb.classes import Table
 from octofludb.util import log, die
+import octofludb.colors as colors
 
 
 def get_data_file(filename):
@@ -32,12 +33,25 @@ def epiflu_fasta_files(config):
 def epiflu_meta_files(config):
     try:
         data_home = expandpath(config["datadir"])[0]
-        log(data_home)
     except KeyError:
         die("The config file is missing a `datadir` entry")
     except IndexError:
         die("The path to the `datadir` entry in config does not exist")
     return expandpath(os.path.join(data_home, config["epiflu_meta"]))
+
+
+def get_octoflu_reference(config):
+    try:
+        refpath = config["octoflu_reference"]
+        if refpath:
+            reference = expandpath(os.path.join(octofludbHome(), refpath))[0]
+        else:
+            reference = None
+    except KeyError:
+        die("The config file is missing a `datadir` entry")
+    except IndexError:
+        die("The path to the `datadir` entry in config does not exist")
+    return reference
 
 
 def initialize_config_file():
@@ -118,18 +132,30 @@ def runOctoFLU(path, reference=None):
     names are appropriate segment ids (e.g., genbank ids or epiflu ids).
     """
 
+    # The given path may be a glob (e.g., `data/*fna`), so expand to all
+    # fasta files and make the paths absolute
+    fastafiles = expandpath(path)
+
+    log(fastafiles)
+
+    if reference:
+        try:
+            reference = expandpath(reference)[0]
+        except IndexError:
+            die(f"The path {reference} does not point to a file")
+
     # Store the current working directory so that we can return to it at the
     # end of this function
     cwd = os.getcwd()
+
+    def cleanup():
+        os.chdir(cwd)
 
     # List of all files that have been successfully created. These will be
     # concatenated together and uploaded after a successful run.
     created_files = []
 
     try:
-        # The given path may be a glob (e.g., `data/*fna`), so expand to all
-        # fasta files and make the paths absolute
-        fastafiles = expandpath(path)
 
         # Everything in this build is relative to the default build directory specified in the config file
         gotoBuildHome()
@@ -152,36 +178,39 @@ def runOctoFLU(path, reference=None):
 
         for fastafile in fastafiles:
             # open the fasta file as a list of FastaEntry objects
-            fna = smof.open_fasta(fastafile)
+            fna = list(smof.open_fasta(fastafile))
             # break the input fasta into small pieces so we don't kill our tree builder
             for (i, chunk) in enumerate(partition(fna, evenly_divide(len(fna), 5000))):
                 # create a default name for the fasta file chunk
-                chunk_filename = f"x{str(i)}_{fastafile}"
-                # write the FastaEntry list to the chunk filename
-                smof.print_fasta(chunk, out=chunk_filename)
-                # run octoFLU using the given reference
-                subprocess.run(["octoFLU", chunk_filename])
-                # if the octoFLU command was successful, it will have created a table in the location below
-                table_path = os.path.join(
-                    [f"{chunk_filename}_output", f"{chunk_filename}_Final_Output.txt"]
-                )
-                # add the absolute path to this table to the created file list
-                created_files.append(expandpath(table_path))
+                chunk_relpath = f"x{str(i)}_{os.path.basename(fastafile)}"
+                with open(chunk_relpath, "w") as chunk_fh:
+                    # write the FastaEntry list to the chunk filename
+                    smof.print_fasta(chunk, out=chunk_fh)
+                    # run octoFLU using the given reference
+                    try:
+                        subprocess.run(["./octoFLU.sh", chunk_relpath], check=True)
+                    except subprocess.CalledProcessError as e:
+                        log(colors.bad(f"`./octoFLU.sh {chunk_relpath}` failed"))
+                        raise e
+                    # if the octoFLU command was successful, it will have created a table in the location below
+                    table_path = os.path.join(f"{chunk_relpath}_output", f"{chunk_relpath}_Final_Output.txt")
+                    # add the absolute path to this table to the created file list
+                    created_files.append(expandpath(table_path)[0])
+
+        results = []
+        for filename in created_files:
+            with open(filename, "r") as f:
+                results += [line.split("\t")[0:4] for line in f.readlines()]
+
+        # move the original reference file back if it was moved
+        if reference and os.path.exists("reference.fa~"):
+            os.rename("reference.fa~", reference_path)
     except Exception as e:
-        print(e, file=sys.stderr)
-        sys.exit(1)
+        cleanup()
+        log(colors.bad("octoFLU run failed"))
+        raise e
 
-    results = []
-    for filename in created_files:
-        with open(filename, "r") as f:
-            results += [line.split("\t")[0:4] for line in f.readlines()]
-
-    # move the original reference file back if it was moved
-    if reference and reref and os.path.exists("reference.fa~"):
-        os.rename("reference.fa~", reference_path)
-
-    # move back to wherever we called this command from
-    os.chdir(cwd)
+    cleanup()
 
     return results
 
@@ -222,4 +251,4 @@ def expandpath(path):
 
     This command NEVER fails. If nothing in a path exists, an empty list is returned.
     """
-    return glob.glob(os.path.expanduser(path))
+    return glob.glob(os.path.abspath(os.path.expanduser(path)))

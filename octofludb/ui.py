@@ -6,6 +6,7 @@ import sys
 import textwrap
 from octofludb.util import log
 import octofludb.classes as classes
+import octofludb.script as script
 
 
 def open_graph():
@@ -120,7 +121,6 @@ def init_cmd(url, repo):
     import pgraphdb as db
     import requests
     import shutil
-    import octofludb.script as script
 
     config_file = os.path.join(
         os.path.dirname(__file__), "data", "octofludb-config.ttl"
@@ -167,7 +167,6 @@ def pull_cmd(nmonths, url, repo):
     assign clades to swine data, assign subtypes to all data, and extract
     motifs
     """
-    import octofludb.script as script
     import octofludb.recipes as recipe
 
     cwd = os.getcwd()
@@ -194,7 +193,7 @@ def pull_cmd(nmonths, url, repo):
         for epiflu_metafile in epiflu_metafiles:
             outfile = os.path.basename(epiflu_metafile) + ".ttl"
             if os.path.exists(outfile) and os.path.getsize(outfile) > 0:
-              skipped_meta += 1
+                skipped_meta += 1
             else:
                 with open(outfile, "w") as f:
                     with_graph(recipe.mk_gis, epiflu_metafile, outfile=f)
@@ -203,7 +202,9 @@ def pull_cmd(nmonths, url, repo):
         log("No epiflu metafiles found")
 
     if skipped_meta > 0:
-      log(f"Skipped {str(skipped_meta)} epiflu meta files where existing non-empty turtle files were found in the build directory")
+        log(
+            f"Skipped {str(skipped_meta)} epiflu meta files where existing non-empty turtle files were found in the build directory"
+        )
 
     epiflu_fastafiles = script.epiflu_fasta_files(config)
     skipped_fasta = 0
@@ -220,7 +221,9 @@ def pull_cmd(nmonths, url, repo):
         log("No epiflu fasta found")
 
     if skipped_fasta > 0:
-      log(f"Skipped {str(skipped_fasta)} epiflu fasta files where existing non-empty turtle files were found in the build directory")
+        log(
+            f"Skipped {str(skipped_fasta)} epiflu fasta files where existing non-empty turtle files were found in the build directory"
+        )
 
     #  # octoflu classifications of unclassified swine
     #  script.runOctoFLU()
@@ -292,6 +295,39 @@ def query_cmd(*args, **kwargs):
     fmt_query_cmd(*args, **kwargs)
 
 
+@click.command(name="classify")
+@filename_arg
+@click.option("--reference", help="An octoFLU reference fasta file", default=None)
+def classify_cmd(*args, **kwargs):
+    """
+    Classify the sequences in a fasta file using octoFLU
+
+    The reference file used will be selected as follows:
+
+      1. If --reference=REFERENCE is given, use REFERENCE. If the file does not exist, die.
+
+      2. If the term `octoflu_references` is defined in the `config.yaml` file
+         in octoflu home, then use this file. If term is not null and does not
+         exist, die.
+
+      3. If no references are given, use the default reference in the octoFLU repo.
+    """
+    rows = classify(*args, **kwargs)
+    if rows:
+        print("strain\tsegment\tus_clade\tglobal_clade")
+        for row in rows:
+            print("\t".join(row))
+    else:
+        die(colors.bad("No result from running octFLU"))
+
+
+def classify(filename, reference=None):
+    if not reference:
+        config = script.load_config_file()
+        reference = script.get_octoflu_reference(config)
+    return script.runOctoFLU(filename, reference)
+
+
 @click.command(
     name="construct",
 )
@@ -342,7 +378,6 @@ def upload_cmd(turtle_filenames, url, repo):
 
 def upload(turtle_filenames, url, repo):
     import pgraphdb as db
-    import octofludb.script as script
 
     files = []
     for filenames in turtle_filenames:
@@ -1145,6 +1180,7 @@ cli_grp.add_command(pull_cmd)
 cli_grp.add_command(clean_cmd)
 cli_grp.add_command(query_cmd)
 cli_grp.add_command(update_cmd)
+cli_grp.add_command(classify_cmd)
 cli_grp.add_command(construct_cmd)
 cli_grp.add_command(upload_cmd)
 cli_grp.add_command(prep_grp)
