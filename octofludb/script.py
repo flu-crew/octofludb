@@ -7,6 +7,7 @@ import glob
 import os
 import sys
 import shutil
+import math
 from octofludb.classes import Table
 from octofludb.util import log, die
 import octofludb.colors as colors
@@ -107,7 +108,7 @@ def read_manifest(manifest):
 
 
 def evenly_divide(total, preferred_size):
-    n = max(round(total / preferred_size), 1)
+    n = max(math.ceil(total / preferred_size), 1)
     size = total // n
     return [size + (i < total - size * n) for i in range(n)]
 
@@ -193,7 +194,9 @@ def runOctoFLU(path, reference=None):
                         log(colors.bad(f"`./octoFLU.sh {chunk_relpath}` failed"))
                         raise e
                     # if the octoFLU command was successful, it will have created a table in the location below
-                    table_path = os.path.join(f"{chunk_relpath}_output", f"{chunk_relpath}_Final_Output.txt")
+                    table_path = os.path.join(
+                        f"{chunk_relpath}_output", f"{chunk_relpath}_Final_Output.txt"
+                    )
                     # add the absolute path to this table to the created file list
                     created_files.append(expandpath(table_path)[0])
 

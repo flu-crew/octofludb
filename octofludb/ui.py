@@ -16,7 +16,7 @@ def open_graph():
     return Graph(namespace_manager=manager)
 
 
-def with_graph(f, filename=None, outfile=sys.stdout, *args, **kwargs):
+def with_graph(f, *args, filename=None, outfile=sys.stdout, **kwargs):
     g = open_graph()
 
     if filename is not None:
@@ -200,7 +200,6 @@ def pull_cmd(nmonths, url, repo):
                 upload([outfile], url, repo)
     else:
         log("No epiflu metafiles found")
-
     if skipped_meta > 0:
         log(
             f"Skipped {str(skipped_meta)} epiflu meta files where existing non-empty turtle files were found in the build directory"
@@ -225,8 +224,32 @@ def pull_cmd(nmonths, url, repo):
             f"Skipped {str(skipped_fasta)} epiflu fasta files where existing non-empty turtle files were found in the build directory"
         )
 
-    #  # octoflu classifications of unclassified swine
-    #  script.runOctoFLU()
+    # octoflu classifications of unclassified swine
+    # * retrieve unclassified strains
+    unclassified_fasta = "unclassified-swine.fna"
+    unclassified_classes = "unclassified-swine.txt"
+    unclassified_turtle = "unclassified-swine.ttl"
+
+    sparql_file = script.get_data_file("fetch-unclassified-swine.rq")
+    with open(unclassified_fasta, "w") as fastaout:
+        fmt_query_cmd(
+            sparql_filename=sparql_file,
+            header=False,
+            fasta=True,
+            url=url,
+            repo=repo,
+            outfile=fastaout,
+        )
+
+    with open(unclassified_classes, "w") as classout:
+        # feed them into runOctoFLU
+        classify_and_write(unclassified_fasta, outfile=classout)
+
+    with open(unclassified_turtle, "w") as turtleout:
+        # print the results
+        prep_table(unclassified_classes, outfile=turtleout)
+
+    upload(unclassified_turtle)
 
     #  # infer subtypes
     #  with_graph(script.inferSubtypes, url, repo, outfile=".subtypes.ttl")
@@ -267,17 +290,17 @@ def clean_cmd(url, repo):
     raise NotImplemented
 
 
-def fmt_query_cmd(sparql_filename, header, fasta, url, repo):
+def fmt_query_cmd(sparql_filename, header, fasta, url, repo, outfile=sys.stdout):
     import octofludb.formatting as formatting
     import pgraphdb as db
 
     results = db.sparql_query(sparql_file=sparql_filename, url=url, repo_name=repo)
     if fasta:
-        formatting.write_as_fasta(results)
+        formatting.write_as_fasta(results, outfile=outfile)
     else:
-        formatting.write_as_table(results, header=header)
+        formatting.write_as_table(results, header=header, outfile=outfile)
 
-    return None
+    return outfile
 
 
 @click.command(
@@ -298,7 +321,7 @@ def query_cmd(*args, **kwargs):
 @click.command(name="classify")
 @filename_arg
 @click.option("--reference", help="An octoFLU reference fasta file", default=None)
-def classify_cmd(*args, **kwargs):
+def classify_cmd(filename, reference=None):
     """
     Classify the sequences in a fasta file using octoFLU
 
@@ -312,13 +335,17 @@ def classify_cmd(*args, **kwargs):
 
       3. If no references are given, use the default reference in the octoFLU repo.
     """
-    rows = classify(*args, **kwargs)
+    classify_and_write(filename, reference=None, outfile=sys.stdout)
+
+
+def classify_and_write(filename, reference=None, outfile=sys.stdout):
+    rows = classify(filename, reference=reference)
     if rows:
-        print("strain\tsegment\tus_clade\tglobal_clade")
+        print("strain\tsegment\tus_clade\tglobal_clade", file=outfile)
         for row in rows:
-            print("\t".join(row))
+            print("\t".join(row), file=outfile)
     else:
-        die(colors.bad("No result from running octFLU"))
+        die(colors.bad("No result from running octFLU"), file=outfile)
 
 
 def classify(filename, reference=None):
@@ -598,8 +625,15 @@ na_opt = click.option("--na", help="The string that represents a missing value")
 @click.option("--levels", help="levels")
 @na_opt
 @segment_key_opt
-def prep_table_cmd(
-    filename, tag, include, exclude, levels, na, segment_key, outfile=sys.stdout
+def prep_table_cmd(*args, **kwargs):
+    """
+    Translate a table to RDF
+    """
+    prep_table(*args, **kwargs)
+
+
+def prep_table(
+    filename, tag=None, include=None, exclude=None, levels=None, na=None, segment_key=None, outfile=sys.stdout
 ):
     """
     Translate a table to RDF
@@ -623,7 +657,7 @@ def prep_table_cmd(
             na_str=make_na(na),
         ).connect(g)
 
-    with_graph(_mk_table_cmd, filename, outfile=outfile)
+    with_graph(_mk_table_cmd, filename=filename, outfile=outfile)
 
 
 @click.command(
@@ -897,7 +931,7 @@ def fetch_isolate_cmd(url, repo):
     sparql_filename = os.path.join(
         os.path.dirname(__file__), "data", "get-tagged-isolate.rq"
     )
-    fmt_query_cmd(sparql_filename, True, False, url, repo)
+    fmt_query_cmd(sparql_filename, header=True, fasta=False, url=url, repo=repo)
 
 
 @click.command(
@@ -912,7 +946,7 @@ def fetch_strain_cmd(url, repo):
     sparql_filename = os.path.join(
         os.path.dirname(__file__), "data", "get-tagged-strain.rq"
     )
-    fmt_query_cmd(sparql_filename, True, False, url, repo)
+    fmt_query_cmd(sparql_filename, header=True, fasta=False, url=url, repo=repo)
 
 
 @click.command(
@@ -927,7 +961,7 @@ def fetch_segment_cmd(url, repo):
     sparql_filename = os.path.join(
         os.path.dirname(__file__), "data", "get-tagged-segment.rq"
     )
-    fmt_query_cmd(sparql_filename, True, False, url, repo)
+    fmt_query_cmd(sparql_filename, header=True, fasta=False, url=url, repo=repo)
 
 
 @click.command(
@@ -942,7 +976,7 @@ def fetch_sequence_cmd(url, repo):
     sparql_filename = os.path.join(
         os.path.dirname(__file__), "data", "get-tagged-sequence.rq"
     )
-    fmt_query_cmd(sparql_filename, False, True, url, repo)
+    fmt_query_cmd(sparql_filename, header=False, fasta=True, url=url, repo=repo)
 
 
 @click.command(
@@ -1012,7 +1046,7 @@ def macro_query(filename, macros, *args, **kwargs):
                     line = re.sub(macro, replacement, line)
                 print(line, file=query)
 
-    fmt_query_cmd(tmpfile, *args, **kwargs)
+    fmt_query_cmd(sparql_filename, *args, **kwargs)
 
     os.remove(tempfile)
 

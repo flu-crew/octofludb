@@ -4,7 +4,7 @@ from octofludb.colors import bad
 import sys
 
 
-def write_as_fasta(results):
+def write_as_fasta(results, outfile=sys.stdout):
     """
     Write a SPARQL query result as a FASTA file
     """
@@ -19,11 +19,11 @@ def write_as_fasta(results):
                 fields.append("")
         header = "|".join(fields)
         sequence = row[seq_field]["value"]
-        print(">" + header)
-        print(sequence)
+        print(">" + header, file=outfile)
+        print(sequence, file=outfile)
 
 
-def write_as_table(results, header=True):
+def write_as_table(results, header=True, outfile=sys.stdout):
     """
     Write a SPARQL query result as a TAB-delimited table with an optional header
     """
@@ -35,13 +35,13 @@ def write_as_table(results, header=True):
             return ""
 
     if header:
-        print("\t".join(results["head"]["vars"]))
+        print("\t".join(results["head"]["vars"]), file=outfile)
     for row in results["results"]["bindings"]:
         fields = (val(row, field) for field in results["head"]["vars"])
-        print("\t".join(fields))
+        print("\t".join(fields), file=outfile)
 
 
-def write_constellations(results):
+def write_constellations(results, outfile=sys.stdout):
     """
     Prepare constellations
     """
@@ -50,9 +50,9 @@ def write_constellations(results):
 
     consts = _make_constellations(rows)
 
-    print("strain_name\tconstellation")
+    print("strain_name\tconstellation", file=outfile)
     for (strain, const) in consts:
-        print(f"{strain}\t{const}")
+        print(f"{strain}\t{const}", file=outfile)
 
 
 def _parse_constellation_query(results):
