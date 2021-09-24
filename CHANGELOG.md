@@ -1,15 +1,19 @@
-v0.8.0 [2021-xx-xx]
+v0.9.0 [2021-09-24]
 ===================
 
  * Remove `script` folder and all bash scripting
  * Add `pull` subcommand for updating the database
  * Add `classify` subcommand as a wrapper around octoFLU
  * Add a config file that contains links to all data and the octoFLU reference
+
+v0.8.0 [2021-08-12]
+===================
+
+ * Fix subtype generation
+ * Fix bugs in init
  * Add `report monthly --context` to pull sequences for comparisons
  * Add support for the the SPARQL CONSTRUCT command
  * Do not generate "unknown" triples
- * Fix subtype generation
- * Fix bugs in init
 
 v0.7.0 [2021-04-12]
 ===================
