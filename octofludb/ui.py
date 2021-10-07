@@ -1,12 +1,9 @@
 import click
 import collections
-import os
 import signal
 import sys
-import textwrap
+import os
 from octofludb.util import log
-import octofludb.classes as classes
-import octofludb.script as script
 
 
 def open_graph():
@@ -121,6 +118,7 @@ def init_cmd(url, repo):
     import pgraphdb as db
     import requests
     import shutil
+    import octofludb.script as script
 
     config_file = os.path.join(
         os.path.dirname(__file__), "data", "octofludb-config.ttl"
@@ -168,6 +166,7 @@ def pull_cmd(nmonths, url, repo):
     motifs
     """
     import octofludb.recipes as recipe
+    import octofludb.script as script
     import pgraphdb as db
 
     cwd = os.getcwd()
@@ -309,18 +308,6 @@ def pull_cmd(nmonths, url, repo):
     return None
 
 
-@click.command(
-    name="clean",
-)
-@url_opt
-@repo_name_opt
-def clean_cmd(url, repo):
-    """
-    clean the database (not yet implemented)
-    """
-    raise NotImplemented
-
-
 def fmt_query_cmd(sparql_filename, header, fasta, url, repo, outfile=sys.stdout):
     import octofludb.formatting as formatting
     import pgraphdb as db
@@ -380,6 +367,8 @@ def classify_and_write(filename, reference=None, outfile=sys.stdout):
 
 
 def classify(filename, reference=None):
+    import octofludb.script as script
+
     if not reference:
         config = script.load_config_file()
         reference = script.get_octoflu_reference(config)
@@ -436,6 +425,7 @@ def upload_cmd(turtle_filenames, url, repo):
 
 def upload(turtle_filenames, url, repo):
     import pgraphdb as db
+    import octofludb.script as script
 
     files = []
     for filenames in turtle_filenames:
@@ -680,6 +670,7 @@ def prep_table(
     Translate a table to RDF
     """
     from octofludb.recipes import IrregularSegmentTable
+    import octofludb.classes as classes
 
     if segment_key:
         constructor = IrregularSegmentTable
@@ -729,6 +720,8 @@ def prep_fasta(
     na=None,
     outfile=sys.stdout,
 ):
+    import octofludb.classes as classes
+
     def _mk_fasta_cmd(g, fh):
         (inc, exc, levels) = process_tablelike(include, exclude, None)
         classes.Ragged(
@@ -1093,9 +1086,10 @@ def macro_query(filename, macros, *args, **kwargs):
                     line = re.sub(macro, replacement, line)
                 print(line, file=query)
 
-    fmt_query_cmd(sparql_filename, *args, **kwargs)
+    fmt_query_cmd(tmpfile, *args, **kwargs)
 
-    os.remove(tempfile)
+    os.remove(tmpfile)
+
 
 
 @click.command(
@@ -1258,7 +1252,6 @@ def cli_grp():
 
 cli_grp.add_command(init_cmd)
 cli_grp.add_command(pull_cmd)
-cli_grp.add_command(clean_cmd)
 cli_grp.add_command(query_cmd)
 cli_grp.add_command(update_cmd)
 cli_grp.add_command(classify_cmd)

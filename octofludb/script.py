@@ -206,7 +206,8 @@ def runOctoFLU(path, reference=None):
         results = []
         for filename in created_files:
             with open(filename, "r") as f:
-                results += [line.split("\t")[0:4] for line in f.readlines()]
+                results += [ [r.strip() for r in line.split("\t")[0:4]]
+                             for line in f.readlines()]
 
         # move the original reference file back if it was moved
         if reference and os.path.exists("reference.fa~"):

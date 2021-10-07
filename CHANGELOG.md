@@ -1,3 +1,9 @@
+v0.10.0 [2021-10-06]
+====================
+ 
+ * Move imports to location of use (speeds usage mesages)
+ * Remove unused `clean` command
+
 v0.9.0 [2021-09-24]
 ===================
 
