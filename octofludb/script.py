@@ -182,7 +182,7 @@ def runOctoFLU(path, reference=None):
 
         for fastafile in fastafiles:
             # open the fasta file as a list of FastaEntry objects
-            fna = list(smof.open_fasta(fastafile))
+            fna = list(smof.uniq_headers(smof.open_fasta(fastafile)))
             # break the input fasta into small pieces so we don't kill our tree builder
             for (i, chunk) in enumerate(partition(fna, evenly_divide(len(fna), 5000))):
                 # create a default name for the fasta file chunk
