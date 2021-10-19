@@ -224,6 +224,7 @@ def pull_cmd(nmonths, url, repo):
             f"Skipped {str(skipped_fasta)} epiflu fasta files where existing non-empty turtle files were found in the build directory"
         )
 
+
     # octoflu classifications of unclassified swine
     # * retrieve unclassified strains
     unclassified_fasta = "unclassified-swine.fna"
@@ -250,6 +251,7 @@ def pull_cmd(nmonths, url, repo):
         prep_table(unclassified_classes, outfile=turtleout)
 
     upload([unclassified_turtle], url=url, repo=repo)
+
 
     # infer subtypes
     subtypes_table = "subtypes.txt"
@@ -359,7 +361,7 @@ def classify_cmd(filename, reference=None):
 def classify_and_write(filename, reference=None, outfile=sys.stdout):
     rows = classify(filename, reference=reference)
     if rows:
-        print("strain\tsegment\tus_clade\tglobal_clade", file=outfile)
+        print("seqid\tsegment_subtype\tclade\tgl_clade", file=outfile)
         for row in rows:
             print("\t".join(row), file=outfile)
     else:
