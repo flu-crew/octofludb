@@ -18,3 +18,5 @@ include octofludb/data/schema.ttl
 include octofludb/data/segments.rq
 include octofludb/data/subtypes.rq
 include octofludb/data/wgs.rq
+include octofludb/data/get-h1-swine.rq
+include octofludb/data/get-h3-swine.rq

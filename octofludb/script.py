@@ -183,6 +183,10 @@ def runOctoFLU(path, reference=None):
         for fastafile in fastafiles:
             # open the fasta file as a list of FastaEntry objects
             fna = list(smof.uniq_headers(smof.open_fasta(fastafile)))
+
+            if len(fna) == 0:
+                next
+
             # break the input fasta into small pieces so we don't kill our tree builder
             for (i, chunk) in enumerate(partition(fna, evenly_divide(len(fna), 5000))):
                 # create a default name for the fasta file chunk
@@ -206,8 +210,9 @@ def runOctoFLU(path, reference=None):
         results = []
         for filename in created_files:
             with open(filename, "r") as f:
-                results += [ [r.strip() for r in line.split("\t")[0:4]]
-                             for line in f.readlines()]
+                results += [
+                    [r.strip() for r in line.split("\t")[0:4]] for line in f.readlines()
+                ]
 
         # move the original reference file back if it was moved
         if reference and os.path.exists("reference.fa~"):
@@ -220,6 +225,32 @@ def runOctoFLU(path, reference=None):
     cleanup()
 
     return results
+
+
+def findMotifs(sparql_filename, patterns, subtype, url, repo_name):
+    import octofludb.formatting as formatting
+    import pgraphdb as db
+    import flutile
+
+    # write fasta file
+    fasta_filename = f"{subtype}.fna"
+    results = db.sparql_query(sparql_file=sparql_filename, url=url, repo_name=repo_name)
+    with open(fasta_filename, "w") as f:
+        formatting.write_as_fasta(results, outfile=f)
+
+    # use flutile to find motifs
+    motif_filename = f"{subtype}-motif.tab"
+    flutile.write_bounds(
+        tabular=True,
+        motif_strs=patterns,
+        keep_signal=False,
+        subtype=subtype,
+        fasta_file=fasta_filename,
+        conversion="dna2aa",
+        outfile=motif_filename,
+    )
+
+    return motif_filename
 
 
 def cloneGithubRepo(user, repo):

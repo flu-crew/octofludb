@@ -1,0 +1,693 @@
+@prefix f: <https://flu-crew.org/term/> .
+@prefix usa: <https://flu-crew.org/geo/country/usa/> .
+
+<https://flu-crew.org/id/a%2Fsw%2Far%2F12491%2F00> f:ca1_motif "IGSG" ;
+    f:ca2_motif "PGNRD" ;
+    f:cb_motif "-----E" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQE" ;
+    f:state usa:AR ;
+    f:strain_name "A/SW/AR/12491/00" .
+
+<https://flu-crew.org/id/a%2Fsw%2Fco%2F17871%2F01> f:ca1_motif "IKSG" ;
+    f:ca2_motif "PGNRD" ;
+    f:cb_motif "LFASSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQTQA" ;
+    f:state usa:CO ;
+    f:strain_name "A/SW/CO/17871/01" .
+
+<https://flu-crew.org/id/a%2Fsw%2Fin%2F14810_s%2F01> f:ca1_motif "TGSG" ;
+    f:ca2_motif "PGKRD" ;
+    f:cb_motif "-----E" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQKQA" ;
+    f:state usa:IN ;
+    f:strain_name "A/SW/IN/14810-S/01" .
+
+<https://flu-crew.org/id/a%2Fsw%2Fin%2F14810_t%2F01> f:ca1_motif "TGSG" ;
+    f:ca2_motif "PGKRD" ;
+    f:cb_motif "-----E" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQKQA" ;
+    f:state usa:IN ;
+    f:strain_name "A/SW/IN/14810-T/01" .
+
+<https://flu-crew.org/id/a%2Fsw%2Fks%2F13481_s%2F00> f:ca1_motif "IGSG" ;
+    f:ca2_motif "PGNRD" ;
+    f:cb_motif "-----E" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:state usa:KS ;
+    f:strain_name "A/SW/KS/13481-S/00" .
+
+<https://flu-crew.org/id/a%2Fsw%2Fks%2F13481_t%2F00> f:ca1_motif "IGSG" ;
+    f:ca2_motif "PGNRD" ;
+    f:cb_motif "-----E" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:state usa:KS ;
+    f:strain_name "A/SW/KS/13481-T/00" .
+
+<https://flu-crew.org/id/a%2Fsw%2Fmn%2F12883%2F00> f:ca1_motif "IGSG" ;
+    f:ca2_motif "PGNRD" ;
+    f:cb_motif "-----E" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:state usa:MN ;
+    f:strain_name "A/SW/MN/12883/00" .
+
+<https://flu-crew.org/id/a%2Fsw%2Fmn%2F13130%2F00> f:ca1_motif "IGSG" ;
+    f:ca2_motif "PGNRD" ;
+    f:cb_motif "-----E" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KGQSQA" ;
+    f:state usa:MN ;
+    f:strain_name "A/SW/MN/13130/00" .
+
+<https://flu-crew.org/id/a%2Fsw%2Fmn%2F16356%2F01> f:ca1_motif "IKSG" ;
+    f:ca2_motif "PGNRD" ;
+    f:cb_motif "-----E" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQTQA" ;
+    f:state usa:MN ;
+    f:strain_name "A/SW/MN/16356/01" .
+
+<https://flu-crew.org/id/a%2Fsw%2Fmn%2F16419%2F01> f:ca1_motif "IESG" ;
+    f:ca2_motif "PGNRD" ;
+    f:cb_motif "LFASSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:state usa:MN ;
+    f:strain_name "A/SW/MN/16419/01" .
+
+<https://flu-crew.org/id/a%2Fsw%2Fmn%2F17138%2F01> f:ca1_motif "VGSG" ;
+    f:ca2_motif "PGNRG" ;
+    f:cb_motif "LFVSSE" ;
+    f:sa_motif "PNGSPTSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:state usa:MN ;
+    f:strain_name "A/SW/MN/17138/01" .
+
+<https://flu-crew.org/id/a%2Fsw%2Fmn%2F22860_s%2F01> f:ca1_motif "IGSG" ;
+    f:ca2_motif "PGNRG" ;
+    f:cb_motif "-----E" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:state usa:MN ;
+    f:strain_name "A/SW/MN/22860-S/01" .
+
+<https://flu-crew.org/id/a%2Fsw%2Fmn%2F22860_t%2F01> f:ca1_motif "IGSG" ;
+    f:ca2_motif "PGNRG" ;
+    f:cb_motif "-----E" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:state usa:MN ;
+    f:strain_name "A/SW/MN/22860-T/01" .
+
+<https://flu-crew.org/id/a%2Fsw%2Fmn%2F23124_s%2F01> f:ca1_motif "IESG" ;
+    f:ca2_motif "PGNRD" ;
+    f:cb_motif "LFASSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:state usa:MN ;
+    f:strain_name "A/SW/MN/23124-S/01" .
+
+<https://flu-crew.org/id/a%2Fsw%2Fmn%2F23124_t%2F01> f:ca1_motif "IESG" ;
+    f:ca2_motif "PGNRD" ;
+    f:cb_motif "LFASSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:state usa:MN ;
+    f:strain_name "A/SW/MN/23124-T/01" .
+
+<https://flu-crew.org/id/a%2Fsw%2Fmn%2F3128%2F00> f:ca1_motif "TESG" ;
+    f:ca2_motif "PGNRD" ;
+    f:cb_motif "-----E" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQT" ;
+    f:state usa:MN ;
+    f:strain_name "A/SW/MN/3128/00" .
+
+<https://flu-crew.org/id/a%2Fsw%2Fmn%2F3227%2F00> f:ca1_motif "IKSG" ;
+    f:ca2_motif "PGNRD" ;
+    f:cb_motif "-----E" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQTQA" ;
+    f:state usa:MN ;
+    f:strain_name "A/SW/MN/3227/00" .
+
+<https://flu-crew.org/id/a%2Fsw%2Fmn%2F34893%2F01> f:ca1_motif "TESG" ;
+    f:ca2_motif "PGNRD" ;
+    f:cb_motif "LFASSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQT" ;
+    f:state usa:MN ;
+    f:strain_name "A/SW/MN/34893/01" .
+
+<https://flu-crew.org/id/a%2Fsw%2Fmo%2F1877%2F01> f:ca1_motif "IKSG" ;
+    f:ca2_motif "PGSRD" ;
+    f:cb_motif "LFASSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KDQTQA" ;
+    f:state usa:MO ;
+    f:strain_name "A/SW/MO/1877/01" .
+
+<https://flu-crew.org/id/a%2Fsw%2Fnc%2F17366%2F01> f:ca1_motif "VESG" ;
+    f:ca2_motif "PGNRN" ;
+    f:cb_motif "-----E" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQV" ;
+    f:state usa:NC ;
+    f:strain_name "A/SW/NC/17366/01" .
+
+<https://flu-crew.org/id/a%2Fsw%2Fne%2F18339%2F01> f:ca1_motif "IGSG" ;
+    f:ca2_motif "PGNRD" ;
+    f:cb_motif "-----E" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:state usa:NE ;
+    f:strain_name "A/SW/NE/18339/01" .
+
+<https://flu-crew.org/id/a%2Fsw%2Fne%2F21147%2F01> f:ca1_motif "IGSG" ;
+    f:ca2_motif "PGNRG" ;
+    f:cb_motif "-----E" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:state usa:NE ;
+    f:strain_name "A/SW/NE/21147/01" .
+
+<https://flu-crew.org/id/a%2Fsw%2Fobihiro%2F5%2F1992> f:ca1_motif "VESG" ;
+    f:ca2_motif "SGSRG" ;
+    f:cb_motif "LFKESE" ;
+    f:sa_motif "PNNLPNSKS" ;
+    f:sb_motif "EGGAHE" ;
+    f:strain_name "A/sw/Obihiro/5/1992" .
+
+<https://flu-crew.org/id/a%2Fsw%2Foh%2F7802%2F00> f:ca1_motif "IGSG" ;
+    f:ca2_motif "PGNRD" ;
+    f:cb_motif "-----E" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:state usa:OH ;
+    f:strain_name "A/SW/OH/7802/00" .
+
+<https://flu-crew.org/id/a%2Fsw%2Fquebec%2F1192%2F1986> f:ca1_motif "VGSG" ;
+    f:ca2_motif "PGNRD" ;
+    f:cb_motif "LFVRSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:strain_name "A/SW/Quebec/1192/1986" .
+
+<https://flu-crew.org/id/a%2Fsw%2Fquebec%2F1747%2F90> f:ca1_motif "VGSG" ;
+    f:ca2_motif "PGNRG" ;
+    f:cb_motif "LFVSSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:strain_name "A/Sw/Quebec/1747/90" .
+
+<https://flu-crew.org/id/a%2Fsw%2Fquebec%2F3291%2F90> f:ca1_motif "VGSG" ;
+    f:ca2_motif "PGNRG" ;
+    f:cb_motif "LSVSSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:strain_name "A/Sw/Quebec/3291/90" .
+
+<https://flu-crew.org/id/a%2Fswine%2F29%2F1937> f:ca1_motif "VGSG" ;
+    f:ca2_motif "PGSRG" ;
+    f:cb_motif "LLVNSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KDQSQA" ;
+    f:strain_name "A/swine/29/1937" .
+
+<https://flu-crew.org/id/a%2Fswine%2Farnsberg%2F6554%2F1979> f:ca1_motif "TGSG" ;
+    f:ca2_motif "SGSRE" ;
+    f:cb_motif "LLANSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:strain_name "A/swine/Arnsberg/6554/1979" .
+
+<https://flu-crew.org/id/a%2Fswine%2Farnsberg%2F6554%2F79> f:ca1_motif "TGSG" ;
+    f:ca2_motif "SGSRE" ;
+    f:cb_motif "LLANSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:strain_name "A/swine/Arnsberg/6554/79" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fbeijing%2F47%2F1991> f:ca1_motif "IESG" ;
+    f:ca2_motif "PGNRG" ;
+    f:cb_motif "LFVSSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:strain_name "A/swine/Beijing/47/1991" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fbelgium%2F1%2F83> f:ca1_motif "TGSG" ;
+    f:ca2_motif "SGRKG" ;
+    f:cb_motif "LLANSE" ;
+    f:sa_motif "PNESPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:strain_name "A/swine/Belgium/1/83" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fcambridge%2F1939> f:ca1_motif "VGSG" ;
+    f:ca2_motif "SGSRD" ;
+    f:cb_motif "LLARSE" ;
+    f:sa_motif "PNGSPENNS" ;
+    f:sb_motif "KNQTHA" ;
+    f:strain_name "A/swine/Cambridge/1939" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fcambridge%2F39> f:ca1_motif "VGSG" ;
+    f:ca2_motif "SGSRD" ;
+    f:cb_motif "LLARSE" ;
+    f:sa_motif "PNGSPENNS" ;
+    f:sb_motif "KNQTHA" ;
+    f:strain_name "A/swine/Cambridge/39" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fehime%2F1%2F80> f:ca1_motif "VGSG" ;
+    f:ca2_motif "PGNKG" ;
+    f:cb_motif "LFVSSE" ;
+    f:sa_motif "PNESPKRKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:strain_name "A/swine/Ehime/1/80" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fengland%2F117316%2F86> f:ca1_motif "VGSG" ;
+    f:ca2_motif "PGNRG" ;
+    f:cb_motif "LFVSSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:strain_name "A/swine/England/117316/86" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fengland%2F17394%2F96> f:ca1_motif "VESG" ;
+    f:ca2_motif "SGSRD" ;
+    f:cb_motif "LFRKSE" ;
+    f:sa_motif "PKDSPNSKS" ;
+    f:sb_motif "EGRARE" ;
+    f:strain_name "A/swine/England/17394/96" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fengland%2F191973%2F92> f:ca1_motif "VESG" ;
+    f:ca2_motif "SGSRG" ;
+    f:cb_motif "LFKKSE" ;
+    f:sa_motif "PKNSPNSKS" ;
+    f:sb_motif "EGKTRE" ;
+    f:strain_name "A/swine/England/191973/92" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fengland%2F195852%2F92> f:ca1_motif "TGSG" ;
+    f:ca2_motif "SGRRG" ;
+    f:cb_motif "LLANSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:strain_name "A/Swine/England/195852/92" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fengland%2F283902%2F93> f:ca1_motif "VESG" ;
+    f:ca2_motif "PGNRG" ;
+    f:cb_motif "LSVSSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:strain_name "A/swine/England/283902/93" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fengland%2F438207%2F94> f:ca1_motif "MESG" ;
+    f:ca2_motif "SGSRG" ;
+    f:cb_motif "LFRKSE" ;
+    f:sa_motif "PKNSPNSKS" ;
+    f:sb_motif "EGKARE" ;
+    f:strain_name "A/swine/England/438207/94" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fengland%2F690421%2F95> f:ca1_motif "VESG" ;
+    f:ca2_motif "SGSRD" ;
+    f:cb_motif "LFKKSE" ;
+    f:sa_motif "PKNSPNSKS" ;
+    f:sb_motif "EGRARE" ;
+    f:strain_name "A/swine/England/690421/95" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fengland%2F72685%2F96> f:ca1_motif "VESG" ;
+    f:ca2_motif "SGSRD" ;
+    f:cb_motif "LFRKSE" ;
+    f:sa_motif "PKDSPNSKS" ;
+    f:sb_motif "EGRARE" ;
+    f:strain_name "A/swine/England/72685/96" .
+
+<https://flu-crew.org/id/a%2Fswine%2Ffrance%2F3614%2F84> f:ca1_motif "TGSG" ;
+    f:ca2_motif "SGRKG" ;
+    f:cb_motif "LLANSE" ;
+    f:sa_motif "PDGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:strain_name "A/Swine/France/3614/84" .
+
+<https://flu-crew.org/id/a%2Fswine%2Ffrance%2F4203%2F85> f:ca1_motif "TGSG" ;
+    f:ca2_motif "SGRKG" ;
+    f:cb_motif "LLANSE" ;
+    f:sa_motif "PNESPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:strain_name "A/Swine/France/4203/85" .
+
+<https://flu-crew.org/id/a%2Fswine%2Ffrance%2F4510%2F86> f:ca1_motif "TGSG" ;
+    f:ca2_motif "SGRKG" ;
+    f:cb_motif "LLANSE" ;
+    f:sa_motif "PNESPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:strain_name "A/Swine/France/4510/86" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fgermany%2F2%2F81> f:ca1_motif "TGSG" ;
+    f:ca2_motif "SGHKG" ;
+    f:cb_motif "LLANSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:strain_name "A/swine/Germany/2/81" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fgermany%2F8533%2F91> f:ca1_motif "TGSG" ;
+    f:ca2_motif "PGLRG" ;
+    f:cb_motif "LLANSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:strain_name "A/swine/Germany/8533/91" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fhokkaido%2F2%2F81> f:ca1_motif "VGSG" ;
+    f:ca2_motif "PGNRG" ;
+    f:cb_motif "LFVSSE" ;
+    f:sa_motif "PDGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:strain_name "A/swine/Hokkaido/2/81" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fhong_kong%2F1%2F1974> f:ca1_motif "VGSG" ;
+    f:ca2_motif "PGNRG" ;
+    f:cb_motif "LFVSSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KDQSQA" ;
+    f:strain_name "A/swine/Hong_Kong/1/1974" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fhong_kong%2F168%2F1993> f:ca1_motif "TGSG" ;
+    f:ca2_motif "SGSRG" ;
+    f:cb_motif "LLANSQ" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KTQTQT" ;
+    f:strain_name "A/swine/Hong_Kong/168/1993" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fhong_kong%2F172%2F1993> f:ca1_motif "IESG" ;
+    f:ca2_motif "PGNRG" ;
+    f:cb_motif "LFASSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:strain_name "A/swine/Hong_Kong/172/1993" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fhong_kong%2F176%2F1993> f:ca1_motif "TGSG" ;
+    f:ca2_motif "SGSRG" ;
+    f:cb_motif "LLANSQ" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KTQTQT" ;
+    f:strain_name "A/swine/Hong_Kong/176/1993" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fhong_kong%2F273%2F1994> f:ca1_motif "IESG" ;
+    f:ca2_motif "PGNRG" ;
+    f:cb_motif "LFASSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:strain_name "A/swine/Hong_Kong/273/1994" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fillinois%2F63> f:ca1_motif "VGSG" ;
+    f:ca2_motif "PGNRG" ;
+    f:cb_motif "LLVSSE" ;
+    f:sa_motif "PNESPKSKS" ;
+    f:sb_motif "KSQSQA" ;
+    f:state usa:IL ;
+    f:strain_name "A/swine/Illinois/63" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fin%2F1726%2F1988> f:ca1_motif "VESG" ;
+    f:ca2_motif "PGNRG" ;
+    f:cb_motif "LFASSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:state usa:IN ;
+    f:strain_name "A/swine/IN/1726/1988" .
+
+<https://flu-crew.org/id/a%2Fswine%2Findiana%2F1726%2F1988> f:ca1_motif "VESG" ;
+    f:ca2_motif "PGNRG" ;
+    f:cb_motif "LFASSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:state usa:IN ;
+    f:strain_name "A/Swine/Indiana/1726/1988",
+        "A/swine/Indiana/1726/1988" .
+
+<https://flu-crew.org/id/a%2Fswine%2Findiana%2F9k035%2F99> f:ca1_motif "IESG" ;
+    f:ca2_motif "PGNRD" ;
+    f:cb_motif "LFASSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:state usa:IN ;
+    f:strain_name "A/Swine/Indiana/9K035/99" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fiowa%2F15%2F30> f:ca1_motif "VGSG" ;
+    f:ca2_motif "PGSRG" ;
+    f:cb_motif "LLVSSE" ;
+    f:sa_motif "PNESPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:state usa:IA ;
+    f:strain_name "A/swine/Iowa/15/30" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fiowa%2F17672%2F88> f:ca1_motif "VESG" ;
+    f:ca2_motif "PGNRG" ;
+    f:cb_motif "LFASSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:state usa:IA ;
+    f:strain_name "A/swine/Iowa/17672/88" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fiowa%2F1976%2F1931> f:ca1_motif "VGSG" ;
+    f:ca2_motif "PGSRG" ;
+    f:cb_motif "LLVSSE" ;
+    f:sa_motif "PNESPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:state usa:IA ;
+    f:strain_name "A/swine/Iowa/1976/1931" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fitaly%2Fv.147%2F1981> f:ca1_motif "VGSG" ;
+    f:ca2_motif "PGNRG" ;
+    f:cb_motif "LFVSSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:strain_name "A/swine/Italy/v.147/1981" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fitaly_v147%2F81> f:ca1_motif "VGSG" ;
+    f:ca2_motif "PGNRG" ;
+    f:cb_motif "LFVSSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:strain_name "A/Swine/Italy_v147/81" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fitaly_virus%2F671%2F87> f:ca1_motif "TRSG" ;
+    f:ca2_motif "SGLKG" ;
+    f:cb_motif "LLANSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:strain_name "A/swine/Italy-Virus/671/87" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fminnesota%2F1713%2F00%2F> f:ca1_motif "IKSG" ;
+    f:ca2_motif "PGNRD" ;
+    f:cb_motif "-----E" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQTQA" ;
+    f:state usa:MN ;
+    f:strain_name "A/Swine/Minnesota/1713/00/" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fnagasaki%2F1%2F1989> f:ca1_motif "VGSG" ;
+    f:ca2_motif "PGNKG" ;
+    f:cb_motif "LSVSSE" ;
+    f:sa_motif "PNESPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:strain_name "A/swine/Nagasaki/1/1989" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fnagasaki%2F1%2F1990> f:ca1_motif "VGSG" ;
+    f:ca2_motif "PGNRG" ;
+    f:cb_motif "LSVSSE" ;
+    f:sa_motif "PNESPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:strain_name "A/swine/Nagasaki/1/1990" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fnebraska%2F1%2F1992> f:ca1_motif "VGSG" ;
+    f:ca2_motif "PGKRN" ;
+    f:cb_motif "LSISSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQAQA" ;
+    f:state usa:NE ;
+    f:strain_name "A/swine/Nebraska/1/1992" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fnebraska%2F1%2F92> f:ca1_motif "VGSG" ;
+    f:ca2_motif "PGKRN" ;
+    f:cb_motif "LSISSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQAQA" ;
+    f:state usa:NE ;
+    f:strain_name "A/Swine/Nebraska/1/92" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fnetherlands%2F12%2F1985> f:ca1_motif "TGSG" ;
+    f:ca2_motif "SGLKG" ;
+    f:cb_motif "LLANSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:strain_name "A/swine/Netherlands/12/1985" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fnetherlands%2F3%2F1980> f:ca1_motif "TGSG" ;
+    f:ca2_motif "SGSRE" ;
+    f:cb_motif "LLANSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:strain_name "A/swine/Netherlands/3/1980" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fnew_jersey%2F11%2F76> f:ca1_motif "VGSG" ;
+    f:ca2_motif "PGNRG" ;
+    f:cb_motif "LLVSSE" ;
+    f:sa_motif "PNESPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:state usa:NJ ;
+    f:strain_name "A/swine/new_jersey/11/76" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fni%2F1938> f:ca1_motif "VGSG" ;
+    f:ca2_motif "SGSRA" ;
+    f:cb_motif "LLARSE" ;
+    f:sa_motif "PNGSPKNNS" ;
+    f:sb_motif "KDQSHG" ;
+    f:strain_name "A/swine/NI/1938" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fnorthern_ireland%2F1938> f:ca1_motif "VGSG" ;
+    f:ca2_motif "SGSRA" ;
+    f:cb_motif "LLARSE" ;
+    f:sa_motif "PNGSPKNNS" ;
+    f:sb_motif "KDQSHG" ;
+    f:strain_name "A/swine/Northern_Ireland/1938" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fqc%2F81> f:ca1_motif "VGSG" ;
+    f:ca2_motif "PGNRG" ;
+    f:cb_motif "LFVSSE" ;
+    f:sa_motif "PNESPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:strain_name "A/swine/QC/81" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fqc%2F91> f:ca1_motif "VGSG" ;
+    f:ca2_motif "PGNRN" ;
+    f:cb_motif "LFVSSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:strain_name "A/swine/QC/91" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fschleswig_holstein%2F1%2F92> f:ca1_motif "TGSG" ;
+    f:ca2_motif "FGLRG" ;
+    f:cb_motif "LLANSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:strain_name "A/swine/Schleswig-Holstein/1/92" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fschleswig_holstein%2F1%2F93> f:ca1_motif "TGSG" ;
+    f:ca2_motif "PGRRG" ;
+    f:cb_motif "LLANSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KDQSQA" ;
+    f:strain_name "A/swine/Schleswig-Holstein/1/93" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fscotland%2F410440%2F94> f:ca1_motif "VESG" ;
+    f:ca2_motif "SGSRD" ;
+    f:cb_motif "LFKKSE" ;
+    f:sa_motif "PKNSPNSKS" ;
+    f:sb_motif "EGKTRE" ;
+    f:strain_name "A/swine/Scotland/410440/94" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fst_hyacinthe%2F106%2F1991> f:ca1_motif "VGSG" ;
+    f:ca2_motif "PGNRD" ;
+    f:cb_motif "LSVSSE" ;
+    f:sa_motif "PNGSPKNKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:strain_name "A/swine/St-Hyacinthe/106/1991" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fst_hyacinthe%2F148%2F1990> f:ca1_motif "VGSG" ;
+    f:ca2_motif "PGSRG" ;
+    f:cb_motif "LLVSSE" ;
+    f:sa_motif "PNESPKSKS" ;
+    f:sb_motif "KXQSQA" ;
+    f:strain_name "A/swine/St-Hyacinthe/148/1990" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fwisconsin%2F125%2F97> f:ca1_motif "IGSG" ;
+    f:ca2_motif "PGNRG" ;
+    f:cb_motif "LFASSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:state usa:WI ;
+    f:strain_name "A/Swine/Wisconsin/125/97" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fwisconsin%2F136%2F97> f:ca1_motif "IGSG" ;
+    f:ca2_motif "PGNRG" ;
+    f:cb_motif "LFASSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:state usa:WI ;
+    f:strain_name "A/Swine/Wisconsin/136/97" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fwisconsin%2F163%2F97> f:ca1_motif "IESG" ;
+    f:ca2_motif "PGNRG" ;
+    f:cb_motif "LFASSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:state usa:WI ;
+    f:strain_name "A/Swine/Wisconsin/163/97" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fwisconsin%2F164%2F97> f:ca1_motif "IESG" ;
+    f:ca2_motif "PGNRG" ;
+    f:cb_motif "LFASSE" ;
+    f:sa_motif "PDGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:state usa:WI ;
+    f:strain_name "A/Swine/Wisconsin/164/97" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fwisconsin%2F166%2F97> f:ca1_motif "IESG" ;
+    f:ca2_motif "PGNRG" ;
+    f:cb_motif "LFASSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:state usa:WI ;
+    f:strain_name "A/Swine/Wisconsin/166/97" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fwisconsin%2F168%2F97> f:ca1_motif "IESG" ;
+    f:ca2_motif "PGNRG" ;
+    f:cb_motif "LFASSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:state usa:WI ;
+    f:strain_name "A/Swine/Wisconsin/168/97" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fwisconsin%2F235%2F97> f:ca1_motif "IGSG" ;
+    f:ca2_motif "PGNRG" ;
+    f:cb_motif "LFASSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:state usa:WI ;
+    f:strain_name "A/Swine/Wisconsin/235/97" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fwisconsin%2F238%2F97> f:ca1_motif "IGSG" ;
+    f:ca2_motif "PGNRG" ;
+    f:cb_motif "LFASSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:state usa:WI ;
+    f:strain_name "A/Swine/Wisconsin/238/97" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fwisconsin%2F457%2F98> f:ca1_motif "IESG" ;
+    f:ca2_motif "PGNRG" ;
+    f:cb_motif "LFASSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:state usa:WI ;
+    f:strain_name "A/Swine/Wisconsin/457/98" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fwisconsin%2F458%2F98> f:ca1_motif "IGSG" ;
+    f:ca2_motif "PGNRG" ;
+    f:cb_motif "LFASSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:state usa:WI ;
+    f:strain_name "A/Swine/Wisconsin/458/98" .
+
+<https://flu-crew.org/id/a%2Fswine%2Fwisconsin%2F464%2F98> f:ca1_motif "IGSG" ;
+    f:ca2_motif "LWKRG" ;
+    f:cb_motif "LFASSE" ;
+    f:sa_motif "PNGSPKSKS" ;
+    f:sb_motif "KNQSQA" ;
+    f:state usa:WI ;
+    f:strain_name "A/Swine/Wisconsin/464/98" .
+

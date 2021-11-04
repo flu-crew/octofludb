@@ -173,7 +173,7 @@ class ParsedPhraseList(Interpreter):
 def tabularTyping(data, levels=None, na_str=[None]):
     cols = []
     if not data:
-      return []
+        return []
     for k, v in data.items():
         hl = HomoList(v, field_name=k, na_str=na_str).data
         if len(hl) > 0:
@@ -190,7 +190,7 @@ def tabularTyping(data, levels=None, na_str=[None]):
 def headlessTabularTyping(data, levels=None, na_str=[None]):
     cols = []
     if not data:
-      return []
+        return []
     for (i, xs) in enumerate(data):
         hl = HomoList(xs, na_str=na_str).data
         log(f" - 'X{i}':{colors.good(hl[0].typename)}")
@@ -239,16 +239,16 @@ class Table(ParsedPhraseList):
         log(f"Reading {file_str(filehandle)} as tab-delimited file ...")
         rows = [r.split(delimiter) for r in filehandle.readlines()]
         if len(rows) < 2:
-          # if the input table is empty or has only a header
-          return dict()
+            # if the input table is empty or has only a header
+            return dict()
         else:
-          self.header = [c.strip() for c in rows[0]]
-          indices = range(len(self.header))
-          rows = rows[1:]
-          columns = {
-              self.header[i]: [strOrNone(r[i].strip()) for r in rows] for i in indices
-          }
-          return columns
+            self.header = [c.strip() for c in rows[0]]
+            indices = range(len(self.header))
+            rows = rows[1:]
+            columns = {
+                self.header[i]: [strOrNone(r[i].strip()) for r in rows] for i in indices
+            }
+            return columns
 
 
 class Ragged(ParsedPhraseList):

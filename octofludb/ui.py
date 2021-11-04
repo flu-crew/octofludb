@@ -3,7 +3,7 @@ import collections
 import signal
 import sys
 import os
-from octofludb.util import log
+from octofludb.util import log, die
 
 
 def open_graph():
@@ -148,44 +148,8 @@ def init_cmd(url, repo):
     script.initialize_config_file()
 
 
-@click.command(
-    name="pull",
-)
-@click.option(
-    "--nmonths",
-    help="Update Genbank files for the last N months",
-    default=3,
-    type=click.IntRange(min=1, max=9999),
-)
-@url_opt
-@repo_name_opt
-def pull_cmd(nmonths, url, repo):
-    """
-    Update data. Pull from genbank, process any new data in the data folder,
-    assign clades to swine data, assign subtypes to all data, and extract
-    motifs
-    """
-    import octofludb.recipes as recipe
+def upload_gisaid(config, url, repo):
     import octofludb.script as script
-    import pgraphdb as db
-
-    cwd = os.getcwd()
-
-    script.gotoBuildHome()
-
-    config = script.load_config_file()
-
-    # upload ontological schema
-    schema_file = script.get_data_file("schema.ttl")  #
-    upload([schema_file], url=url, repo=repo)
-
-    # upload geological relationships
-    geog_file = upload([script.get_data_file("geography.ttl")], url=url, repo=repo)[0]
-
-    # update genbank (take a parameter telling how far back to go)
-    # this command fills the current directory with .gb* files
-    gb_turtles = prep_update_gb(minyear=1900, maxyear=2121, nmonths=nmonths)
-    upload(gb_turtles, url=url, repo=repo)
 
     epiflu_metafiles = script.epiflu_meta_files(config)
     skipped_meta = 0
@@ -225,6 +189,10 @@ def pull_cmd(nmonths, url, repo):
         )
 
 
+def upload_classifications(config, url, repo):
+    import octofludb.script as script
+    import pgraphdb as db
+
     # octoflu classifications of unclassified swine
     # * retrieve unclassified strains
     unclassified_fasta = "unclassified-swine.fna"
@@ -251,7 +219,6 @@ def pull_cmd(nmonths, url, repo):
         prep_table(unclassified_classes, outfile=turtleout)
 
     upload([unclassified_turtle], url=url, repo=repo)
-
 
     # infer subtypes
     subtypes_table = "subtypes.txt"
@@ -297,6 +264,42 @@ def pull_cmd(nmonths, url, repo):
 
     upload([constellation_turtles], url=url, repo=repo)
 
+
+def upload_motifs(config, url, repo):
+    import octofludb.script as script
+
+    # find h1 motifs
+    h1_motif_table = script.findMotifs(
+        os.path.join(os.path.dirname(__file__), "data", "get-h1-swine.rq"),
+        [
+            "sa_motif=124,125,155,157,159,160,162,163,164",
+            "sb_motif=153,156,189,190,193,195",
+            "ca1_motif=166,170,204,237",
+            "ca2_motif=137,140,142,221,222",
+            "cb_motif=70,71,73,74,75,115",
+        ],
+        "H1",
+        url=url,
+        repo_name=repo,
+    )
+
+    with open("h1-motifs.ttl", "w") as turtleout:
+        prep_table(h1_motif_table, outfile=turtleout)
+    upload(["h1-motifs.ttl"], url=url, repo=repo)
+
+    # find h3 motifs
+    h3_motif_table = script.findMotifs(
+        os.path.join(os.path.dirname(__file__), "data", "get-h3-swine.rq"),
+        ["h3_motif=145,155,156,158,189"],
+        "H3",
+        url=url,
+        repo_name=repo,
+    )
+
+    with open("h3-motifs.ttl", "w") as turtleout:
+        prep_table(h3_motif_table, outfile=turtleout)
+    upload(["h3-motifs.ttl"], url=url, repo=repo)
+
     # load all tags
     for (tag, basename) in config["tags"].items():
         for filename in script.tag_files(config, tag):
@@ -304,6 +307,78 @@ def pull_cmd(nmonths, url, repo):
             with open(outfile, "w") as f:
                 prep_tag(tag, filename, outfile=f)
             upload([outfile], url=url, repo=repo)
+
+
+@click.command(
+    name="pull",
+)
+@click.option(
+    "--nmonths",
+    help="Update Genbank files for the last N months",
+    default=1,
+    type=click.IntRange(min=0, max=9999),
+)
+@click.option(
+    "--no-schema", is_flag=True, default=False, help="Skip upload schema steps"
+)
+@click.option(
+    "--no-gisaid", is_flag=True, default=False, help="Skip upload gisaid data step"
+)
+@click.option(
+    "--no-classify",
+    is_flag=True,
+    default=False,
+    help="Skip clade, subtype, and constellation classification steps",
+)
+@click.option(
+    "--no-motifs", is_flag=True, default=False, help="Skip motif extraction steps"
+)
+@url_opt
+@repo_name_opt
+def pull_cmd(nmonths, no_schema, no_gisaid, no_classify, no_motifs, url, repo):
+    """
+    Update data. Pull from genbank, process any new data in the data folder,
+    assign clades to swine data, assign subtypes to all data, and extract
+    motifs.
+
+    To build the database from nothing call `octofludb pull --nmonths=360`.
+    This will pull all genbank data that has been released in the last 30
+    years (which should be all of it).
+    """
+    import octofludb.recipes as recipe
+    import octofludb.script as script
+    import pgraphdb as db
+
+    cwd = os.getcwd()
+
+    script.gotoBuildHome()
+
+    config = script.load_config_file()
+
+    if not no_schema:
+        # upload ontological schema
+        schema_file = script.get_data_file("schema.ttl")  #
+        upload([schema_file], url=url, repo=repo)
+
+        # upload geological relationships
+        geog_file = upload([script.get_data_file("geography.ttl")], url=url, repo=repo)[
+            0
+        ]
+
+    if nmonths > 0:
+        # update genbank (take a parameter telling how far back to go)
+        # this command fills the current directory with .gb* files
+        gb_turtles = prep_update_gb(minyear=1900, maxyear=2121, nmonths=nmonths)
+        upload(gb_turtles, url=url, repo=repo)
+
+    if not no_gisaid:
+        upload_gisaid(config, url, repo)
+
+    if not no_classify:
+        upload_classifications(config, url, repo)
+
+    if not no_motifs:
+        upload_motifs(config, url, repo)
 
     os.chdir(cwd)
 
@@ -359,13 +434,16 @@ def classify_cmd(filename, reference=None):
 
 
 def classify_and_write(filename, reference=None, outfile=sys.stdout):
+    import octofludb.colors as colors
+
     rows = classify(filename, reference=reference)
-    if rows:
-        print("seqid\tsegment_subtype\tclade\tgl_clade", file=outfile)
-        for row in rows:
-            print("\t".join(row), file=outfile)
-    else:
-        die(colors.bad("No result from running octFLU"), file=outfile)
+    print("seqid\tsegment_subtype\tclade\tgl_clade", file=outfile)
+
+    # This may be empty, that is fine. A table with only a heade line would
+    # generate an empty turtle file. Uploading an empty turtle file does
+    # nothing.
+    for row in rows:
+        print("\t".join(row), file=outfile)
 
 
 def classify(filename, reference=None):
@@ -1091,7 +1169,6 @@ def macro_query(filename, macros, *args, **kwargs):
     fmt_query_cmd(tmpfile, *args, **kwargs)
 
     os.remove(tmpfile)
-
 
 
 @click.command(

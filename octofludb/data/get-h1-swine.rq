@@ -1,0 +1,23 @@
+PREFIX onto: <http://www.ontotext.com/>
+PREFIX f: <https://flu-crew.org/term/>
+
+SELECT DISTINCT
+  ?gb
+  ?seq
+FROM onto:disable-sameAs
+WHERE {
+  ?sid f:host "swine" .
+  ?sid f:has_segment ?gid .
+  ?gid f:genbank_id ?gb .
+
+  FILTER NOT EXISTS {
+    ?gid f:sa_motif ?sa_motif .
+    ?gid f:sb_motif ?sb_motif .
+    ?gid f:cb_motif ?cb_motif .
+    ?gid f:ca1_motif ?ca1_motif .
+    ?gid f:ca2_motif ?ca2_motif .
+  }
+
+  ?gid f:segment_subtype "H1" .
+  ?gid f:dnaseq ?seq .
+}
