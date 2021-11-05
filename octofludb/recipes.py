@@ -129,7 +129,12 @@ def mk_ird(g, filehandle) -> None:
 
 
 def mk_gis(g, filehandle) -> None:
-    fh = pd.read_excel(filehandle.name, sheet_name=0)
+    if isinstance(filehandle, str):
+        filename = filehandle
+    else:
+        filename = filehandle.name
+
+    fh = pd.read_excel(filename, sheet_name=0)
     d = {c: [x for x in fh[c]] for c in fh}
     epipat = re.compile(" *\|.*")
     for i in tqdm(range(len(d["Isolate_Id"]))):

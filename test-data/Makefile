@@ -2,6 +2,6 @@
 # If the make command fails, then there is a problem
 
 all:
-	octofludb mk_gis gisaid.xls > .obs-gisaid.ttl
+	octofludb prep gis gisaid.xls > .obs-gisaid.ttl
 	diff .obs-gisaid.ttl .exp-gisaid.ttl
 	rm .obs*
