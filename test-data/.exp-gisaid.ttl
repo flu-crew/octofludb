@@ -1,16 +1,13 @@
 @prefix f: <https://flu-crew.org/term/> .
 @prefix fid: <https://flu-crew.org/id/> .
 @prefix ns1: <http://www.w3.org/2002/07/owl#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix usa: <https://flu-crew.org/geo/country/usa/> .
 @prefix world: <https://flu-crew.org/geo/country/> .
-@prefix xml: <http://www.w3.org/XML/1998/namespace> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 fid:epi_isl_218508 f:collection_date "2015-12-07"^^xsd:date ;
     f:country world:VNM ;
     f:gisaid_strain_name "A/swine/Bac Ninh/12-01-3/2015" ;
+    f:gisaid_subtype "H1N1" ;
     f:has_segment fid:epi744022,
         fid:epi744023,
         fid:epi744024,
@@ -21,13 +18,13 @@ fid:epi_isl_218508 f:collection_date "2015-12-07"^^xsd:date ;
         fid:epi744029 ;
     f:host "swine" ;
     f:isolate_id "EPI_ISL_218508" ;
-    f:strain_name "A/swine/Bac Ninh/12-01-3/2015" ;
-    f:submission_date "2016-04-26"^^xsd:date ;
-    f:subtype "H1N1" .
+    f:strain_name "A/swine/Bac_Ninh/12-01-3/2015" ;
+    f:submission_date "2016-04-26"^^xsd:date .
 
 fid:epi_isl_393493 f:collection_date "2019-08-19"^^xsd:date ;
     f:country world:USA ;
     f:gisaid_strain_name "A/swine/Iowa/A02478617/2019" ;
+    f:gisaid_subtype "H3N2" ;
     f:has_segment fid:epi1601841,
         fid:epi1601842,
         fid:mn436834,
@@ -35,12 +32,12 @@ fid:epi_isl_393493 f:collection_date "2019-08-19"^^xsd:date ;
     f:host "swine" ;
     f:isolate_id "EPI_ISL_393493" ;
     f:strain_name "A/swine/Iowa/A02478617/2019" ;
-    f:submission_date "2019-09-11"^^xsd:date ;
-    f:subtype "H3N2" .
+    f:submission_date "2019-09-11"^^xsd:date .
 
 fid:epi_isl_393494 f:collection_date "2019-04-22"^^xsd:date ;
     f:country world:USA ;
     f:gisaid_strain_name "A/swine/Virginia/A02478581/2019" ;
+    f:gisaid_subtype "H3N2" ;
     f:has_segment fid:epi1601843,
         fid:epi1601844,
         fid:epi1601845,
@@ -60,12 +57,12 @@ fid:epi_isl_393494 f:collection_date "2019-04-22"^^xsd:date ;
     f:host "swine" ;
     f:isolate_id "EPI_ISL_393494" ;
     f:strain_name "A/swine/Virginia/A02478581/2019" ;
-    f:submission_date "2019-09-11"^^xsd:date ;
-    f:subtype "H3N2" .
+    f:submission_date "2019-09-11"^^xsd:date .
 
 fid:epi_isl_393495 f:collection_date "2019-08-28"^^xsd:date ;
     f:country world:USA ;
     f:gisaid_strain_name "A/swine/Minnesota/A02245227/2019" ;
+    f:gisaid_subtype "H1N1" ;
     f:has_segment fid:epi1601851,
         fid:epi1601852,
         fid:mn447202,
@@ -73,170 +70,197 @@ fid:epi_isl_393495 f:collection_date "2019-08-28"^^xsd:date ;
     f:host "swine" ;
     f:isolate_id "EPI_ISL_393495" ;
     f:strain_name "A/swine/Minnesota/A02245227/2019" ;
-    f:submission_date "2019-09-12"^^xsd:date ;
-    f:subtype "H1N1" .
-
-f:collection_date rdfs:subPropertyOf f:date .
-
-f:submission_date rdfs:subPropertyOf f:date .
+    f:submission_date "2019-09-12"^^xsd:date .
 
 fid:epi744022 f:epi_id "EPI744022" ;
+    f:gisaid_subtype "H1N1" ;
     f:isolate_id "EPI_ISL_218508" ;
     f:lineage "pdm09" ;
     f:segment_name "NP" .
 
 fid:epi744023 f:epi_id "EPI744023" ;
+    f:gisaid_subtype "H1N1" ;
     f:isolate_id "EPI_ISL_218508" ;
     f:lineage "pdm09" ;
     f:segment_name "NS" .
 
 fid:epi744024 f:epi_id "EPI744024" ;
+    f:gisaid_subtype "H1N1" ;
     f:isolate_id "EPI_ISL_218508" ;
     f:lineage "pdm09" ;
     f:segment_name "M" .
 
 fid:epi744025 f:epi_id "EPI744025" ;
+    f:gisaid_subtype "H1N1" ;
     f:isolate_id "EPI_ISL_218508" ;
     f:lineage "pdm09" ;
     f:segment_name "PA" .
 
 fid:epi744026 f:epi_id "EPI744026" ;
+    f:gisaid_subtype "H1N1" ;
     f:isolate_id "EPI_ISL_218508" ;
     f:lineage "pdm09" ;
     f:segment_name "PB2" .
 
 fid:epi744027 f:epi_id "EPI744027" ;
+    f:gisaid_subtype "H1N1" ;
     f:isolate_id "EPI_ISL_218508" ;
     f:lineage "pdm09" ;
     f:segment_name "PB1" .
 
 fid:epi744028 f:epi_id "EPI744028" ;
+    f:gisaid_subtype "H1N1" ;
     f:isolate_id "EPI_ISL_218508" ;
     f:lineage "pdm09" ;
     f:segment_name "NA" .
 
 fid:epi744029 f:epi_id "EPI744029" ;
+    f:gisaid_subtype "H1N1" ;
     f:isolate_id "EPI_ISL_218508" ;
     f:lineage "pdm09" ;
     f:segment_name "HA" .
 
 fid:epi1601841 ns1:sameAs fid:mn436834 ;
     f:epi_id "EPI1601841" ;
+    f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393493" ;
     f:segment_name "HA" .
 
 fid:epi1601842 ns1:sameAs fid:mn436835 ;
     f:epi_id "EPI1601842" ;
+    f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393493" ;
     f:segment_name "NA" .
 
 fid:epi1601843 ns1:sameAs fid:mn436836 ;
     f:epi_id "EPI1601843" ;
+    f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393494" ;
     f:segment_name "PB2" .
 
 fid:epi1601844 ns1:sameAs fid:mn436837 ;
     f:epi_id "EPI1601844" ;
+    f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393494" ;
     f:segment_name "PB1" .
 
 fid:epi1601845 ns1:sameAs fid:mn436838 ;
     f:epi_id "EPI1601845" ;
+    f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393494" ;
     f:segment_name "PA" .
 
 fid:epi1601846 ns1:sameAs fid:mn436839 ;
     f:epi_id "EPI1601846" ;
+    f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393494" ;
     f:segment_name "HA" .
 
 fid:epi1601847 ns1:sameAs fid:mn436840 ;
     f:epi_id "EPI1601847" ;
+    f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393494" ;
     f:segment_name "NP" .
 
 fid:epi1601848 ns1:sameAs fid:mn436841 ;
     f:epi_id "EPI1601848" ;
+    f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393494" ;
     f:segment_name "NA" .
 
 fid:epi1601849 ns1:sameAs fid:mn436842 ;
     f:epi_id "EPI1601849" ;
+    f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393494" ;
     f:segment_name "M" .
 
 fid:epi1601850 ns1:sameAs fid:mn436843 ;
     f:epi_id "EPI1601850" ;
+    f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393494" ;
     f:segment_name "NS" .
 
 fid:epi1601851 ns1:sameAs fid:mn447202 ;
     f:epi_id "EPI1601851" ;
+    f:gisaid_subtype "H1N1" ;
     f:isolate_id "EPI_ISL_393495" ;
     f:segment_name "HA" .
 
 fid:epi1601852 ns1:sameAs fid:mn447203 ;
     f:epi_id "EPI1601852" ;
+    f:gisaid_subtype "H1N1" ;
     f:isolate_id "EPI_ISL_393495" ;
     f:segment_name "NA" .
 
 fid:mn436834 ns1:sameAs fid:epi1601841 ;
     f:genbank_id "MN436834" ;
+    f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393493" ;
     f:segment_name "HA" .
 
 fid:mn436835 ns1:sameAs fid:epi1601842 ;
     f:genbank_id "MN436835" ;
+    f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393493" ;
     f:segment_name "NA" .
 
 fid:mn436836 ns1:sameAs fid:epi1601843 ;
     f:genbank_id "MN436836" ;
+    f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393494" ;
     f:segment_name "PB2" .
 
 fid:mn436837 ns1:sameAs fid:epi1601844 ;
     f:genbank_id "MN436837" ;
+    f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393494" ;
     f:segment_name "PB1" .
 
 fid:mn436838 ns1:sameAs fid:epi1601845 ;
     f:genbank_id "MN436838" ;
+    f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393494" ;
     f:segment_name "PA" .
 
 fid:mn436839 ns1:sameAs fid:epi1601846 ;
     f:genbank_id "MN436839" ;
+    f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393494" ;
     f:segment_name "HA" .
 
 fid:mn436840 ns1:sameAs fid:epi1601847 ;
     f:genbank_id "MN436840" ;
+    f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393494" ;
     f:segment_name "NP" .
 
 fid:mn436841 ns1:sameAs fid:epi1601848 ;
     f:genbank_id "MN436841" ;
+    f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393494" ;
     f:segment_name "NA" .
 
 fid:mn436842 ns1:sameAs fid:epi1601849 ;
     f:genbank_id "MN436842" ;
+    f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393494" ;
     f:segment_name "M" .
 
 fid:mn436843 ns1:sameAs fid:epi1601850 ;
     f:genbank_id "MN436843" ;
+    f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393494" ;
     f:segment_name "NS" .
 
 fid:mn447202 ns1:sameAs fid:epi1601851 ;
     f:genbank_id "MN447202" ;
+    f:gisaid_subtype "H1N1" ;
     f:isolate_id "EPI_ISL_393495" ;
     f:segment_name "HA" .
 
 fid:mn447203 ns1:sameAs fid:epi1601852 ;
     f:genbank_id "MN447203" ;
+    f:gisaid_subtype "H1N1" ;
     f:isolate_id "EPI_ISL_393495" ;
     f:segment_name "NA" .
 
