@@ -15,7 +15,10 @@ WHERE {
     OPTIONAL { ?sid f:isolate_id ?isolate . }
     ?gid f:segment_name ?segment_name .
     FILTER (?segment_name = "HA" || ?segment_name = "NA") .
-    FILTER NOT EXISTS { ?sid f:subtype ?subtype . }
+    FILTER NOT EXISTS {
+        ?sid f:subtype ?subtype .
+        FILTER REGEX(?subtype, "H.N.") .
+    }
     OPTIONAL { ?gid f:segment_subtype ?segment_subtype . }
     OPTIONAL { ?gid f:has_feature/f:serotype ?genbank_subtype . }
     OPTIONAL { ?sid f:gisaid_subtype ?gisaid_subtype . }
