@@ -1,7 +1,11 @@
 include octofludb/data/all-acc.rq
 include octofludb/data/clear-query-tags.rq
 include octofludb/data/config.yaml
+include octofludb/data/delete-us_clades.rq
+include octofludb/data/delete-gl_clades.rq
 include octofludb/data/delete-constellations.rq
+include octofludb/data/delete-motifs.rq
+include octofludb/data/delete-subtypes.rq
 include octofludb/data/fetch-unclassified-swine.rq
 include octofludb/data/geography.ttl
 include octofludb/data/get-h1-sequences.rq

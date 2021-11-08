@@ -3,6 +3,7 @@ v0.11.0 [2021-11-xx]
 
  * Add motif generation to `pull`
  * Add options to limit what data is updated with `pull`
+ * Add deletion commands
 
 v0.10.1 [2021-10-19]
 ====================

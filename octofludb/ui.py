@@ -220,6 +220,26 @@ def upload_classifications(config, url, repo):
 
     upload([unclassified_turtle], url=url, repo=repo)
 
+    # infer constellations
+    constellation_table = "constellations.txt"
+    constellation_turtles = "constellations.ttl"
+
+    delete_constellations = script.get_data_file("delete-constellations.rq")
+    db.update(sparql_file=delete_constellations, url=url, repo_name=repo)
+
+    with open(constellation_table, "w") as constout:
+        make_const(url=url, repo=repo, outfile=constout)
+
+    with open(constellation_turtles, "w") as turtleout:
+        prep_table(constellation_table, outfile=turtleout)
+
+    upload([constellation_turtles], url=url, repo=repo)
+
+
+def upload_subtypes(config, url, repo):
+    import octofludb.script as script
+    import pgraphdb as db
+
     # infer subtypes
     subtypes_table = "subtypes.txt"
     with open(subtypes_table, "w") as subtypesout:
@@ -248,21 +268,6 @@ def upload_classifications(config, url, repo):
     with open(eturtles, "w") as eturtleout:
         prep_table(epiflu_subtypes, outfile=eturtleout)
     upload([gturtles, eturtles], url=url, repo=repo)
-
-    # infer constellations
-    constellation_table = "constellations.txt"
-    constellation_turtles = "constellations.ttl"
-
-    delete_constellations = script.get_data_file("delete-constellations.rq")
-    db.update(sparql_file=delete_constellations, url=url, repo_name=repo)
-
-    with open(constellation_table, "w") as constout:
-        make_const(url=url, repo=repo, outfile=constout)
-
-    with open(constellation_turtles, "w") as turtleout:
-        prep_table(constellation_table, outfile=turtleout)
-
-    upload([constellation_turtles], url=url, repo=repo)
 
 
 def upload_motifs(config, url, repo):
@@ -325,17 +330,25 @@ def upload_motifs(config, url, repo):
     "--no-gisaid", is_flag=True, default=False, help="Skip upload gisaid data step"
 )
 @click.option(
-    "--no-classify",
+    "--no-clades",
     is_flag=True,
     default=False,
-    help="Skip clade, subtype, and constellation classification steps",
+    help="Skip clade and constellation classification steps",
+)
+@click.option(
+    "--no-subtype",
+    is_flag=True,
+    default=False,
+    help="Skip subtype inferrence step",
 )
 @click.option(
     "--no-motifs", is_flag=True, default=False, help="Skip motif extraction steps"
 )
 @url_opt
 @repo_name_opt
-def pull_cmd(nmonths, no_schema, no_gisaid, no_classify, no_motifs, url, repo):
+def pull_cmd(
+    nmonths, no_schema, no_gisaid, no_clades, no_subtype, no_motifs, url, repo
+):
     """
     Update data. Pull from genbank, process any new data in the data folder,
     assign clades to swine data, assign subtypes to all data, and extract
@@ -374,8 +387,11 @@ def pull_cmd(nmonths, no_schema, no_gisaid, no_classify, no_motifs, url, repo):
     if not no_gisaid:
         upload_gisaid(config, url, repo)
 
-    if not no_classify:
+    if not no_clades:
         upload_classifications(config, url, repo)
+
+    if not no_subtype:
+        upload_subtypes(config, url, repo)
 
     if not no_motifs:
         upload_motifs(config, url, repo)
@@ -1264,7 +1280,11 @@ def delete_constellations_cmd(url, repo):
     """
     Delete all constellation data
     """
-    raise NotImplemented
+    import octofludb.script as script
+    import pgraphdb as db
+
+    delete_script = script.get_data_file("delete-constellations.rq")
+    db.update(sparql_file=delete_script, url=url, repo_name=repo)
 
 
 @click.command(
@@ -1276,23 +1296,31 @@ def delete_subtypes_cmd(url, repo):
     """
     Delete all subtype data
     """
-    raise NotImplemented
+    import octofludb.script as script
+    import pgraphdb as db
+
+    delete_script = script.get_data_file("delete-subtypes.rq")
+    db.update(sparql_file=delete_script, url=url, repo_name=repo)
 
 
 @click.command(
-    name="clades",
+    name="us-clades",
 )
 @url_opt
 @repo_name_opt
-def delete_clades_cmd(url, repo):
+def delete_us_clades_cmd(url, repo):
     """
     Delete all clade data
     """
-    raise NotImplemented
+    import octofludb.script as script
+    import pgraphdb as db
+
+    delete_script = script.get_data_file("delete-us_clades.rq")
+    db.update(sparql_file=delete_script, url=url, repo_name=repo)
 
 
 @click.command(
-    name="gl_clades",
+    name="gl-clades",
 )
 @url_opt
 @repo_name_opt
@@ -1300,7 +1328,27 @@ def delete_gl_clades_cmd(url, repo):
     """
     Delete all global H1 clade data
     """
-    raise NotImplemented
+    import octofludb.script as script
+    import pgraphdb as db
+
+    delete_script = script.get_data_file("delete-gl_clades.rq")
+    db.update(sparql_file=delete_script, url=url, repo_name=repo)
+
+
+@click.command(
+    name="motifs",
+)
+@url_opt
+@repo_name_opt
+def delete_motifs_cmd(url, repo):
+    """
+    Delete all antigenic motifs
+    """
+    import octofludb.script as script
+    import pgraphdb as db
+
+    delete_script = script.get_data_file("delete-motifs.rq")
+    db.update(sparql_file=delete_script, url=url, repo_name=repo)
 
 
 @click.group(
@@ -1310,15 +1358,22 @@ def delete_gl_clades_cmd(url, repo):
 )
 def delete_grp():
     """
-    Remove data from the database in various ways
+    Delete datasets. This can be useful when the dataset is corrupted in some
+    way. For example, if you changed clade names in your octoFLU reference file
+    and then reran `octofludb pull`, no change would occur since only strains
+    with missing clades are updated. Instead you would need to first delete the
+    existing clades and restart. If instead you manually ran octoFLU, built a
+    turtle file from the resulting file, and uploaded that, then you could end
+    up with multiple clades associated with some sequences.
     """
     pass
 
 
 delete_grp.add_command(delete_constellations_cmd)
 delete_grp.add_command(delete_subtypes_cmd)
-delete_grp.add_command(delete_clades_cmd)
+delete_grp.add_command(delete_us_clades_cmd)
 delete_grp.add_command(delete_gl_clades_cmd)
+delete_grp.add_command(delete_motifs_cmd)
 
 
 @click.group(cls=OrderedGroup, context_settings=CONTEXT_SETTINGS)

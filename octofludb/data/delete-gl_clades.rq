@@ -1,0 +1,8 @@
+PREFIX f: <https://flu-crew.org/term/>
+
+delete {
+    ?s f:gl_clade ?gl_clade .
+}
+where {
+    ?s f:gl_clade ?gl_clade .
+}
