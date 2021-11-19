@@ -27,7 +27,10 @@ def with_graph(f, *args, filename=None, outfile=sys.stdout, **kwargs):
     turtles = g.serialize(format="turtle")
     log("done")
     for l in turtles.splitlines():
-        print(l.decode("utf-8"), file=outfile)
+        try:
+          print(l.decode("utf-8"), file=outfile)
+        except:
+          print(l, file=outfile)
     g.close()
 
 
@@ -567,7 +570,10 @@ def prep_tag(tag, filename, outfile=sys.stdout):
         turtles = g.serialize(format="turtle")
         log("done")
         for l in turtles.splitlines():
-            print(l.decode("utf-8"), file=outfile)
+            try:
+                print(l.decode("utf-8"), file=outfile)
+            except:
+                print(l, file=outfile)
     g.close()
 
 
@@ -1046,7 +1052,10 @@ def fetch_tag_cmd(filename, url, repo):
     (n, turtle_filename) = mkstemp(suffix=".ttl")
     with open(turtle_filename, "w") as th:
         for l in turtles.splitlines():
-            print(l.decode("utf-8"), file=th)
+            try:
+                print(l.decode("utf-8"), file=th)
+            except:
+                print(l, file=th)
 
     # upload it to the database
     upload_cmd([turtle_filename], url, repo)
