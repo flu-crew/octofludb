@@ -836,7 +836,8 @@ def prep_fasta(
             na_str=make_na(na),
         ).connect(g)
 
-    with_graph(_mk_fasta_cmd, filename, outfile=outfile)
+    with open(filename, "r") as fasta_fh:
+        with_graph(_mk_fasta_cmd, fasta_fh, outfile=outfile)
 
     return outfile
 
