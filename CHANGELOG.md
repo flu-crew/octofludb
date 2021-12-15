@@ -1,3 +1,10 @@
+v0.12.0 [2021-12-15]
+====================
+
+ * Extended documentation in README
+ * Do not include gisaid data by default (replace `--no-gisaid` flag in
+   `octofludb pull` with `--include-gisaid`)
+
 v0.11.0 [2021-11-08]
 ====================
 
