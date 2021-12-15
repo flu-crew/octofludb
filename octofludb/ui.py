@@ -327,7 +327,7 @@ def upload_motifs(config, url, repo):
     "--no-schema", is_flag=True, default=False, help="Skip upload schema steps"
 )
 @click.option(
-    "--no-gisaid", is_flag=True, default=False, help="Skip upload gisaid data step"
+    "--include-gisaid", is_flag=True, default=False, help="include gisaid data step"
 )
 @click.option(
     "--no-clades",
@@ -347,7 +347,7 @@ def upload_motifs(config, url, repo):
 @url_opt
 @repo_name_opt
 def pull_cmd(
-    nmonths, no_schema, no_gisaid, no_clades, no_subtype, no_motifs, url, repo
+    nmonths, no_schema, include_gisaid, no_clades, no_subtype, no_motifs, url, repo
 ):
     """
     Update data. Pull from genbank, process any new data in the data folder,
@@ -384,7 +384,7 @@ def pull_cmd(
         gb_turtles = prep_update_gb(minyear=1900, maxyear=2121, nmonths=nmonths)
         upload(gb_turtles, url=url, repo=repo)
 
-    if not no_gisaid:
+    if include_gisaid:
         upload_gisaid(config, url, repo)
 
     if not no_clades:
