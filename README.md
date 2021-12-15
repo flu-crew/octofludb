@@ -20,14 +20,18 @@ You may need to replace `pip` with `pip3` on your system.
 database to which all data is pushed. Go to https://graphdb.ontotext.com and
 download the GraphDB Free version.
 
-## Configuration
-
 ## Help
 
 You can get a list of subcommands with `octofludb -h`. More detailed
 documentation is available for each subcommand, e.g., `octofludb query -h`.
 
-## Subcommand: `init` - initialize an empty octofludb database
+## Subcommands
+
+`octofldub` has builtin documentation for each subcommand that describes the
+all arguments and general usage. Below I will cover each of the subcommands at
+a higher level with examples and background info as needed.
+
+### Subcommand: `init` - initialize an empty octofludb database
 
 To start a new database, first you have to call the daemon:
 
@@ -52,7 +56,7 @@ This is a Python wrapper around GraphDB that is used internally throughout
 pgraphdb rm_repo octofludb
 ```
 
-## Subcommand: `pull` - update data
+### Subcommand: `pull` - update data
 
 Use of this command requires some understanding of the `octofludb` configuration.
 
@@ -115,7 +119,7 @@ following:
  * H1 and H3 antigenic motifs are determined from the HA sequences using the
    `flutile` module.
 
-## Subcommand: `query` - submit a SPARQL query
+### Subcommand: `query` - submit a SPARQL query
 
 Once you've uploaded your data, you will want to access it. This is done with
 `octofludb query`. Data is pulled using SPARQL queries. SPARQL is a query
@@ -190,7 +194,7 @@ $ octofludb query --fasta myquery.rq | smof clean -t n -drux > myseqs.fna
 For an example of complete with filters, aggregate, and optional data, see the
 `*.rq` query files in the `octofludb/data` folder of the `octofludb` git repo.
 
-## Subcommand: `update` - submit a SPARQL deletion statement 
+### Subcommand: `update` - submit a SPARQL deletion statement 
 
 Like `octofludb query`, `octofludb update` also takes a SPARQL file. They are
 called in different ways since `query` is a readonly call and `update` can
@@ -242,19 +246,19 @@ SELECT ?sid ?clade .
 
 Which should return nothing.
 
-## Subcommand: `delete` - delete 
+### Subcommand: `delete` - delete 
 
 `octofludb delete` can be used as an alternative to the lower-level `octofludb
 update` SPARQL calls described above. It deletes specific kinds of data, such
 as all constellations, all subtypes, all us-clades, and global clades, or all
 motifs.
 
-## Subcommand: `construct` - submit a SPARQL construction statement
+### Subcommand: `construct` - submit a SPARQL construction statement
 
 Honestly, I never use this subcommand and am not sure if it works. Maybe I
 should remove it?
 
-## Subcommand: `prep` - munge data into Turtle files
+### Subcommand: `prep` - munge data into Turtle files
 
 If you want to work with data beyond that which `octofludb pull` loads, then
 you will need `prep`. This subcommand parses data out of various formats and
@@ -341,12 +345,12 @@ Whenever you use `octofludb prep`, you should always double check the resulting
 Turtle files before uploading them to the database to ensure the right
 information is being pushed.
 
-## Subcommand: `upload` - upload one or more Turtle files
+### Subcommand: `upload` - upload one or more Turtle files
 
 Not much to say here, the `upload` command uploads Turtle files to the
 database. Any triples that are already present in the database are ignored.
 
-## Subcommand: `classify` - classify strains with octoFLU
+### Subcommand: `classify` - classify strains with octoFLU
 
 `octofludb classify` takes a fasta file as an argument and produces a table
 showing the clades. It is a wrapper around octoFLU that uses the locally
@@ -354,7 +358,7 @@ specified reference file. The path to this reference file may be specified in
 the `~/.octofludb/config.yaml` file. If no reference file is specified, the
 default octoFLU reference is used.
 
-## Subcommand: `report` - make specialized reports
+### Subcommand: `report` - make specialized reports
 
 Any report generating logic that is important enough to crystallize into
 octofludb itself, that is comprised of both a query and filtering/cleaning in
@@ -371,7 +375,7 @@ stub that will eventually produce the public and gisaid inputs to the VCM-offlu
 pipeline. `quarter` is currently just a wrapper around `masterlist`, since both
 octoflushow and the quarterly report use the same input.
 
-## Subcommand: `fetch` - tag and fetch sets of identifiers
+### Subcommand: `fetch` - tag and fetch sets of identifiers
 
 `octofludb fetch` contains a selection of tools for working with specific sets of identifiers.
 
@@ -451,7 +455,12 @@ WHERE {
 }
 ```
 
+
 ## Problem strain examples
 
-    `A/USA/LAN_(P10)_NA/2018`
-    `A/R(duck/Hokkaido/9/99-tern/South Africa/1961)`
+Here is a (*very incomplete*) list of strange strain names I have to deal with:
+
+  * `A/USA/LAN_(P10)_NA/2018` - parentheses
+  * `A/R(duck/Hokkaido/9/99-tern/South Africa/1961)` - worse parentheses
+  * `A/swine/Denmark/18-13002-73_PB1/2018` - includes segment name (there are lots of these)
+  * `A/swine/Cotes d'Armor/110466/2010` - single quotes
