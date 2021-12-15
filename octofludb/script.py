@@ -20,10 +20,16 @@ def get_data_file(filename):
 def octofludbHome():
     return os.path.join(os.path.expanduser("~"), ".octofludb")
 
+def getDatadir(config):
+    datadir = expandpath(config["datadir"])[0]
+    if not os.path.exists(datadir):
+        os.mkdir(datadir)
+    return datadir
+
 
 def epiflu_fasta_files(config):
     try:
-        data_home = expandpath(config["datadir"])[0]
+        data_home = geteDataDir(config)
     except KeyError:
         die("The config file is missing a `datadir` entry")
     except IndexError:
@@ -33,7 +39,7 @@ def epiflu_fasta_files(config):
 
 def epiflu_meta_files(config):
     try:
-        data_home = expandpath(config["datadir"])[0]
+        data_home = geteDataDir(config)
     except KeyError:
         die("The config file is missing a `datadir` entry")
     except IndexError:
