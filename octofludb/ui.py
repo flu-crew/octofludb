@@ -543,11 +543,11 @@ def upload(turtle_filenames, url, repo):
 )
 @click.argument("tag", type=str)
 @filename_arg
-def prep_tag_cmd(tag, filename, outfile=sys.stdout):
+def prep_tag_cmd(tag, filename):
     """
     Associate list of IDs with a tag
     """
-    prep_tag(tag, filename, outfile=outfile)
+    prep_tag(tag, filename)
 
 
 def prep_tag(tag, filename, outfile=sys.stdout):
@@ -920,15 +920,7 @@ prep_grp.add_command(prep_ird_cmd)
 prep_grp.add_command(prep_ivr_cmd)
 
 
-# ===== make subcommands ====
-
-
-@click.command(
-    name="const",
-)
-@url_opt
-@repo_name_opt
-def make_const_cmd(url, repo):
+def make_const(url, repo, outfile=sys.stdout):
     """
     Generate constellations for all swine strains.
 
@@ -941,28 +933,12 @@ def make_const_cmd(url, repo):
     only a few of these in the US. "X" represents something else exotic (e.g.,
     not US). For mixed strains, the constellation will be recorded as "mixed".
     """
-    make_const(url, repo)
-
-
-def make_const(url, repo, outfile=sys.stdout):
     import octofludb.formatting as formatting
     import pgraphdb as db
 
     sparql_filename = os.path.join(os.path.dirname(__file__), "data", "segments.rq")
     results = db.sparql_query(sparql_file=sparql_filename, url=url, repo_name=repo)
     formatting.write_constellations(results, outfile=outfile)
-
-
-@click.command(
-    name="subtypes",
-)
-@url_opt
-@repo_name_opt
-def make_subtypes_cmd(url, repo, outfile=sys.stdout):
-    """
-    Determine subtypes based on Genbank serotype field, epiflu data, or octoflu HA/NA classifications"
-    """
-    make_subtypes(url=url, repo=repo, outfile=outfile)
 
 
 def make_subtypes(url, repo, outfile=sys.stdout):
@@ -988,7 +964,7 @@ def get_missing_subtypes(url, repo):
 )
 @url_opt
 @repo_name_opt
-def make_masterlist_cmd(url, repo):
+def report_masterlist_cmd(url, repo):
     """
     Generate the surveillance masterlist
     """
@@ -1000,23 +976,6 @@ def make_masterlist_cmd(url, repo):
     results = db.sparql_query(sparql_file=sparql_filename, url=url, repo_name=repo)
 
     recipe.mk_masterlist(results)
-
-
-@click.group(
-    cls=OrderedGroup,
-    name="make",
-    context_settings=CONTEXT_SETTINGS,
-)
-def make_grp():
-    """
-    Derive constellations, subtypes and such
-    """
-    pass
-
-
-make_grp.add_command(make_const_cmd)
-make_grp.add_command(make_subtypes_cmd)
-make_grp.add_command(make_masterlist_cmd)
 
 
 # ===== fetch subcommands =====
@@ -1246,7 +1205,7 @@ def report_quarter_cmd(url, repo):
     Currently, this just generates the smae masterlist as is used in
     octoflushow. However, it may eventually be specialized.
     """
-    make_masterlist_cmd(url=url, repo=repo)
+    report_masterlist_cmd(url=url, repo=repo)
 
 
 @click.command(
@@ -1273,10 +1232,10 @@ def report_grp():
     pass
 
 
+report_grp.add_command(report_offlu_cmd)
 report_grp.add_command(report_monthly_cmd)
 report_grp.add_command(report_quarter_cmd)
-report_grp.add_command(report_offlu_cmd)
-
+report_grp.add_command(report_masterlist_cmd)
 
 # ===== deletion subcommands =====
 
@@ -1402,7 +1361,6 @@ cli_grp.add_command(classify_cmd)
 cli_grp.add_command(construct_cmd)
 cli_grp.add_command(upload_cmd)
 cli_grp.add_command(prep_grp)
-cli_grp.add_command(make_grp)
 cli_grp.add_command(fetch_grp)
 cli_grp.add_command(report_grp)
 cli_grp.add_command(delete_grp)

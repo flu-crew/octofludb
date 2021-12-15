@@ -5,6 +5,9 @@ v0.12.0 [2021-12-15]
  * Do not include gisaid data by default (replace `--no-gisaid` flag in
    `octofludb pull` with `--include-gisaid`)
  * Fix read error in `octofludb prep fasta`
+ * Remove the `octofludb make` subcommand
+   - moved `octofludb make masterlist` to `octofludb report masterlist` 
+   - removed `const` and `subtypes`, just run SPARQL queries instead
 
 v0.11.0 [2021-11-08]
 ====================
