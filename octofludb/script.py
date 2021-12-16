@@ -29,7 +29,7 @@ def getDatadir(config):
 
 def epiflu_fasta_files(config):
     try:
-        data_home = geteDataDir(config)
+        data_home = getDataDir(config)
     except KeyError:
         die("The config file is missing a `datadir` entry")
     except IndexError:
@@ -39,7 +39,7 @@ def epiflu_fasta_files(config):
 
 def epiflu_meta_files(config):
     try:
-        data_home = geteDataDir(config)
+        data_home = getDataDir(config)
     except KeyError:
         die("The config file is missing a `datadir` entry")
     except IndexError:
