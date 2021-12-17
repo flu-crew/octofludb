@@ -194,6 +194,22 @@ $ octofludb query --fasta myquery.rq | smof clean -t n -drux > myseqs.fna
 For an example of complete with filters, aggregate, and optional data, see the
 `*.rq` query files in the `octofludb/data` folder of the `octofludb` git repo.
 
+To explore the relations in the database, you can run queries such as the following:
+
+```sparql
+PREFIX f: <https://flu-crew.org/term/>
+SELECT ?gid ?p ?o WHERE {
+    ?sid f:has_segment ?gid .
+    ?sid f:host "swine" .
+    ?gid f:segment_name "HA" .
+    ?gid f:clade ?clade .
+    ?gid ?p ?o .
+}
+LIMIT 100
+```
+
+This gives you a list of links from a swine segment to other data. 
+
 ### Subcommand: `update` - submit a SPARQL deletion statement 
 
 Like `octofludb query`, `octofludb update` also takes a SPARQL file. They are
