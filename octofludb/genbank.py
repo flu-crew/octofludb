@@ -24,24 +24,21 @@ import octofludb.domain.geography as geo
 
 def add_gb_meta_triples(g, gb_meta, only_influenza_a=True):
 
-    bad_entries = []
+    error_entry = ""
 
     try:
         accession = str(gb_meta["GBSeq_primary-accession"])
     except:
         log(bad("Bad Genbank Entry"))
-        bad_entries.append("Unknown\tNo primary accession")
-        return None
+        return "Unknown\tNo primary accession"
 
     if only_influenza_a:
         # ignore this entry if the organism is not specified
         if not "GBSeq_organism" in gb_meta:
-            log(f"No organsim specified for {accession}")
-            return None
+            return f"{accession}\tNo organsim specified"
         # ignore this entry if the organism is not an Influenza virus
         if not bool(re.match("Influenza [ABCD] virus", gb_meta["GBSeq_organism"])):
-            log(f"Accession '{accession}' does not appear to be influenza")
-            return None
+            return f"{accession}\tNot influenza"
 
     gid = make_uri(accession)
     g.add((gid, P.gb, Literal(accession)))
@@ -102,7 +99,7 @@ def add_gb_meta_triples(g, gb_meta, only_influenza_a=True):
                         strain = identifier.p_strain.parse(val)
                     except:
                         log(bad("Bad strain name: ") + val)
-                        bad_entries.append(f"{val}\tBad strain name")
+                        error_entry = f"{val}\tBad strain name"
                         strain = val
                 elif key == "collection_date":
                     date = make_date(val)
@@ -154,6 +151,6 @@ def add_gb_meta_triples(g, gb_meta, only_influenza_a=True):
     else:
         locus = gb_meta["GBSeq_locus"]
         log(bad("Missing strain: ") + locus)
-        bad_entries.append(f"{locus}\Missing strain")
+        error_entry = f"{locus}\tNo strain name"
 
-    return bad_entries
+    return error_entry

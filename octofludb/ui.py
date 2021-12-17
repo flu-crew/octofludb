@@ -641,18 +641,19 @@ def _mk_gbids_cmd(g, gbids=[]):
     import octofludb.genbank as gb
     import octofludb.script as script
 
-    failed_strains = []
+    error_msgs = []
 
     for gb_metas in entrez.get_gbs(gbids):
         for gb_meta in gb_metas:
-            failed = gb.add_gb_meta_triples(g, gb_meta)
-            failed_strains += failed
+            error_msg = gb.add_gb_meta_triples(g, gb_meta)
+            if error_msg:
+                error_msgs.append(error_msg)
         # commit the current batch (say of 1000 entries)
         g.commit()
 
-    if failed_strains:
-        logpath = script.error_log_entry(failed_strains, "failed_genbank_parses.txt")
-        log(f"{len(failed_strains)} genbank entries could not be parsed, see {logpath}")
+    if len(error_msgs) > 0:
+        logpath = script.error_log_entry(error_msgs, "failed_genbank_parses.txt")
+        log(f"{len(error_msgs)} genbank entries could not be parsed, see {logpath}")
 
 
 @click.command(
