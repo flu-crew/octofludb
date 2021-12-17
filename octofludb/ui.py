@@ -4,6 +4,7 @@ import signal
 import sys
 import os
 from octofludb.util import log, die
+from octofludb.version import __version__
 
 
 def open_graph():
@@ -308,14 +309,6 @@ def upload_motifs(config, url, repo):
         prep_table(h3_motif_table, outfile=turtleout)
     upload(["h3-motifs.ttl"], url=url, repo=repo)
 
-    # load all tags
-    for (tag, basename) in config["tags"].items():
-        for filename in script.tag_files(config, tag):
-            outfile = filename + ".ttl"
-            with open(outfile, "w") as f:
-                prep_tag(tag, filename, outfile=f)
-            upload([outfile], url=url, repo=repo)
-
 
 @click.command(
     name="pull",
@@ -328,9 +321,6 @@ def upload_motifs(config, url, repo):
 )
 @click.option(
     "--no-schema", is_flag=True, default=False, help="Skip upload schema steps"
-)
-@click.option(
-    "--include-gisaid", is_flag=True, default=False, help="include gisaid data step"
 )
 @click.option(
     "--no-clades",
@@ -347,10 +337,19 @@ def upload_motifs(config, url, repo):
 @click.option(
     "--no-motifs", is_flag=True, default=False, help="Skip motif extraction steps"
 )
+@click.option(
+    "--include-gisaid", is_flag=True, default=False, help="include gisaid data step"
+)
+@click.option(
+    "--include-tags",
+    is_flag=True,
+    default=False,
+    help="Upload tags as defined in the config file",
+)
 @url_opt
 @repo_name_opt
 def pull_cmd(
-    nmonths, no_schema, include_gisaid, no_clades, no_subtype, no_motifs, url, repo
+    nmonths, no_schema, no_clades, no_subtype, no_motifs, include_gisaid, include_tags, url, repo
 ):
     """
     Update data. Pull from genbank, process any new data in the data folder,
@@ -398,6 +397,15 @@ def pull_cmd(
 
     if not no_motifs:
         upload_motifs(config, url, repo)
+
+    if include_tags:
+        # load all tags
+        for (tag, basename) in config["tags"].items():
+            for filename in script.tag_files(config, tag):
+                outfile = filename + ".ttl"
+                with open(outfile, "w") as f:
+                    prep_tag(tag, filename, outfile=f)
+                upload([outfile], url=url, repo=repo)
 
     os.chdir(cwd)
 
@@ -1346,6 +1354,7 @@ delete_grp.add_command(delete_motifs_cmd)
 
 
 @click.group(cls=OrderedGroup, context_settings=CONTEXT_SETTINGS)
+@click.version_option(__version__, "-v", "--version", message=__version__)
 def cli_grp():
     """
     API and utilities for the USDA swine IVA surveillance database
