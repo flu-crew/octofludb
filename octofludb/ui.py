@@ -4,6 +4,7 @@ import signal
 import sys
 import os
 from octofludb.util import log, die
+from octofludb.version import __version__
 
 
 def open_graph():
@@ -1353,6 +1354,7 @@ delete_grp.add_command(delete_motifs_cmd)
 
 
 @click.group(cls=OrderedGroup, context_settings=CONTEXT_SETTINGS)
+@click.version_option(__version__, "-v", "--version", message=__version__)
 def cli_grp():
     """
     API and utilities for the USDA swine IVA surveillance database
