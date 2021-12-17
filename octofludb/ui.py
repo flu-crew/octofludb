@@ -711,7 +711,7 @@ def prep_update_gb(minyear, maxyear, nmonths):
     ):
         if missing_acc:
             outfile = ".gb_" + date.replace("/", "-") + ".ttl"
-            if os.path.exists(outfile):
+            if os.path.exists(outfile) and os.path.getsize(outfile) > 0:
                 log(f"GenBank turtle file for '{str(date)}' already exists, skipping")
             else:
                 log(colors.good(f"Updating {date} ..."))

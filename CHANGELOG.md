@@ -4,6 +4,7 @@ v0.13.0 [2021-12-17]
  * Add version argument
  * Make pulling of tag data optional
  * Write failed genbank parses to a log file
+ * Only skip if cached genbank ttl file has size greater than 0
 
 v0.12.1 [2021-12-16]
 ====================
