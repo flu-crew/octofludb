@@ -29,9 +29,9 @@ def with_graph(f, *args, filename=None, outfile=sys.stdout, **kwargs):
     log("done")
     for l in turtles.splitlines():
         try:
-          print(l.decode("utf-8"), file=outfile)
+            print(l.decode("utf-8"), file=outfile)
         except:
-          print(l, file=outfile)
+            print(l, file=outfile)
     g.close()
 
 
@@ -349,7 +349,15 @@ def upload_motifs(config, url, repo):
 @url_opt
 @repo_name_opt
 def pull_cmd(
-    nmonths, no_schema, no_clades, no_subtype, no_motifs, include_gisaid, include_tags, url, repo
+    nmonths,
+    no_schema,
+    no_clades,
+    no_subtype,
+    no_motifs,
+    include_gisaid,
+    include_tags,
+    url,
+    repo,
 ):
     """
     Update data. Pull from genbank, process any new data in the data folder,
@@ -638,7 +646,7 @@ def _mk_gbids_cmd(g, gbids=[]):
     for gb_metas in entrez.get_gbs(gbids):
         for gb_meta in gb_metas:
             failed = gb.add_gb_meta_triples(g, gb_meta)
-            failed_strains + failed
+            failed_strains += failed
         # commit the current batch (say of 1000 entries)
         g.commit()
 

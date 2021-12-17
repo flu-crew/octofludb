@@ -20,13 +20,15 @@ def get_data_file(filename):
 def octofludbHome():
     return os.path.join(os.path.expanduser("~"), ".octofludb")
 
+
 def getDatadir(config):
     datadir = expandpath(config["datadir"])[0]
     if not os.path.exists(datadir):
         os.mkdir(datadir)
     return datadir
 
-def error_log_entry(entries, logfile): 
+
+def error_log_entry(entries, logfile):
     homedir = octofludbHome()
     logdir = os.path.join(homedir, "logs")
     logpath = os.path.join(logdir, logfile)
