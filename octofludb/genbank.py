@@ -24,10 +24,13 @@ import octofludb.domain.geography as geo
 
 def add_gb_meta_triples(g, gb_meta, only_influenza_a=True):
 
+    bad_entries = []
+
     try:
         accession = str(gb_meta["GBSeq_primary-accession"])
     except:
         log(bad("Bad Genbank Entry"))
+        bad_entries.append("Unknown\tNo primary accession")
         return None
 
     if only_influenza_a:
@@ -99,6 +102,7 @@ def add_gb_meta_triples(g, gb_meta, only_influenza_a=True):
                         strain = identifier.p_strain.parse(val)
                     except:
                         log(bad("Bad strain name: ") + val)
+                        bad_entries.append(f"{val}\tBad strain name")
                         strain = val
                 elif key == "collection_date":
                     date = make_date(val)
@@ -148,4 +152,8 @@ def add_gb_meta_triples(g, gb_meta, only_influenza_a=True):
                     except:
                         pass
     else:
-        log(bad("Missing strain: ") + gb_meta["GBSeq_locus"])
+        locus = gb_meta["GBSeq_locus"]
+        log(bad("Missing strain: ") + locus)
+        bad_entries.append(f"{locus}\Missing strain")
+
+    return bad_entries

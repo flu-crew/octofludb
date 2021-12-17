@@ -26,6 +26,20 @@ def getDatadir(config):
         os.mkdir(datadir)
     return datadir
 
+def error_log_entry(entries, logfile): 
+    homedir = octofludbHome()
+    logdir = os.path.join(homedir, "logs")
+    logpath = os.path.join(logdir, logfile)
+
+    if not os.path.exists(logdir):
+        os.mkdir(logdir)
+
+    with open(logpath, "a") as f:
+        for line in entries:
+            print(line, file=f)
+
+    return logpath
+
 
 def epiflu_fasta_files(config):
     try:

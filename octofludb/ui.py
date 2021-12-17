@@ -631,12 +631,20 @@ def prep_gis_cmd(filename):
 def _mk_gbids_cmd(g, gbids=[]):
     import octofludb.entrez as entrez
     import octofludb.genbank as gb
+    import octofludb.script as script
+
+    failed_strains = []
 
     for gb_metas in entrez.get_gbs(gbids):
         for gb_meta in gb_metas:
-            gb.add_gb_meta_triples(g, gb_meta)
+            failed = gb.add_gb_meta_triples(g, gb_meta)
+            failed_strains + failed
         # commit the current batch (say of 1000 entries)
         g.commit()
+
+    if failed_strains:
+        logpath = script.error_log_entry(failed_strains, "failed_genbank_parses.txt")
+        log(f"{len(failed_strains)} genbank entries could not be parsed, see {logpath}")
 
 
 @click.command(

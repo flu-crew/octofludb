@@ -3,6 +3,7 @@ v0.13.0 [2021-12-17]
 
  * Add version argument
  * Make pulling of tag data optional
+ * Write failed genbank parses to a log file
 
 v0.12.1 [2021-12-16]
 ====================
