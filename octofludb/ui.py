@@ -154,6 +154,7 @@ def init_cmd(url, repo):
 
 def upload_gisaid(config, url, repo):
     import octofludb.script as script
+    import octofludb.recipes as recipe
 
     epiflu_metafiles = script.epiflu_meta_files(config)
     skipped_meta = 0
@@ -617,6 +618,8 @@ def prep_ird_cmd(filename):
     """
     Translate an IRD table to RDF.
     """
+
+    import octofludb.recipes as recipe
 
     with_graph(recipe.mk_ird, filename)
 

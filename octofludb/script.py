@@ -21,7 +21,7 @@ def octofludbHome():
     return os.path.join(os.path.expanduser("~"), ".octofludb")
 
 
-def getDatadir(config):
+def getDataDir(config):
     datadir = expandpath(config["datadir"])[0]
     if not os.path.exists(datadir):
         os.mkdir(datadir)
