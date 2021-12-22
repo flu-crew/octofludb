@@ -23,6 +23,19 @@ import octofludb.domain.geography as geo
 
 
 def add_gb_meta_triples(g, gb_meta, only_influenza_a=True):
+    """
+    Add genbank triples
+
+    Parameters
+    ----------
+    g : rdflib Graph object
+    gb_meta : Genbank metadata dictionary from Bio.Entrez
+    only_influenza_a : bool
+
+    Returns
+    -------
+    string containing any raised error or warning message
+    """
 
     error_entry = ""
 

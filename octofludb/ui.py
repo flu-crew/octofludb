@@ -906,7 +906,7 @@ def prep_unpublished_cmd(filename, tag, delimiter, include, exclude, na):
     """
     import octofludb.recipes as recipe
 
-    def _mk_unpublisehd_fasta_cmd(g, fh):
+    def _mk_unpublished_fasta_cmd(g, fh):
         (inc, exc, levels) = process_tablelike(include, exclude, None)
         recipe.IrregularFasta(
             filehandle=fh,
@@ -918,7 +918,7 @@ def prep_unpublished_cmd(filename, tag, delimiter, include, exclude, na):
             na_str=make_na(na),
         ).connect(g)
 
-    with_graph(_mk_unpublisehd_fasta_cmd, filename)
+    with_graph(_mk_unpublished_fasta_cmd, filename=filename)
 
 
 @click.group(
