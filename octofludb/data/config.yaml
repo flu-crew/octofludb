@@ -32,7 +32,7 @@ tags:
   antiserum: 'antiserum/antiserum_strain_names.txt'
   antigen: 'antiserum/antiserum_strain_names.txt'
   vaccine: 'vaccine/isolate_ids.txt'
-  variants: 'variants/isolate_ids.txt'
+  variant: 'variants/isolate_ids.txt'
   wgs: 'wgs/wgs.txt'
 
 # optional list of other files that contain raw turtles files
