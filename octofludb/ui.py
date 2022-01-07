@@ -1,6 +1,5 @@
 import click
 import collections
-import signal
 import sys
 import os
 from octofludb.util import log, die
@@ -1397,9 +1396,3 @@ cli_grp.add_command(delete_grp)
 
 def main():
     cli_grp()
-
-
-if __name__ == "__main__":
-    if os.name is "posix":
-        signal.signal(signal.SIGPIPE, signal.SIG_DFL)
-    main()
