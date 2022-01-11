@@ -1,6 +1,6 @@
 @prefix f: <https://flu-crew.org/term/> .
 @prefix fid: <https://flu-crew.org/id/> .
-@prefix ns1: <http://www.w3.org/2002/07/owl#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix world: <https://flu-crew.org/geo/country/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
@@ -120,145 +120,145 @@ fid:epi744029 f:epi_id "EPI744029" ;
     f:lineage "pdm09" ;
     f:segment_name "HA" .
 
-fid:epi1601841 ns1:sameAs fid:mn436834 ;
+fid:epi1601841 owl:sameAs fid:mn436834 ;
     f:epi_id "EPI1601841" ;
     f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393493" ;
     f:segment_name "HA" .
 
-fid:epi1601842 ns1:sameAs fid:mn436835 ;
+fid:epi1601842 owl:sameAs fid:mn436835 ;
     f:epi_id "EPI1601842" ;
     f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393493" ;
     f:segment_name "NA" .
 
-fid:epi1601843 ns1:sameAs fid:mn436836 ;
+fid:epi1601843 owl:sameAs fid:mn436836 ;
     f:epi_id "EPI1601843" ;
     f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393494" ;
     f:segment_name "PB2" .
 
-fid:epi1601844 ns1:sameAs fid:mn436837 ;
+fid:epi1601844 owl:sameAs fid:mn436837 ;
     f:epi_id "EPI1601844" ;
     f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393494" ;
     f:segment_name "PB1" .
 
-fid:epi1601845 ns1:sameAs fid:mn436838 ;
+fid:epi1601845 owl:sameAs fid:mn436838 ;
     f:epi_id "EPI1601845" ;
     f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393494" ;
     f:segment_name "PA" .
 
-fid:epi1601846 ns1:sameAs fid:mn436839 ;
+fid:epi1601846 owl:sameAs fid:mn436839 ;
     f:epi_id "EPI1601846" ;
     f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393494" ;
     f:segment_name "HA" .
 
-fid:epi1601847 ns1:sameAs fid:mn436840 ;
+fid:epi1601847 owl:sameAs fid:mn436840 ;
     f:epi_id "EPI1601847" ;
     f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393494" ;
     f:segment_name "NP" .
 
-fid:epi1601848 ns1:sameAs fid:mn436841 ;
+fid:epi1601848 owl:sameAs fid:mn436841 ;
     f:epi_id "EPI1601848" ;
     f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393494" ;
     f:segment_name "NA" .
 
-fid:epi1601849 ns1:sameAs fid:mn436842 ;
+fid:epi1601849 owl:sameAs fid:mn436842 ;
     f:epi_id "EPI1601849" ;
     f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393494" ;
     f:segment_name "M" .
 
-fid:epi1601850 ns1:sameAs fid:mn436843 ;
+fid:epi1601850 owl:sameAs fid:mn436843 ;
     f:epi_id "EPI1601850" ;
     f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393494" ;
     f:segment_name "NS" .
 
-fid:epi1601851 ns1:sameAs fid:mn447202 ;
+fid:epi1601851 owl:sameAs fid:mn447202 ;
     f:epi_id "EPI1601851" ;
     f:gisaid_subtype "H1N1" ;
     f:isolate_id "EPI_ISL_393495" ;
     f:segment_name "HA" .
 
-fid:epi1601852 ns1:sameAs fid:mn447203 ;
+fid:epi1601852 owl:sameAs fid:mn447203 ;
     f:epi_id "EPI1601852" ;
     f:gisaid_subtype "H1N1" ;
     f:isolate_id "EPI_ISL_393495" ;
     f:segment_name "NA" .
 
-fid:mn436834 ns1:sameAs fid:epi1601841 ;
+fid:mn436834 owl:sameAs fid:epi1601841 ;
     f:genbank_id "MN436834" ;
     f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393493" ;
     f:segment_name "HA" .
 
-fid:mn436835 ns1:sameAs fid:epi1601842 ;
+fid:mn436835 owl:sameAs fid:epi1601842 ;
     f:genbank_id "MN436835" ;
     f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393493" ;
     f:segment_name "NA" .
 
-fid:mn436836 ns1:sameAs fid:epi1601843 ;
+fid:mn436836 owl:sameAs fid:epi1601843 ;
     f:genbank_id "MN436836" ;
     f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393494" ;
     f:segment_name "PB2" .
 
-fid:mn436837 ns1:sameAs fid:epi1601844 ;
+fid:mn436837 owl:sameAs fid:epi1601844 ;
     f:genbank_id "MN436837" ;
     f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393494" ;
     f:segment_name "PB1" .
 
-fid:mn436838 ns1:sameAs fid:epi1601845 ;
+fid:mn436838 owl:sameAs fid:epi1601845 ;
     f:genbank_id "MN436838" ;
     f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393494" ;
     f:segment_name "PA" .
 
-fid:mn436839 ns1:sameAs fid:epi1601846 ;
+fid:mn436839 owl:sameAs fid:epi1601846 ;
     f:genbank_id "MN436839" ;
     f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393494" ;
     f:segment_name "HA" .
 
-fid:mn436840 ns1:sameAs fid:epi1601847 ;
+fid:mn436840 owl:sameAs fid:epi1601847 ;
     f:genbank_id "MN436840" ;
     f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393494" ;
     f:segment_name "NP" .
 
-fid:mn436841 ns1:sameAs fid:epi1601848 ;
+fid:mn436841 owl:sameAs fid:epi1601848 ;
     f:genbank_id "MN436841" ;
     f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393494" ;
     f:segment_name "NA" .
 
-fid:mn436842 ns1:sameAs fid:epi1601849 ;
+fid:mn436842 owl:sameAs fid:epi1601849 ;
     f:genbank_id "MN436842" ;
     f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393494" ;
     f:segment_name "M" .
 
-fid:mn436843 ns1:sameAs fid:epi1601850 ;
+fid:mn436843 owl:sameAs fid:epi1601850 ;
     f:genbank_id "MN436843" ;
     f:gisaid_subtype "H3N2" ;
     f:isolate_id "EPI_ISL_393494" ;
     f:segment_name "NS" .
 
-fid:mn447202 ns1:sameAs fid:epi1601851 ;
+fid:mn447202 owl:sameAs fid:epi1601851 ;
     f:genbank_id "MN447202" ;
     f:gisaid_subtype "H1N1" ;
     f:isolate_id "EPI_ISL_393495" ;
     f:segment_name "HA" .
 
-fid:mn447203 ns1:sameAs fid:epi1601852 ;
+fid:mn447203 owl:sameAs fid:epi1601852 ;
     f:genbank_id "MN447203" ;
     f:gisaid_subtype "H1N1" ;
     f:isolate_id "EPI_ISL_393495" ;
