@@ -1,8 +1,8 @@
 import hashlib
 import subprocess
 import yaml
-import pgraphdb
-import smof
+import pgraphdb # type: ignore
+import smof # type: ignore
 import glob
 import os
 import sys

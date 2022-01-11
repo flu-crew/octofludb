@@ -2,6 +2,7 @@ from typing import List
 from rdflib import Literal
 import math
 import sys
+import re
 
 
 def log(msg, end="\n"):

@@ -5,11 +5,11 @@ import requests
 import datetime
 from typing import List
 from urllib.error import HTTPError
-from Bio import Entrez
-from tqdm import tqdm
+from Bio import Entrez # type: ignore
+from tqdm import tqdm # type: ignore
 from octofludb.util import log
 import octofludb.colors as colors
-import pgraphdb as db
+import pgraphdb as db # type: ignore
 
 Entrez.email = "zebulun.arendsee@usda.gov"
 

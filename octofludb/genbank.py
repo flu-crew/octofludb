@@ -59,7 +59,7 @@ def add_gb_meta_triples(g, gb_meta, only_influenza_a=True):
     maybe_add = make_maybe_add(g, gb_meta, gid)
 
     def make_integer(x):
-        return rdflib.Literal(x, datatype=XSD.integer)
+        return Literal(x, datatype=XSD.integer)
 
     maybe_add(P.gb_locus, "GBSeq_locus")
     maybe_add(P.gb_length, "GBSeq_length", formatter=make_integer)

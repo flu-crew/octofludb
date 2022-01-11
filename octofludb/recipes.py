@@ -1,6 +1,6 @@
 import sys
 from rdflib import Literal
-import pandas as pd
+import pandas as pd # type: ignore
 import octofludb.classes as classes
 from octofludb.colors import bad
 import octofludb.classifiers.flucrew as flu
@@ -11,7 +11,7 @@ from octofludb.nomenclature import P, O, make_uri, make_tag_uri
 from octofludb.util import log, file_str
 import re
 import math
-from tqdm import tqdm
+from tqdm import tqdm # type: ignore
 import datetime as datetime
 
 

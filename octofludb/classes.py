@@ -5,12 +5,12 @@ from octofludb.token import Token, Unknown, Missing
 from octofludb.util import zipGen, strOrNone, log, concat, file_str
 from octofludb.nomenclature import make_tag_uri, P
 import dateutil.parser as dateparser
-import xlrd
-import pandas as pd
+import xlrd # type: ignore
+import pandas as pd # type: ignore
 import octofludb.colors as colors
 import datetime as datetime
 from rdflib import Literal
-from tqdm import tqdm
+from tqdm import tqdm # type: ignore
 
 
 def updateClassifiers(classifiers, include, exclude):
