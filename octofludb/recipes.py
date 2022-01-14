@@ -3,7 +3,7 @@ from rdflib import Literal
 import pandas as pd # type: ignore
 import octofludb.classes as classes
 from octofludb.colors import bad
-import octofludb.classifiers_flucrew as flu
+import octofludb.classifier_flucrew as flu
 import octofludb.token as tok
 import octofludb.domain_identifier as identifier
 import parsec

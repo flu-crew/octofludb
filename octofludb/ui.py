@@ -1,37 +1,37 @@
+from __future__ import annotations
+from typing import Callable, TextIO, Union
+
 import click
 import collections
 import sys
 import os
+import functools
+from rdflib import Graph
 from octofludb.util import log, die
 from octofludb.version import __version__
 
 
-def open_graph():
-    from rdflib import Graph
+def open_graph() -> Graph:
     from octofludb.nomenclature import manager
 
     return Graph(namespace_manager=manager)
 
 
-def with_graph(f, *args, filename=None, outfile=sys.stdout, **kwargs):
+def with_graph(f : Callable[[Graph], None], outfile : TextIO = sys.stdout) -> None:
     g = open_graph()
 
-    if filename is not None:
-        with open(filename, "r") as fh:
-            f(g, fh, *args, **kwargs)
-    else:
-        f(g, *args, **kwargs)
+    # mutate the Graph
+    f(g)
 
     g.commit()  # just in case we missed anything
     log("Serializing to turtle format ... ", end="")
     turtles = g.serialize(format="turtle")
     log("done")
     for l in turtles.splitlines():
-        try:
-            print(l.decode("utf-8"), file=outfile)
-        except:
-            print(l, file=outfile)
+        print(l, file=outfile)
     g.close()
+
+    return None
 
 
 def open_file(path):
@@ -164,7 +164,7 @@ def upload_gisaid(config, url, repo):
                 skipped_meta += 1
             else:
                 with open(outfile, "w") as f:
-                    with_graph(recipe.mk_gis, epiflu_metafile, outfile=f)
+                    with_graph(functools.partial(recipe.mk_gis, epiflu_metafile), outfile=f)
                 upload([outfile], url=url, repo=repo)
     else:
         log("No epiflu metafiles found")
@@ -606,7 +606,7 @@ def prep_ivr_cmd(filename):
     """
     import octofludb.recipes as recipe
 
-    with_graph(recipe.mk_influenza_na, filename)
+    with_graph(functools.partial(recipe.mk_influenza_na, filename))
 
 
 @click.command(
@@ -620,7 +620,7 @@ def prep_ird_cmd(filename):
 
     import octofludb.recipes as recipe
 
-    with_graph(recipe.mk_ird, filename)
+    with_graph(functools.partial(recipe.mk_ird, filename))
 
 
 @click.command(
@@ -635,7 +635,7 @@ def prep_gis_cmd(filename):
     """
     import octofludb.recipes as recipe
 
-    with_graph(recipe.mk_gis, filename)
+    with_graph(functools.partial(recipe.mk_gis, filename))
 
 
 def _mk_gbids_cmd(g, gbids=[]):
@@ -671,7 +671,7 @@ def prep_gbids_cmd(*args, **kwargs):
     with open(filename, "r") as fh:
         gbids = [gbid.strip() for gbid in fh]
     log(f"Retrieving and parsing genbank ids from '{args.filename}'")
-    with_graph(_mk_gbids_cmd, gbids=gbids)
+    with_graph(functools.partial(_mk_gbids_cmd, gbids=gbids))
 
 
 @click.command(name="update_gb")
@@ -718,7 +718,7 @@ def prep_update_gb(minyear, maxyear, nmonths):
             else:
                 log(colors.good(f"Updating {date} ..."))
                 with open(outfile, "w") as fh:
-                    with_graph(_mk_gbids_cmd, gbids=missing_acc, outfile=fh)
+                    with_graph(functools.partial(_mk_gbids_cmd, gbids=missing_acc), outfile=fh)
                 outfiles.append(outfile)
         else:
             log(colors.good(f"Up-to-date for {date}"))
@@ -740,7 +740,7 @@ def prep_blast_cmd(tag, filename):
     import octofludb.recipes as recipe
 
     log(f"Retrieving and parsing blast results from '{filename}'")
-    with_graph(recipe.mk_blast, filename, tag=tag)
+    with_graph(functools.partial(recipe.mk_blast, filename, tag=tag))
 
 
 def process_tablelike(include, exclude, levels):
@@ -818,7 +818,7 @@ def prep_table(
             na_str=make_na(na),
         ).connect(g)
 
-    with_graph(_mk_table_cmd, filename=filename, outfile=outfile)
+    with_graph(functools.partial(_mk_table_cmd, filename), outfile=outfile)
 
 
 @click.command(
@@ -864,7 +864,7 @@ def prep_fasta(
         ).connect(g)
 
     with open(filename, "r") as fasta_fh:
-        with_graph(_mk_fasta_cmd, fasta_fh, outfile=outfile)
+        with_graph(functools.partial(_mk_fasta_cmd, fasta_fh), outfile=outfile)
 
     return outfile
 
@@ -920,7 +920,7 @@ def prep_unpublished_cmd(filename, tag, delimiter, include, exclude, na):
             na_str=make_na(na),
         ).connect(g)
 
-    with_graph(_mk_unpublished_fasta_cmd, filename=filename)
+    with_graph(functools.partial(_mk_unpublished_fasta_cmd, filename))
 
 
 @click.group(

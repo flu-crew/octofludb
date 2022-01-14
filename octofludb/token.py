@@ -1,3 +1,6 @@
+from __future__ import annotations
+from typing import Optional
+
 import parsec as p
 from octofludb.nomenclature import make_property, make_literal, define_subproperty
 import rdflib
@@ -9,10 +12,10 @@ from rdflib.namespace import XSD
 
 
 class Token:
-    parser = None
-    group = None
-    typename = "auto"
-    class_predicate = None
+    parser : Optional[p.Parser[str]] = None
+    group : Optional[str] = None
+    typename : Optional[str] = "auto"
+    class_predicate : Optional[str] = None
 
     def __init__(self, text, field_name=None, na_str=[None]):
         self.matches = self.testOne(text, na_str=na_str)
