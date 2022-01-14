@@ -1,7 +1,7 @@
 import parsec as p
 import re
-from octofludb.domain.date import p_year
-from octofludb.domain.identifier import p_A0
+from octofludb.domain_date import p_year
+from octofludb.domain_identifier import p_A0
 from octofludb.parser import wordset
 from octofludb.util import rmNone, concat
 

@@ -3,8 +3,8 @@ import rdflib
 import urllib.parse as url
 import sys
 import re
-import octofludb.domain.geography as geo
-import octofludb.domain.date as date
+import octofludb.domain_geography as geo
+import octofludb.domain_date as date
 from rdflib.namespace import RDF, RDFS, OWL, XSD
 from octofludb.util import padDigit
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import octofludb.classifiers.flucrew as ftok
+import octofludb.classifiers_flucrew as ftok
 import octofludb.recipes as recipes
 import octofludb.formatting as formatter
 import octofludb.token as tok

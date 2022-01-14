@@ -13,13 +13,13 @@ from octofludb.hash import chksum
 from rdflib import Literal
 from rdflib.namespace import XSD
 import re
-import octofludb.domain.identifier as identifier
-import octofludb.domain.flu as flu
-import octofludb.domain.animal as animal
+import octofludb.domain_identifier as identifier
+import octofludb.domain_flu as flu
+import octofludb.domain_animal as animal
 import sys
 from octofludb.util import log
 from octofludb.colors import bad
-import octofludb.domain.geography as geo
+import octofludb.domain_geography as geo
 
 
 def add_gb_meta_triples(g, gb_meta, only_influenza_a=True):

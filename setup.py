@@ -14,7 +14,8 @@ setup(
     url="https://github.com/flu-crew/octofludb",
     author="Zebulun Arendsee",
     author_email="zebulun.arendsee@usda.gov",
-    packages=["octofludb", "octofludb.classifiers", "octofludb.domain"],
+    packages=["octofludb"],
+    package_data={"octofludb": ["py.typed"]},
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

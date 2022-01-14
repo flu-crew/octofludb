@@ -1,6 +1,6 @@
 import sys
 import parsec
-from octofludb.classifiers.flucrew import allClassifiers
+from octofludb.classifiers_flucrew import allClassifiers
 from octofludb.token import Token, Unknown, Missing
 from octofludb.util import zipGen, strOrNone, log, concat, file_str
 from octofludb.nomenclature import make_tag_uri, P

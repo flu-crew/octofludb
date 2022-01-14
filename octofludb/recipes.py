@@ -3,9 +3,9 @@ from rdflib import Literal
 import pandas as pd # type: ignore
 import octofludb.classes as classes
 from octofludb.colors import bad
-import octofludb.classifiers.flucrew as flu
+import octofludb.classifiers_flucrew as flu
 import octofludb.token as tok
-import octofludb.domain.identifier as identifier
+import octofludb.domain_identifier as identifier
 import parsec
 from octofludb.nomenclature import P, O, make_uri, make_tag_uri
 from octofludb.util import log, file_str
