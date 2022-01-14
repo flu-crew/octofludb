@@ -9,7 +9,7 @@ from Bio import Entrez # type: ignore
 from tqdm import tqdm # type: ignore
 from octofludb.util import log
 import octofludb.colors as colors
-import pgraphdb as db # type: ignore
+import pgraphdb as db
 
 Entrez.email = "zebulun.arendsee@usda.gov"
 

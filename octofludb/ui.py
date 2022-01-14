@@ -118,7 +118,7 @@ def init_cmd(url, repo):
     """
     Initialize an empty octofludb database
     """
-    import pgraphdb as db # type: ignore
+    import pgraphdb as db
     import requests
     import shutil
     import octofludb.script as script
@@ -195,7 +195,7 @@ def upload_gisaid(config, url, repo):
 
 def upload_classifications(config, url, repo):
     import octofludb.script as script
-    import pgraphdb as db # type: ignore
+    import pgraphdb as db
 
     # octoflu classifications of unclassified swine
     # * retrieve unclassified strains
@@ -242,7 +242,7 @@ def upload_classifications(config, url, repo):
 
 def upload_subtypes(config, url, repo):
     import octofludb.script as script
-    import pgraphdb as db # type: ignore
+    import pgraphdb as db
 
     # infer subtypes
     subtypes_table = "subtypes.txt"
@@ -370,7 +370,7 @@ def pull_cmd(
     """
     import octofludb.recipes as recipe
     import octofludb.script as script
-    import pgraphdb as db # type: ignore
+    import pgraphdb as db
 
     cwd = os.getcwd()
 
@@ -422,7 +422,7 @@ def pull_cmd(
 
 def fmt_query_cmd(sparql_filename, header, fasta, url, repo, outfile=sys.stdout):
     import octofludb.formatting as formatting
-    import pgraphdb as db # type: ignore
+    import pgraphdb as db
 
     results = db.sparql_query(sparql_file=sparql_filename, url=url, repo_name=repo)
     if fasta:
@@ -500,7 +500,7 @@ def construct_cmd(sparql_filename, url, repo):
     """
     Construct new triples
     """
-    import pgraphdb as db # type: ignore
+    import pgraphdb as db
 
     results = db.sparql_construct(sparql_file=sparql_filename, url=url, repo_name=repo)
 
@@ -519,7 +519,7 @@ def update_cmd(sparql_filename, url, repo):
     """
     Submit a SPARQL delete or insert query to octofludb
     """
-    import pgraphdb as db # type: ignore
+    import pgraphdb as db
 
     db.update(sparql_file=sparql_filename, url=url, repo_name=repo)
     return None
@@ -539,7 +539,7 @@ def upload_cmd(turtle_filenames, url, repo):
 
 
 def upload(turtle_filenames, url, repo):
-    import pgraphdb as db # type: ignore
+    import pgraphdb as db
     import octofludb.script as script
 
     files = []
@@ -961,7 +961,7 @@ def make_const(url, repo, outfile=sys.stdout):
     not US). For mixed strains, the constellation will be recorded as "mixed".
     """
     import octofludb.formatting as formatting
-    import pgraphdb as db # type: ignore
+    import pgraphdb as db
 
     sparql_filename = os.path.join(os.path.dirname(__file__), "data", "segments.rq")
     results = db.sparql_query(sparql_file=sparql_filename, url=url, repo_name=repo)
@@ -977,7 +977,7 @@ def make_subtypes(url, repo, outfile=sys.stdout):
 
 def get_missing_subtypes(url, repo):
     import octofludb.recipes as recipe
-    import pgraphdb as db # type: ignore
+    import pgraphdb as db
 
     sparql_filename = os.path.join(os.path.dirname(__file__), "data", "subtypes.rq")
 
@@ -996,7 +996,7 @@ def report_masterlist_cmd(url, repo):
     Generate the surveillance masterlist
     """
     import octofludb.recipes as recipe
-    import pgraphdb as db # type: ignore
+    import pgraphdb as db
 
     sparql_filename = os.path.join(os.path.dirname(__file__), "data", "masterlist.rq")
 
@@ -1120,7 +1120,7 @@ def fetch_clear_cmd(url, repo):
     """
     Clear all uploaded tags
     """
-    import pgraphdb as db # type: ignore
+    import pgraphdb as db
 
     sparql_filename = os.path.join(
         os.path.dirname(__file__), "data", "clear-query-tags.rq"
@@ -1277,7 +1277,7 @@ def delete_constellations_cmd(url, repo):
     Delete all constellation data
     """
     import octofludb.script as script
-    import pgraphdb as db # type: ignore
+    import pgraphdb as db
 
     delete_script = script.get_data_file("delete-constellations.rq")
     db.update(sparql_file=delete_script, url=url, repo_name=repo)
@@ -1293,7 +1293,7 @@ def delete_subtypes_cmd(url, repo):
     Delete all subtype data
     """
     import octofludb.script as script
-    import pgraphdb as db # type: ignore
+    import pgraphdb as db
 
     delete_script = script.get_data_file("delete-subtypes.rq")
     db.update(sparql_file=delete_script, url=url, repo_name=repo)
@@ -1309,7 +1309,7 @@ def delete_us_clades_cmd(url, repo):
     Delete all clade data
     """
     import octofludb.script as script
-    import pgraphdb as db # type: ignore
+    import pgraphdb as db
 
     delete_script = script.get_data_file("delete-us_clades.rq")
     db.update(sparql_file=delete_script, url=url, repo_name=repo)
@@ -1325,7 +1325,7 @@ def delete_gl_clades_cmd(url, repo):
     Delete all global H1 clade data
     """
     import octofludb.script as script
-    import pgraphdb as db # type: ignore
+    import pgraphdb as db
 
     delete_script = script.get_data_file("delete-gl_clades.rq")
     db.update(sparql_file=delete_script, url=url, repo_name=repo)
@@ -1341,7 +1341,7 @@ def delete_motifs_cmd(url, repo):
     Delete all antigenic motifs
     """
     import octofludb.script as script
-    import pgraphdb as db # type: ignore
+    import pgraphdb as db
 
     delete_script = script.get_data_file("delete-motifs.rq")
     db.update(sparql_file=delete_script, url=url, repo_name=repo)
