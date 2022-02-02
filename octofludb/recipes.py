@@ -1,6 +1,10 @@
+from __future__ import annotations
+from typing import Optional, List, Set, Tuple, TextIO
+
 import sys
 from rdflib import Literal
-import pandas as pd # type: ignore
+from rdflib.term import Node
+import pandas as pd  # type: ignore
 import octofludb.classes as classes
 from octofludb.colors import bad
 import octofludb.classifier_flucrew as flu
@@ -11,11 +15,17 @@ from octofludb.nomenclature import P, O, make_uri, make_tag_uri
 from octofludb.util import log, file_str
 import re
 import math
-from tqdm import tqdm # type: ignore
+from tqdm import tqdm  # type: ignore
 import datetime as datetime
+from SPARQLWrapper import SPARQLWrapper  # type:ignore
 
 
-def mk_blast(g, filehandle, tag=None):
+def mk_blast(
+    filehandle: TextIO, tag: Optional[str] = None
+) -> Set[Tuple[Node, Node, Node]]:
+
+    g: Set[Tuple[Node, Node, Node]] = set()  # initialize triple set
+
     timestr = datetime.datetime.now()
     for row in tqdm(filehandle.readlines()):
         try:
@@ -59,10 +69,14 @@ def mk_blast(g, filehandle, tag=None):
         g.add((huid, P.send, Literal(int(send))))
         g.add((huid, P.evalue, Literal(float(evalue))))
         g.add((huid, P.bitscore, Literal(float(bitscore))))
-    g.commit()
+
+    return g
 
 
-def mk_influenza_na(g, filehandle) -> None:
+def mk_influenza_na(filehandle: TextIO) -> Set[Tuple[Node, Node, Node]]:
+
+    g = set()  # initialize triple set
+
     def extract_strain(x):
         strain_pat = re.compile("[ABCD]/[^()\[\]]+")
         m = re.search(strain_pat, x)
@@ -74,67 +88,76 @@ def mk_influenza_na(g, filehandle) -> None:
     for line in tqdm(filehandle.readlines()):
         els = line.split("\t")
         try:
-            classes.Phrase(
-                [
-                    flu.Genbank(els[0]),
-                    tok.Unknown(els[1].lower(), field_name="host"),
-                    flu.SegmentNumber(els[2]),
-                    flu.Subtype(els[3]),
-                    flu.Country(els[4]),
-                    flu.Date(els[5]),
-                    tok.Integer(els[6].lower(), field_name="length"),
-                    flu.Strain(extract_strain(els[7])),
-                    # skip 8
-                    # skip 9
-                    tok.Unknown(els[10].strip(), field_name="genome_status"),
-                ]
-            ).connect(g)
+            g.update(
+                classes.Phrase(
+                    [
+                        flu.Genbank(els[0]),
+                        tok.Unknown(els[1].lower(), field="host"),
+                        flu.SegmentNumber(els[2]),
+                        flu.Subtype(els[3]),
+                        flu.Country(els[4]),
+                        flu.Date(els[5]),
+                        tok.Integer(els[6].lower(), field="length"),
+                        flu.Strain(extract_strain(els[7])),
+                        # skip 8
+                        # skip 9
+                        tok.Unknown(els[10].strip(), field="genome_status"),
+                    ]
+                ).connect()
+            )
         except IndexError:
             log(line)
             sys.exit(1)
 
+    return g
 
-def mk_ird(g, filehandle) -> None:
-    na_str = "-N/A-"
+
+def mk_ird(filehandle: TextIO) -> Set[Tuple[Node, Node, Node]]:
+
+    g = set()  # initialize triple set
+
+    na_str = ["-N/A-"]
     for line in tqdm(filehandle.readlines()):
         els = line.split("\t")
         try:
-            classes.Phrase(
-                [
-                    flu.SegmentNumber(els[0], na_str=na_str),
-                    # skip protein name
-                    flu.Genbank(els[2], field_name="genbank_id", na_str=na_str),
-                    # skip complete genome
-                    tok.Integer(els[4], field_name="length", na_str=na_str),
-                    flu.Subtype(els[5], na_str=na_str),
-                    flu.Date(els[6], na_str=na_str),
-                    flu.Unknown(
-                        els[7].replace("IRD:", "").lower(),
-                        field_name="host",
-                        na_str=na_str,
-                    ),
-                    flu.Country(els[8]),
-                    # ignore state - can parse it from strain name
-                    tok.Unknown(els[10], field_name="flu_season", na_str=na_str),
-                    flu.Strain(els[11], field_name="strain_name", na_str=na_str),
-                    # curation report - hard pass
-                    ### I don't need your annotations, I can do my own, thank you very much
-                    #  flu.US_Clade(els[13], field_name="us_clade", na_str=na_str),
-                    #  flu.GlobalClade(els[14], field_name="gl_clade", na_str=na_str),
-                ]
-            ).connect(g)
+            g.update(
+                classes.Phrase(
+                    [
+                        flu.SegmentNumber(els[0], na_str=na_str),
+                        # skip protein name
+                        flu.Genbank(els[2], field="genbank_id", na_str=na_str),
+                        # skip complete genome
+                        tok.Integer(els[4], field="length", na_str=na_str),
+                        flu.Subtype(els[5], na_str=na_str),
+                        flu.Date(els[6], na_str=na_str),
+                        flu.Unknown(
+                            els[7].replace("IRD:", "").lower(),
+                            field="host",
+                            na_str=na_str,
+                        ),
+                        flu.Country(els[8]),
+                        # ignore state - can parse it from strain name
+                        tok.Unknown(els[10], field="flu_season", na_str=na_str),
+                        flu.Strain(els[11], field="strain_name", na_str=na_str),
+                        # curation report - hard pass
+                        ### I don't need your annotations, I can do my own, thank you very much
+                        #  flu.US_Clade(els[13], field="us_clade", na_str=na_str),
+                        #  flu.GlobalClade(els[14], field="gl_clade", na_str=na_str),
+                    ]
+                ).connect()
+            )
         except IndexError:
             log(line)
             sys.exit(1)
 
+    return g
 
-def mk_gis(g, filehandle) -> None:
-    if isinstance(filehandle, str):
-        filename = filehandle
-    else:
-        filename = filehandle.name
 
-    fh = pd.read_excel(filename, sheet_name=0)
+def mk_gis(filehandle: TextIO) -> Set[Tuple[Node, Node, Node]]:
+
+    g = set()  # initialize triple set
+
+    fh = pd.read_excel(filehandle, sheet_name=0)
     d = {c: [x for x in fh[c]] for c in fh}
     epipat = re.compile(" *\|.*")
     for i in tqdm(range(len(d["Isolate_Id"]))):
@@ -144,28 +167,26 @@ def mk_gis(g, filehandle) -> None:
             # remove the parenthesized garbage following the strain name
             strain_clean = identifier.p_strain.parse(d["Isolate_Name"][i])
             # don't use Strain token here, to avoid double linking
-            strain_tok = flu.Unknown(strain_clean, field_name="strain_name")
+            strain_tok = flu.Unknown(strain_clean, field="strain_name")
             # and keep the full strain name, even if ugly
             full_strain_name_tok = flu.Unknown(
-                d["Isolate_Name"][i], field_name="gisaid_strain_name"
+                d["Isolate_Name"][i], field="gisaid_strain_name"
             )
 
-            host_tok = flu.Host(d["Host"][i], field_name="host")
-            subtype_tok = flu.Subtype(d["Subtype"][i], field_name="gisaid_subtype")
-            lineage_tok = tok.Unknown(
-                d["Lineage"][i], field_name="lineage", na_str=["", None]
-            )
+            host_tok = flu.Host(d["Host"][i], field="host")
+            subtype_tok = flu.Subtype(d["Subtype"][i], field="gisaid_subtype")
+            lineage_tok = tok.Unknown(d["Lineage"][i], field="lineage", na_str=[""])
             try:
                 country_tok = flu.Country(d["Location"][i].split(" / ")[1])
             except:
                 country_tok = flu.Country(None)
-            date_tok = flu.Date(d["Collection_Date"][i], field_name="collection_date")
+            date_tok = flu.Date(d["Collection_Date"][i], field="collection_date")
             try:
                 submission_date_tok = flu.Date(
-                    d["Submission_Date"][i], field_name="submission_date"
+                    d["Submission_Date"][i], field="submission_date"
                 )
             except:
-                submission_date_tok = flu.Date(None, field_name="submission_date")
+                submission_date_tok = flu.Date(None, field="submission_date")
             for segment in ("PB2", "PB1", "PA", "HA", "NP", "NA", "MP", "NS"):
                 segment_tok = flu.SegmentName(segment)
                 try:
@@ -180,22 +201,24 @@ def mk_gis(g, filehandle) -> None:
                 except:
                     gbk_ids = [None]
                 for (epi_id, gbk_id) in zip(epi_ids, gbk_ids):
-                    classes.Phrase(
-                        [
-                            epi_isl_id_tok,
-                            flu.EpiSeqid(epi_id),
-                            flu.Genbank(gbk_id),
-                            strain_tok,
-                            full_strain_name_tok,
-                            segment_tok,
-                            subtype_tok,
-                            lineage_tok,
-                            host_tok,
-                            country_tok,
-                            date_tok,
-                            submission_date_tok,
-                        ]
-                    ).connect(g)
+                    g.update(
+                        classes.Phrase(
+                            [
+                                epi_isl_id_tok,
+                                flu.EpiSeqid(epi_id),
+                                flu.Genbank(gbk_id),
+                                strain_tok,
+                                full_strain_name_tok,
+                                segment_tok,
+                                subtype_tok,
+                                lineage_tok,
+                                host_tok,
+                                country_tok,
+                                date_tok,
+                                submission_date_tok,
+                            ]
+                        ).connect()
+                    )
         except IndexError:
             log("Bad line - index error")
             for name, col in d.items():
@@ -210,15 +233,22 @@ def mk_gis(g, filehandle) -> None:
             for name, col in d.items():
                 log(name + " : " + str(col[i]))
 
+    return g
 
-def default_access(row, field):
+
+def default_access(row: dict, field: str) -> List[str]:
     try:
         return row[field]["value"].split("+")
     except:
         return []
 
 
-def append_add(entry, field, values):
+def append_add(entry: dict, field: str, values: List[str]) -> None:
+    """
+    Adds all values in `values` to `entry[field]` if the value is not already present.
+
+    Modifies the 'entry' argument
+    """
     if len(values) > 0:
         if field in entry:
             for value in values:
@@ -230,25 +260,35 @@ def append_add(entry, field, values):
         entry[field] = []
 
 
-def quarter_from_date(date):
+def quarter_from_date(date: str) -> str:
     year, month = date.split("-")[0:2]
     quarter = str(math.ceil(int(month) / 3))
     return f"{year}Q{quarter}"
 
 
-def _ustr(s):
+def _ustr(s: str) -> str:
     return s.upper().strip()
 
 
-def _clean_subtype(s):
+def _clean_subtype(s: str) -> str:
     try:
-        (ha, na) = re.search(".*(H\\d+).*(N\\d+).*", _ustr(s)).groups()
+        match = re.search(".*(H\\d+).*(N\\d+).*", _ustr(s))
+        if match is None:
+            (ha, na) = ("", "")
+        else:
+            (ha, na) = match.groups()
         return ha + na
     except:
         return ""
 
 
-def _get_subtype(strain, has, nas, gisaid_subtypes, genbank_subtypes):
+def _get_subtype(
+    strain: str,
+    has: List[str],
+    nas: List[str],
+    gisaid_subtypes: List[str],
+    genbank_subtypes: List[str],
+) -> Optional[str]:
     # subtype annotations that where either determined in the past or retrieved from epiflu
     gisaid_subtypes = list(
         {_clean_subtype(subtype) for subtype in gisaid_subtypes if len(subtype) > 0}
@@ -289,14 +329,16 @@ def _get_subtype(strain, has, nas, gisaid_subtypes, genbank_subtypes):
     return subtype
 
 
-def mk_subtypes(results):
-    entries = dict()
+def mk_subtypes(
+    results: SPARQLWrapper,
+) -> Tuple[List[Tuple[str, str]], List[Tuple[str, str]]]:
+    entries: dict = dict()
 
     for row in results["results"]["bindings"]:
         strain = row["strain_name"]["value"]
 
         if strain not in entries:
-            entry = dict(
+            entry: dict = dict(
                 isolates=set(),
                 ha_subtypes=[],
                 na_subtypes=[],
@@ -333,7 +375,7 @@ def mk_subtypes(results):
             gisaid_subtypes=entry["gisaid_subtypes"],
             genbank_subtypes=entry["genbank_subtypes"],
         )
-        if subtype:
+        if subtype is not None:
             strain_entries.append((strain, subtype))
             for isolate in entry["isolates"]:
                 isolate_entries.append((isolate, subtype))
@@ -341,7 +383,7 @@ def mk_subtypes(results):
     return (strain_entries, isolate_entries)
 
 
-MASTERLIST_HEADER = [
+MASTERLIST_HEADER: List[str] = [
     "Barcode",
     "Date",
     "Collection_Q",
@@ -378,8 +420,8 @@ MASTERLIST_HEADER = [
 ]
 
 
-def mk_masterlist(results):
-    entries = dict()
+def mk_masterlist(results: dict) -> None:
+    entries : dict = dict()
 
     for row in results["results"]["bindings"]:
         barcode = row["barcode"]["value"]
@@ -486,12 +528,18 @@ class IrregularFasta(classes.Ragged):
             phrases[i].tokens.append(strain_ids[i])
         return phrases
 
-    def connect(self, g):
+    def connect(self):
+
+        g = set()
+
         for phrase in self.data:
             for token in phrase.tokens:
                 if token.group == "sequence":
                     g.add((token.as_uri(), P.tag, make_tag_uri("unpublished")))
-        super().connect(g)
+
+        g.update(super().connect())
+
+        return g
 
 
 class IrregularSegment(flu.SegmentToken):

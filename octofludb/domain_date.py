@@ -193,3 +193,5 @@ p_any_date = (
     ^ p_date_ym
     ^ p_year.parsecmap(lambda y: Date(year=y))
 )
+
+p_any_date_str = p_any_date.parsecmap(str)

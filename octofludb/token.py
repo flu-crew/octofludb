@@ -1,9 +1,10 @@
 from __future__ import annotations
-from typing import Optional
+from typing import Optional, Callable, Union, List, Tuple, Set
 
 import parsec as p
 from octofludb.nomenclature import make_property, make_literal, define_subproperty
 import rdflib
+from rdflib.term import Node
 import sys
 import re
 import math
@@ -12,64 +13,93 @@ from rdflib.namespace import XSD
 
 
 class Token:
-    parser : Optional[p.Parser[str]] = None
-    group : Optional[str] = None
-    typename : Optional[str] = "auto"
-    class_predicate : Optional[str] = None
+    # The parser may either be a function or a parsec parser
+    parser: Union[
+        Callable[[Optional[str]], Optional[str]], p.Parser[str]
+    ] = lambda x: None
+    group: Optional[str] = None
+    typename: Optional[str] = "auto"
+    class_predicate: Optional[Node] = None
 
-    def __init__(self, text, field_name=None, na_str=[None]):
-        self.matches = self.testOne(text, na_str=na_str)
-        self.dirty = text
-        self.field_name = field_name
-        if self.matches is not None:
-            self.clean = self.munge(self.matches)
+    def __init__(
+        self, text: Optional[str], field: Optional[str] = None, na_str: List[str] = []
+    ):
+        self.match: Optional[str] = self.testOne(text, na_str=na_str)
+        self.dirty: str = self.set_dirty(text, na_str)
+        self.field: Optional[str] = field
+        self.clean: Optional[str]
+        if self.match is not None:
+            self.clean = self.munge(self.match)
         else:
             self.clean = None
 
-    def munge(self, text):
+    def set_dirty(self, text: Optional[str], na_str: List[str]) -> str:
+        if text is None:
+            if na_str:
+                return na_str[0]
+            else:
+                return ""
+        else:
+            return text
+
+    def munge(self, text: str) -> str:
         return text
 
-    def choose_field_name(self):
-        if self.field_name:
-            return self.field_name
+    def choose_field(self) -> Optional[str]:
+        if self.field:
+            return self.field
         else:
             return self.typename
 
-    def as_uri(self):
+    def as_uri(self) -> Optional[Node]:
         """
         Cast this token as a URI
         """
         return None  # default tokens cannot be URIs
 
-    def as_predicate(self):
-        return make_property(self.choose_field_name())
+    def as_predicate(self) -> Optional[Node]:
+        field = self.choose_field()
+        if field is None:
+            return None
+        else:
+            return make_property(field)
 
-    def as_object(self):
+    def as_object(self) -> Optional[Node]:
         return self.as_literal()
 
-    def object_of(self, g, uri):
-        if uri and self.matches:
-            g.add((uri, self.as_predicate(), self.as_object()))
+    def object_of(self, uri: Node) -> Set[Tuple[Node, Node, Node]]:
+        g = set()
+        predicate_node = self.as_predicate()
+        object_node = self.as_object()
+        if self.match and uri and predicate_node and object_node:
+            g.add((uri, predicate_node, object_node))
 
-    def as_literal(self):
-        """
-        Cast this token as a literal value
-        """
-        return rdflib.Literal(self.clean)
+        return g
 
-    def add_triples(self, g):
+    def as_literal(self) -> Optional[Node]:
+        """
+        Cast this token as a literal value if possible
+        """
+        if self.clean is None:
+            return None
+        else:
+            return rdflib.Literal(self.clean)
+
+    def add_triples(self) -> Set[Tuple[Node, Node, Node]]:
         """
         Add knowledge to the graph
         """
-        return None
-        # # FIXME: the following code unifies fields of the same type, but it can go too far
+        return set()
+        #  # FIXME: the following code unifies fields of the same type, but it can go too far
         #  if (
-        #      self.field_name
-        #      and self.field_name != self.typename
+        #      self.field
+        #      and self.field != self.typename
         #      and self.class_predicate
-        #      and self.matches
+        #      and self.match
         #  ):
-        #      define_subproperty(self.as_predicate(), self.class_predicate, g)
+        #      subproperty_triple = define_subproperty(self.as_predicate(), self.class_predicate)
+        #      if subproperty_triple:
+        #          g.add(subproperty_triple)
 
     def relate(self, fields, g, levels=None):
         """
@@ -81,30 +111,33 @@ class Token:
         return self.clean
 
     def __bool__(self):
-        return self.matches is not None and self.matches != ""
+        return self.match is not None and self.match != ""
 
     @classmethod
-    def testOne(cls, item, na_str=[None]):
+    def testOne(cls, item: Optional[str], na_str: List[str] = []) -> Optional[str]:
         """
         The item is a member of this type. In the base case anything
         that can be turned into a string is a member.
         """
-        if item in na_str:
+        if item in na_str or item is None:
             return None
         try:
-            return cls.parser.parse_strict(item)
+            if isinstance(cls.parser, p.Parser):
+                return cls.parser.parse_strict(item)
+            else:
+                return cls.parser(item)
         except p.ParseError:
             return None
 
     @classmethod
-    def goodness(cls, items, na_str=[None]):
-        matches = [
+    def goodness(cls, items, na_str=[]):
+        column_matches = [
             (cls.testOne(item=x, na_str=na_str) != None)
             for x in items
-            if x not in na_str
+            if not (x in na_str or x is None)
         ]
-        if len(matches) > 0:
-            return sum(matches) / len(matches)
+        if len(column_matches) > 0:
+            return sum(column_matches) / len(column_matches)
         else:
             return 0
 
@@ -114,7 +147,7 @@ class Missing(Token):
     typename = "missing"
 
     @classmethod
-    def testOne(cls, item, na_str=[None]):
+    def testOne(cls, item: Optional[str], na_str: List[str] = []) -> None:
         return None
 
 
@@ -123,12 +156,7 @@ class Unknown(Token):
     parser = lambda x: x
 
     @classmethod
-    def testOne(cls, item, na_str=[None]):
-        try:
-            if math.isnan(item):
-                return None
-        except TypeError:
-            pass
+    def testOne(cls, item: Optional[str], na_str: List[str] = []) -> Optional[str]:
         if item in na_str:
             return None
         else:
@@ -175,7 +203,7 @@ class Ignore(Token):
     parser = lambda x: None
 
     @classmethod
-    def testOne(cls, item, na_str=[None]):
+    def testOne(cls, item: Optional[str], na_str: List[str] = []) -> None:
         return None
 
 

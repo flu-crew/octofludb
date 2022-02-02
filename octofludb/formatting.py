@@ -1,10 +1,19 @@
+from __future__ import annotations
+from typing import (
+    List,
+    Tuple,
+    TextIO,
+    Optional,
+    Dict
+)
+
 from octofludb.util import log
 from octofludb.colors import bad
 
 import sys
 
 
-def write_as_fasta(results, outfile=sys.stdout):
+def write_as_fasta(results : dict, outfile : TextIO =sys.stdout) -> None:
     """
     Write a SPARQL query result as a FASTA file
     """
@@ -23,7 +32,7 @@ def write_as_fasta(results, outfile=sys.stdout):
         print(sequence, file=outfile)
 
 
-def write_as_table(results, header=True, outfile=sys.stdout):
+def write_as_table(results : dict, header : bool =True, outfile : TextIO =sys.stdout) -> None:
     """
     Write a SPARQL query result as a TAB-delimited table with an optional header
     """
@@ -41,7 +50,7 @@ def write_as_table(results, header=True, outfile=sys.stdout):
         print("\t".join(fields), file=outfile)
 
 
-def write_constellations(results, outfile=sys.stdout):
+def write_constellations(results : dict, outfile : TextIO =sys.stdout) -> None:
     """
     Prepare constellations
     """
@@ -55,14 +64,14 @@ def write_constellations(results, outfile=sys.stdout):
         print(f"{strain}\t{const}", file=outfile)
 
 
-def _parse_constellation_query(results):
+def _parse_constellation_query(results : dict) -> List[Tuple[str, str, str]]:
     return [
         (row["strain"]["value"], row["segment"]["value"], row["clade"]["value"])
         for row in results["results"]["bindings"]
     ]
 
 
-def _make_constellations(rows):
+def _make_constellations(rows : List[Tuple[str, str, str]]) -> List[Tuple[str, str]]:
 
     segment_lookup = dict(PB2=0, PB1=1, PA=2, NP=3, M=4, MP=4, NS=5)
 
@@ -70,13 +79,10 @@ def _make_constellations(rows):
         pdm="P", LAIV="V", TRIG="T", humanSeasonal="H", classicalSwine="C"
     )
 
-    const = dict()
+    const : Dict[str, List[str]] = dict()
     for (strain, segment, clade) in rows:
 
-        if strain in const:
-            if const[strain] is None:
-                continue
-        else:
+        if not strain in const:
             const[strain] = list("------")
 
         try:
@@ -90,17 +96,21 @@ def _make_constellations(rows):
         if clade in clade_lookup:
             char = clade_lookup[clade]
         else:
+            log(
+                f"{bad('WARNING:')} expected internal gene clade to be one of  'pdm', 'LAIV', 'TRIG', 'classicalSwine', or 'humanSeasonal'. Found clade {clade}, assigning constellation character 'X'"
+            )
             char = "X"
+
 
         if const[strain][index] == "-":
             const[strain][index] = char
         elif const[strain][index] != char:
-            const[strain] = None
+            const[strain][index] = "M" # conflicting internal gene clades, this means the strain is probably mixed
 
-    rows = []
+    output_rows = []
     for (k, c) in const.items():
-        if c is None:
-            rows.append((k, "mixed"))
+        if "M" in c:
+            output_rows.append((k, "mixed"))
         else:
-            rows.append((k, "".join(c)))
-    return rows
+            output_rows.append((k, "".join(c)))
+    return output_rows

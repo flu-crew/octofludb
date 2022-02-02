@@ -1,19 +1,26 @@
+from __future__ import annotations
+from typing import Set, Dict, List, Optional, Any, Type, TextIO, Tuple, Union
+
 import sys
 import parsec
 from octofludb.classifier_flucrew import allClassifiers
 from octofludb.token import Token, Unknown, Missing
-from octofludb.util import zipGen, strOrNone, log, concat, file_str
-from octofludb.nomenclature import make_tag_uri, P
+from octofludb.util import strOrNone, log, concat, file_str
+from octofludb.nomenclature import make_tag_uri, make_literal, P
 import dateutil.parser as dateparser
-import xlrd # type: ignore
-import pandas as pd # type: ignore
+import xlrd  # type: ignore
+import pandas as pd  # type: ignore
 import octofludb.colors as colors
 import datetime as datetime
 from rdflib import Literal
-from tqdm import tqdm # type: ignore
+from rdflib.term import Node
+from tqdm import tqdm  # type: ignore
+from collections import OrderedDict
 
 
-def updateClassifiers(classifiers, include, exclude):
+def updateClassifiers(
+    classifiers: OrderedDict[str, Type[Token]], include: Set[str], exclude: Set[str]
+) -> List[Type[Token]]:
     keys = list(classifiers.keys())
     for classifier in keys:
         if classifier in exclude:
@@ -26,25 +33,27 @@ def updateClassifiers(classifiers, include, exclude):
 class Interpreter:
     def __init__(
         self,
-        data,
-        field_name=None,
-        tag=None,
-        classifiers=allClassifiers,
-        default_classifier=Unknown,
-        include={},
-        exclude={},
-        levels=None,
-        na_str=[None],
-        log=False,
+        data: Any,
+        field: Optional[str] = None,
+        tag: Optional[str] = None,
+        classifiers: OrderedDict[str, Type[Token]] = allClassifiers,
+        default_classifier: Type[Token] = Unknown,
+        include: Set[str] = set(),
+        exclude: Set[str] = set(),
+        levels: Set[str] = set(),
+        na_str: List[str] = [],
+        log: bool = False,
+        filehandle: Optional[TextIO] = None,
     ):
         self.tag = tag
         self.levels = levels
         self.na_str = na_str
         self.classifiers = updateClassifiers(classifiers, include, exclude)
-        self.default_classifier = Unknown
+        self.default_classifier = default_classifier
+        self.filehandle = filehandle
         if log:
             self.log()
-        self.field_name = field_name
+        self.field = field
         self.data = self.cast(data)
 
     def cast(self, data):
@@ -71,25 +80,18 @@ class Datum(Interpreter):
     Interpret a single word. This should not be used much.
     """
 
-    def cast(self, data):
+    def cast(self, data: str) -> Token:
         if data == "":
             return Missing(data, na_str=self.na_str)
         for classifier in self.classifiers:
-            try:
-                token = classifier(data, field_name=self.field_name, na_str=self.na_str)
-            except TypeError:
-                log(data)
-                log(token)
-                sys.exit(1)
+            token = classifier(data, field=self.field, na_str=self.na_str)
             if token:
                 return token
-        return self.default_classifier(
-            data, field_name=self.field_name, na_str=self.na_str
-        )
+        return self.default_classifier(data, field=self.field, na_str=self.na_str)
 
     def summarize(self):
         log(f"typename: {self.data.typename}")
-        log(f"field_name: {self.data.field_name}")
+        log(f"field: {self.data.field}")
         log(f"value: {self.data.dirty}")
         log(f"munged: {self.data.clean}")
 
@@ -97,18 +99,26 @@ class Datum(Interpreter):
         return str(self.data.clean)
 
 
-def addTag(g, tag, filehandle):
+def addTag(
+    tag, filehandle: Optional[TextIO]
+) -> Tuple[Optional[Node], Set[Tuple[Node, Node, Node]]]:
     """
     Add tag info to the triple set and return the tag URI
     """
+
+    g: Set[Tuple[Node, Node, Node]] = set()
+
     if tag:
         taguri = make_tag_uri(tag)
-        g.add((taguri, P.name, Literal(tag)))
-        g.add((taguri, P.time, Literal(datetime.datetime.now())))
-        g.add((taguri, P.file, Literal(file_str(filehandle))))
+
+        g.add((taguri, P.name, make_literal(tag)))
+        g.add((taguri, P.time, make_literal(datetime.datetime.now())))
+        if filehandle is not None:
+            g.add((taguri, P.file, make_literal(filehandle.name)))
     else:
         taguri = None
-    return taguri
+        g = set()
+    return (taguri, g)
 
 
 class HomoList(Interpreter):
@@ -123,32 +133,36 @@ class HomoList(Interpreter):
                 break
         else:
             c = self.default_classifier
-        return [c(x, field_name=self.field_name, na_str=self.na_str) for x in data]
+        return [c(x, field=self.field, na_str=self.na_str) for x in data]
 
-    def connect(self, g):
-        addTag(g, tag=self.tag, filehandle=filehandle)
+    def connect(self) -> Set[Tuple[Node, Node, Node]]:
+        triples = addTag(tag=self.tag, filehandle=None)[1]
+
         for token in self.data:
             if token.clean is None:
                 continue
-            token.add_triples(g)
+            triples.update(token.add_triples())
 
-    def __str__(self):
+        return triples
+
+    def __str__(self) -> str:
+
         return str([t.clean for t in self.data])
 
 
 class ParsedPhraseList(Interpreter):
     def __init__(
         self,
-        filehandle,
-        field_name=None,
-        tag=None,
-        classifiers=allClassifiers,
-        default_classifier=Unknown,
-        include={},
-        exclude={},
-        levels=None,
-        na_str=[None],
-        log=False,
+        filehandle: Optional[TextIO],
+        field: Optional[str] = None,
+        tag: Optional[str] = None,
+        classifiers: OrderedDict[str, Type[Token]] = allClassifiers,
+        default_classifier: Type[Token] = Unknown,
+        include: Set[str] = set(),
+        exclude: Set[str] = set(),
+        levels: Set[str] = set(),
+        na_str: List[str] = [],
+        log: bool = False,
     ):
         self.classifiers = updateClassifiers(classifiers, include, exclude)
         self.tag = tag
@@ -163,19 +177,20 @@ class ParsedPhraseList(Interpreter):
     def parse(self, filehandle):
         raise NotImplementedError
 
-    def connect(self, g):
+    def connect(self) -> Set[Tuple[Node, Node, Node]]:
         log("Making triples")
-        taguri = addTag(g, tag=self.tag, filehandle=self.filehandle)
+        taguri, triples = addTag(tag=self.tag, filehandle=self.filehandle)
         for (i, phrase) in enumerate(tqdm(self.data)):
-            phrase.connect(g, taguri=taguri)
+            triples.update(phrase.connect(taguri=taguri))
+        return triples
 
 
-def tabularTyping(data, levels=None, na_str=[None]):
+def tabularTyping(data, levels=set(), na_str=[]):
     cols = []
     if not data:
         return []
     for k, v in data.items():
-        hl = HomoList(v, field_name=k, na_str=na_str).data
+        hl = HomoList(v, field=k, na_str=na_str).data
         if len(hl) > 0:
             log(f" - '{k}':{colors.good(hl[0].typename)}")
         else:
@@ -187,7 +202,7 @@ def tabularTyping(data, levels=None, na_str=[None]):
     return phrases
 
 
-def headlessTabularTyping(data, levels=None, na_str=[None]):
+def headlessTabularTyping(data, levels=set(), na_str=[]):
     cols = []
     if not data:
         return []
@@ -323,25 +338,30 @@ class Ragged(ParsedPhraseList):
 
 
 class Phrase:
-    def __init__(self, tokens, levels=None):
+    def __init__(self, tokens, levels=set()):
         self.tokens = tokens
         self.levels = levels
 
-    def connect(self, g, taguri=None):
+    def connect(self, taguri=None) -> Set[Tuple[Node, Node, Node]]:
         """
         Create links between a list of Tokens. For example, they may be related
         by fields in a fasta header or elements in a row in a table.
         """
+
+        g = set()
+
         for token in self.tokens:
             if token.clean is None:
                 continue
-            if (self.levels is None) or (token.group in self.levels):
-                token.relate(self.tokens, g, levels=self.levels)
-            token.add_triples(g)
+            if self.levels or (token.group in self.levels):
+                g.update(token.relate(self.tokens, levels=self.levels))
+            g.update(token.add_triples())
             if taguri and token.group:
                 turi = token.as_uri()
                 if turi:
                     g.add((turi, P.tag, taguri))
 
+        return g
+
     def __str__(self):
-        return str([(t.typename, t.field_name, t.clean) for t in self.tokens])
+        return str([(t.typename, t.field, t.clean) for t in self.tokens])

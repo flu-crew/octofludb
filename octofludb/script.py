@@ -1,8 +1,11 @@
+from __future__ import annotations
+from typing import Optional, List, Iterable, TypeVar
+
 import hashlib
 import subprocess
 import yaml
 import pgraphdb
-import smof # type: ignore
+import smof  # type: ignore
 import glob
 import os
 import sys
@@ -12,23 +15,28 @@ from octofludb.classes import Table
 from octofludb.util import log, die
 import octofludb.colors as colors
 
+A = TypeVar("A")
 
-def get_data_file(filename):
+
+def get_data_file(filename: str) -> str:
     return os.path.join(os.path.dirname(__file__), "data", filename)
 
 
-def octofludbHome():
+def octofludbHome() -> str:
     return os.path.join(os.path.expanduser("~"), ".octofludb")
 
 
-def getDataDir(config):
-    datadir = expandpath(config["datadir"])[0]
+def getDataDir(config: dict) -> str:
+    try:
+        datadir = expandpath(config["datadir"])[0]
+    except IndexError:
+        die("Failed to find a data directory (check the octofludb config file)")
     if not os.path.exists(datadir):
         os.mkdir(datadir)
     return datadir
 
 
-def error_log_entry(entries, logfile):
+def error_log_entry(entries: Iterable[str], logfile: str) -> str:
     homedir = octofludbHome()
     logdir = os.path.join(homedir, "logs")
     logpath = os.path.join(logdir, logfile)
@@ -43,31 +51,48 @@ def error_log_entry(entries, logfile):
     return logpath
 
 
-def epiflu_fasta_files(config):
+def epiflu_fasta_files(config: dict) -> List[str]:
     try:
         data_home = getDataDir(config)
     except KeyError:
         die("The config file is missing a `datadir` entry")
     except IndexError:
         die("The path to the `datadir` entry in config does not exist")
-    return expandpath(os.path.join(data_home, config["epiflu_fasta"]))
+
+    try:
+        epiflu_fasta = config["epiflu_fasta"]
+    except KeyError:
+        die("The config file is missing a epiflu_fasta field")
+
+    return expandpath(os.path.join(data_home, epiflu_fasta))
 
 
-def epiflu_meta_files(config):
+def epiflu_meta_files(config: dict) -> List[str]:
     try:
         data_home = getDataDir(config)
     except KeyError:
         die("The config file is missing a `datadir` entry")
     except IndexError:
         die("The path to the `datadir` entry in config does not exist")
-    return expandpath(os.path.join(data_home, config["epiflu_meta"]))
+
+    try:
+        epiflu_meta = config["epiflu_meta"]
+    except KeyError:
+        die("The config file is missing an epiflu_meta field")
+
+    return expandpath(os.path.join(data_home, epiflu_meta))
 
 
-def get_octoflu_reference(config):
+def get_octoflu_reference(config: dict) -> Optional[str]:
     try:
         refpath = config["octoflu_reference"]
         if refpath:
-            reference = expandpath(os.path.join(octofludbHome(), refpath))[0]
+            try:
+                reference = expandpath(os.path.join(octofludbHome(), refpath))[0]
+            except IndexError:
+                die(
+                    "The octoflu_reference file specified in the octofludb config does not exist"
+                )
         else:
             reference = None
     except KeyError:
@@ -77,7 +102,7 @@ def get_octoflu_reference(config):
     return reference
 
 
-def tag_files(config, tag):
+def tag_files(config: dict, tag: str) -> List[str]:
     try:
         data_home = expandpath(config["datadir"])[0]
     except KeyError:
@@ -93,7 +118,7 @@ def tag_files(config, tag):
     return expandpath(os.path.join(data_home, tagfile))
 
 
-def initialize_config_file():
+def initialize_config_file() -> str:
     """
     Create a default config file is none is present in the octofludb home directory
     """
@@ -112,7 +137,7 @@ def initialize_config_file():
     return config_local_file
 
 
-def load_config_file():
+def load_config_file() -> dict:
     """
     Load the local config file (create the config file first if it does not exist)
     """
@@ -126,19 +151,18 @@ def load_config_file():
     return config
 
 
-def file_md5sum(path):
+def file_md5sum(path: str) -> str:
     with open(path, "rb") as f:
-        file_hash = hashlib.md5(f.read()).hexdigest()
-    return file_hash
+        return hashlib.md5(f.read()).hexdigest()
 
 
-def evenly_divide(total, preferred_size):
+def evenly_divide(total: int, preferred_size: int) -> List[int]:
     n = max(math.ceil(total / preferred_size), 1)
     size = total // n
     return [size + (i < total - size * n) for i in range(n)]
 
 
-def partition(xs, sizes):
+def partition(xs: List[A], sizes: List[int]) -> List[List[A]]:
     xss = []
     start = 0
     for size in sizes:
@@ -150,19 +174,19 @@ def partition(xs, sizes):
     return xss
 
 
-def runOctoFLU(path, reference=None):
+def runOctoFLU(path: str, reference: Optional[str] = None) -> List[List[str]]:
     """
     Run octoFLU on the given fasta paths.
 
     OctoFLU mangles names terribly, so it is important to ensure that the input
     names are appropriate segment ids (e.g., genbank ids or epiflu ids).
+
+    Return a list of tuple rows containing octoFLU results
     """
 
     # The given path may be a glob (e.g., `data/*fna`), so expand to all
     # fasta files and make the paths absolute
     fastafiles = expandpath(path)
-
-    log(fastafiles)
 
     if reference:
         try:
@@ -249,7 +273,9 @@ def runOctoFLU(path, reference=None):
     return results
 
 
-def findMotifs(sparql_filename, patterns, subtype, url, repo_name):
+def findMotifs(
+    sparql_filename: str, patterns: List[str], subtype: str, url: str, repo_name: str
+) -> str:
     import octofludb.formatting as formatting
     import pgraphdb as db
     import flutile
@@ -275,7 +301,7 @@ def findMotifs(sparql_filename, patterns, subtype, url, repo_name):
     return motif_filename
 
 
-def cloneGithubRepo(user, repo):
+def cloneGithubRepo(user: str, repo: str) -> None:
     """
     Clone a github repository if the repo folder is not already present.
     """
@@ -283,11 +309,15 @@ def cloneGithubRepo(user, repo):
         subprocess.run(["git", "clone", f"http://github.com/{user}/{repo}"])
 
 
-def buildHome():
+def buildHome() -> str:
     return os.path.join(octofludbHome(), "build")
 
 
-def gotoBuildHome():
+def gotoBuildHome() -> None:
+    """
+    Change directory to the octofldub build folder, create it if it does not exist
+    """
+
     # move to octofludb build home
     build_dir = buildHome()
     if not os.path.exists(build_dir):
@@ -296,7 +326,7 @@ def gotoBuildHome():
     os.chdir(build_dir)
 
 
-def expandpath(path):
+def expandpath(path: str) -> List[str]:
     """
     Expands globs and gets absolute paths
 

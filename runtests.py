@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import octofludb.classifiers_flucrew as ftok
+import octofludb.classifier_flucrew as ftok
 import octofludb.recipes as recipes
 import octofludb.formatting as formatter
 import octofludb.token as tok
@@ -510,8 +510,7 @@ class TestStrain(unittest.TestCase):
         self.assertEqual(ftok.Strain("bogus").clean, None)
 
     def test_strain_barcode_parsing(self):
-        g = set()
-        ftok.Strain("A/asdf/A01234567/sdf").add_triples(g)
+        g = ftok.Strain("A/asdf/A01234567/sdf").add_triples()
         expected = sorted([(str(x), str(y), str(z)) for x, y, z in g])
         self.assertEqual(
             expected,
@@ -634,9 +633,7 @@ class TestPhrase(unittest.TestCase):
 
 class TestFasta(unittest.TestCase):
     def test_fasta(self):
-        g = set()
-        x = Ragged(">baz\nATGG\n>foo||z\nATGGG", na_str=[None])
-        x.connect(g)
+        g = Ragged(">baz\nATGG\n>foo||z\nATGGG", na_str=[]).connect()
         s = sorted([(str(s), str(p), str(o)) for s, p, o in g])
         self.assertEqual(
             s,
@@ -680,13 +677,9 @@ class TestFasta(unittest.TestCase):
         )
 
     def test_fasta_carriage(self):
-        g1 = set()
-        x1 = Ragged(">baz\nATGG\n>foo||z\nATGGG", na_str=[None])
-        x1.connect(g1)
+        g1 = Ragged(">baz\nATGG\n>foo||z\nATGGG", na_str=[]).connect()
         s1 = sorted([(str(s), str(p), str(o)) for s, p, o in g1])
-        g2 = set()
-        x2 = Ragged(">baz\nATGG\n>foo||z\nATGGG", na_str=[None])
-        x2.connect(g2)
+        g2 = Ragged(">baz\nATGG\n>foo||z\nATGGG", na_str=[]).connect()
         s2 = sorted([(str(s), str(p), str(o)) for s, p, o in g2])
         self.assertEqual(s1, s2)
 

@@ -1,3 +1,6 @@
+from __future__ import annotations
+from typing import Set, Tuple
+
 from octofludb.nomenclature import (
     uidgen,
     P,
@@ -11,6 +14,7 @@ from octofludb.nomenclature import (
 from octofludb.util import rmNone, make_maybe_add
 from octofludb.hash import chksum
 from rdflib import Literal
+from rdflib.term import Node
 from rdflib.namespace import XSD
 import re
 import octofludb.domain_identifier as identifier
@@ -22,7 +26,9 @@ from octofludb.colors import bad
 import octofludb.domain_geography as geo
 
 
-def add_gb_meta_triples(g, gb_meta, only_influenza_a=True):
+def make_gb_meta_triples(
+    gb_meta: dict, only_influenza_a: bool = True
+) -> Tuple[Set[Tuple[Node, Node, Node]], str]:
     """
     Add genbank triples
 
@@ -37,21 +43,23 @@ def add_gb_meta_triples(g, gb_meta, only_influenza_a=True):
     string containing any raised error or warning message
     """
 
+    g: Set[Tuple[Node, Node, Node]] = set()  # triples
+
     error_entry = ""
 
     try:
         accession = str(gb_meta["GBSeq_primary-accession"])
     except:
         log(bad("Bad Genbank Entry"))
-        return "Unknown\tNo primary accession"
+        return (g, "Unknown\tNo primary accession")
 
     if only_influenza_a:
         # ignore this entry if the organism is not specified
         if not "GBSeq_organism" in gb_meta:
-            return f"{accession}\tNo organsim specified"
+            return (g, f"{accession}\tNo organsim specified")
         # ignore this entry if the organism is not an Influenza virus
         if not bool(re.match("Influenza [ABCD] virus", gb_meta["GBSeq_organism"])):
-            return f"{accession}\tNot influenza"
+            return (g, f"{accession}\tNot influenza")
 
     gid = make_uri(accession)
     g.add((gid, P.gb, Literal(accession)))
@@ -166,4 +174,4 @@ def add_gb_meta_triples(g, gb_meta, only_influenza_a=True):
         log(bad("Missing strain: ") + locus)
         error_entry = f"{locus}\tNo strain name"
 
-    return error_entry
+    return (g, error_entry)

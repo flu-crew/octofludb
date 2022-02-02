@@ -1,3 +1,16 @@
+from __future__ import annotations
+from typing import (
+    Callable,
+    TextIO,
+    Union,
+    NoReturn,
+    Optional,
+    List,
+    Set,
+    Tuple,
+    Generator,
+)
+
 import sys
 import time
 import os
@@ -5,8 +18,8 @@ import requests
 import datetime
 from typing import List
 from urllib.error import HTTPError
-from Bio import Entrez # type: ignore
-from tqdm import tqdm # type: ignore
+from Bio import Entrez  # type: ignore
+from tqdm import tqdm  # type: ignore
 from octofludb.util import log
 import octofludb.colors as colors
 import pgraphdb as db
@@ -14,7 +27,9 @@ import pgraphdb as db
 Entrez.email = "zebulun.arendsee@usda.gov"
 
 
-def get_all_acc_in_db(url="http://localhost:7200", repo="octofludb"):
+def get_all_acc_in_db(
+    url: str = "http://localhost:7200", repo: str = "octofludb"
+) -> List[str]:
 
     sparql_filename = os.path.join(os.path.dirname(__file__), "data", "all-acc.rq")
 
@@ -24,8 +39,12 @@ def get_all_acc_in_db(url="http://localhost:7200", repo="octofludb"):
 
 
 def get_acc_by_date(
-    mindate, maxdate, ignore=[], retmax=100000, query='"Influenza+A+Virus"[Organism]'
-):
+    mindate: str,
+    maxdate: str,
+    ignore: List[str] = [],
+    retmax: int = 100000,
+    query: str = '"Influenza+A+Virus"[Organism]',
+) -> List[str]:
     """
     mindate: a date string of form YYYY/MM, e.g. "2020/01"
     maxdate: a date string of form YYYY/MM, e.g. "2020/06"
@@ -53,7 +72,7 @@ def get_acc_by_date(
     except:
         log(f'{colors.bad("Error:")} could not find "esearchresult"')
         log(str(req))
-        log(params)
+        log(str(params))
         return []
 
     # For great manner
@@ -63,12 +82,12 @@ def get_acc_by_date(
 
 
 def missing_acc_by_date(
-    min_year=1918,
-    max_year=2099,
-    nmonths=9999,
-    url="http://localhost:7200",
-    repo="octofludb",
-):
+    min_year: int = 1918,
+    max_year: int = 2099,
+    nmonths: int = 9999,
+    url: str = "http://localhost:7200",
+    repo: str = "octofludb",
+) -> Generator[Tuple[str, List[str]], None, None]:
     """
     Find all genbank accessions that are missing from the database. Return as a tuples of (date, [accession])
     """
@@ -110,7 +129,7 @@ def missing_acc_by_date(
 
 
 # code adapted from http://biopython.org/DIST/docs/tutorial/Tutorial.html#htoc122
-def get_gbs(gb_ids: List[str]) -> List[dict]:
+def get_gbs(gb_ids: List[str]) -> Generator[dict, None, None]:
     batch_size = 1000
     count = len(gb_ids)
     for start in tqdm(range(0, count, batch_size)):

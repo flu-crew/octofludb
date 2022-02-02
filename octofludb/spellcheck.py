@@ -1,12 +1,15 @@
-from octofludb.util import compose, underscore, lower, strip
+from __future__ import annotations
+from typing import Iterable, List, Callable, Set, Optional
+
+from octofludb.util import underscore, lower, strip
 
 
 def make_flat_wordfinder(
-    wordlist,
-    alphabet="abcdefghijklmnopqrstuvwxyz",
-    depth=1,
-    clean=compose(underscore, lower, strip),
-):
+    wordlist: Iterable[str],
+    alphabet: str = "abcdefghijklmnopqrstuvwxyz",
+    depth: int = 1,
+    clean: Callable[[str], str] = lambda x: underscore(lower(strip(x))),
+) -> Callable[[str], Optional[str]]:
     """
     Build a function for finding the closest word in a list. This is not a
     spellchecker, since it will return None if not word is found. Also, it is
@@ -21,7 +24,7 @@ def make_flat_wordfinder(
             {e2: w for (e1, w) in WORDSN[-1].items() for e2 in edits(e1, alphabet)}
         )
 
-    def wordfinder(word):
+    def wordfinder(word: str) -> Optional[str]:
         clean_word = clean(word)
 
         if clean_word in WORDS0:
@@ -36,7 +39,7 @@ def make_flat_wordfinder(
     return wordfinder
 
 
-def edits(word, alphabet):
+def edits(word: str, alphabet: str) -> Set[str]:
     """
     Borrowed directly from Peter Norvig's spell checker (https://norvig.com/spell-correct.html).
     """

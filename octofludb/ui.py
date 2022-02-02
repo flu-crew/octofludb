@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Callable, TextIO, Union
+from typing import Callable, TextIO, Union, NoReturn, Optional, List, Set, Tuple
 
 import click
 import collections
@@ -7,6 +7,7 @@ import sys
 import os
 import functools
 from rdflib import Graph
+from rdflib.term import Node
 from octofludb.util import log, die
 from octofludb.version import __version__
 
@@ -17,13 +18,17 @@ def open_graph() -> Graph:
     return Graph(namespace_manager=manager)
 
 
-def with_graph(f : Callable[[Graph], None], outfile : TextIO = sys.stdout) -> None:
+def with_graph(
+    triples: Set[Tuple[Node, Node, Node]], outfile: TextIO = sys.stdout
+) -> None:
     g = open_graph()
 
-    # mutate the Graph
-    f(g)
+    # Add the new triples
+    g.update(triples)
 
-    g.commit()  # just in case we missed anything
+    # Commit them to the database (memory, in this case)
+    g.commit()
+
     log("Serializing to turtle format ... ", end="")
     turtles = g.serialize(format="turtle")
     log("done")
@@ -34,23 +39,24 @@ def with_graph(f : Callable[[Graph], None], outfile : TextIO = sys.stdout) -> No
     return None
 
 
-def open_file(path):
-    if path:
-        filehandle = open(args["<filename>"], "r")
+def make_na(na_str: Optional[str]) -> List[str]:
+    """
+    Process a string holding comma separated options for NAs
+
+    It may be None, if no NA was specified. It may be an empty string, if an
+    empty string was specified. This is a meaningful option since "" is a
+    perfectly normal NA value.
+
+    None will always be added as an option.
+    """
+
+    if na_str is None:
+        na_list = []
     else:
-        filehandle = sys.stdin
-    return filehandle
-
-
-def make_na(na_str):
-    if na_str:
+        # This will return a non-empty list. Either multiple strings or a
+        # single empty string, since `"".split(",") == ['']`
         na_list = na_str.split(",")
-        if isinstance(na_list, list):
-            na_list = [None] + na_str
-        else:
-            na_list = [None, na_list]
-    else:
-        na_list = [None]
+
     return na_list
 
 
@@ -70,6 +76,8 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 url_opt = click.option("--url", help="GraphDB URL", default="http://localhost:7200")
 
 filename_arg = click.argument("filename", type=click.Path(exists=True))
+
+filehandle_r_arg = click.argument("filename", type=click.File("r"))
 
 repo_name_opt = click.option("--repo", help="Repository name", default="octofludb")
 
@@ -114,7 +122,7 @@ delimiter_opt = click.option(
 )
 @url_opt
 @repo_name_opt
-def init_cmd(url, repo):
+def init_cmd(url: str, repo: str) -> NoReturn:
     """
     Initialize an empty octofludb database
     """
@@ -150,10 +158,14 @@ def init_cmd(url, repo):
 
     script.initialize_config_file()
 
+    sys.exit(0)
 
-def upload_gisaid(config, url, repo):
+
+def upload_gisaid(config: dict, url: str, repo: str) -> List[str]:
     import octofludb.script as script
     import octofludb.recipes as recipe
+
+    uploaded_files = []
 
     epiflu_metafiles = script.epiflu_meta_files(config)
     skipped_meta = 0
@@ -163,9 +175,10 @@ def upload_gisaid(config, url, repo):
             if os.path.exists(outfile) and os.path.getsize(outfile) > 0:
                 skipped_meta += 1
             else:
-                with open(outfile, "w") as f:
-                    with_graph(functools.partial(recipe.mk_gis, epiflu_metafile), outfile=f)
-                upload([outfile], url=url, repo=repo)
+                with open(outfile, "w") as fo:
+                    with open(epiflu_metafile, "r") as fi:
+                        with_graph(recipe.mk_gis(fi), outfile=fo)
+                uploaded_files += upload([outfile], url=url, repo=repo)
     else:
         log("No epiflu metafiles found")
     if skipped_meta > 0:
@@ -183,7 +196,7 @@ def upload_gisaid(config, url, repo):
             else:
                 with open(outfile, "w") as f:
                     prep_fasta(filename=infile, outfile=f)
-                    upload([outfile], url=url, repo=repo)
+                    uploaded_files += upload([outfile], url=url, repo=repo)
     else:
         log("No epiflu fasta found")
 
@@ -192,8 +205,10 @@ def upload_gisaid(config, url, repo):
             f"Skipped {str(skipped_fasta)} epiflu fasta files where existing non-empty turtle files were found in the build directory"
         )
 
+    return uploaded_files
 
-def upload_classifications(config, url, repo):
+
+def upload_classifications(url: str, repo: str) -> List[str]:
     import octofludb.script as script
     import pgraphdb as db
 
@@ -222,7 +237,7 @@ def upload_classifications(config, url, repo):
         # print the results
         prep_table(unclassified_classes, outfile=turtleout)
 
-    upload([unclassified_turtle], url=url, repo=repo)
+    uploaded_unclassified = upload([unclassified_turtle], url=url, repo=repo)
 
     # infer constellations
     constellation_table = "constellations.txt"
@@ -237,10 +252,12 @@ def upload_classifications(config, url, repo):
     with open(constellation_turtles, "w") as turtleout:
         prep_table(constellation_table, outfile=turtleout)
 
-    upload([constellation_turtles], url=url, repo=repo)
+    uploaded_constellations = upload([constellation_turtles], url=url, repo=repo)
+
+    return uploaded_unclassified + uploaded_constellations
 
 
-def upload_subtypes(config, url, repo):
+def upload_subtypes(url: str, repo: str) -> List[str]:
     import octofludb.script as script
     import pgraphdb as db
 
@@ -271,10 +288,11 @@ def upload_subtypes(config, url, repo):
         prep_table(genbank_subtypes, outfile=gturtleout)
     with open(eturtles, "w") as eturtleout:
         prep_table(epiflu_subtypes, outfile=eturtleout)
-    upload([gturtles, eturtles], url=url, repo=repo)
+
+    return upload([gturtles, eturtles], url=url, repo=repo)
 
 
-def upload_motifs(config, url, repo):
+def upload_motifs(url: str, repo: str) -> List[str]:
     import octofludb.script as script
 
     # find h1 motifs
@@ -307,7 +325,8 @@ def upload_motifs(config, url, repo):
 
     with open("h3-motifs.ttl", "w") as turtleout:
         prep_table(h3_motif_table, outfile=turtleout)
-    upload(["h3-motifs.ttl"], url=url, repo=repo)
+
+    return upload(["h3-motifs.ttl"], url=url, repo=repo)
 
 
 @click.command(
@@ -349,16 +368,16 @@ def upload_motifs(config, url, repo):
 @url_opt
 @repo_name_opt
 def pull_cmd(
-    nmonths,
-    no_schema,
-    no_clades,
-    no_subtype,
-    no_motifs,
-    include_gisaid,
-    include_tags,
-    url,
-    repo,
-):
+    nmonths: int,
+    no_schema: bool,
+    no_clades: bool,
+    no_subtype: bool,
+    no_motifs: bool,
+    include_gisaid: bool,
+    include_tags: bool,
+    url: str,
+    repo: str,
+) -> NoReturn:
     """
     Update data. Pull from genbank, process any new data in the data folder,
     assign clades to swine data, assign subtypes to all data, and extract
@@ -384,9 +403,7 @@ def pull_cmd(
         upload([schema_file], url=url, repo=repo)
 
         # upload geological relationships
-        geog_file = upload([script.get_data_file("geography.ttl")], url=url, repo=repo)[
-            0
-        ]
+        upload([script.get_data_file("geography.ttl")], url=url, repo=repo)[0]
 
     if nmonths > 0:
         # update genbank (take a parameter telling how far back to go)
@@ -398,13 +415,13 @@ def pull_cmd(
         upload_gisaid(config, url, repo)
 
     if not no_clades:
-        upload_classifications(config, url, repo)
+        upload_classifications(url, repo)
 
     if not no_subtype:
-        upload_subtypes(config, url, repo)
+        upload_subtypes(url, repo)
 
     if not no_motifs:
-        upload_motifs(config, url, repo)
+        upload_motifs(url, repo)
 
     if include_tags:
         # load all tags
@@ -417,14 +434,23 @@ def pull_cmd(
 
     os.chdir(cwd)
 
-    return None
+    sys.exit(0)
 
 
-def fmt_query_cmd(sparql_filename, header, fasta, url, repo, outfile=sys.stdout):
+def fmt_query_cmd(
+    sparql_filename: str,
+    header: bool,
+    fasta: bool,
+    url: str,
+    repo: str,
+    outfile: TextIO = sys.stdout,
+) -> TextIO:
     import octofludb.formatting as formatting
     import pgraphdb as db
 
-    results = db.sparql_query(sparql_file=sparql_filename, url=url, repo_name=repo)
+    results = db.sparql_query(
+        sparql_file=sparql_filename, url=url, repo_name=repo
+    ).convert()
     if fasta:
         formatting.write_as_fasta(results, outfile=outfile)
     else:
@@ -451,7 +477,7 @@ def query_cmd(*args, **kwargs):
 @click.command(name="classify")
 @filename_arg
 @click.option("--reference", help="An octoFLU reference fasta file", default=None)
-def classify_cmd(filename, reference=None):
+def classify_cmd(filename: str, reference: Optional[str] = None) -> NoReturn:
     """
     Classify the sequences in a fasta file using octoFLU
 
@@ -468,7 +494,9 @@ def classify_cmd(filename, reference=None):
     classify_and_write(filename, reference=None, outfile=sys.stdout)
 
 
-def classify_and_write(filename, reference=None, outfile=sys.stdout):
+def classify_and_write(
+    filename: str, reference: Optional[str] = None, outfile: TextIO = sys.stdout
+) -> NoReturn:
     import octofludb.colors as colors
 
     rows = classify(filename, reference=reference)
@@ -480,8 +508,10 @@ def classify_and_write(filename, reference=None, outfile=sys.stdout):
     for row in rows:
         print("\t".join(row), file=outfile)
 
+    sys.exit(0)
 
-def classify(filename, reference=None):
+
+def classify(filename: str, reference: Optional[str] = None) -> List[List[str]]:
     import octofludb.script as script
 
     if not reference:
@@ -496,17 +526,19 @@ def classify(filename, reference=None):
 @sparql_filename_pos
 @url_opt
 @repo_name_opt
-def construct_cmd(sparql_filename, url, repo):
+def construct_cmd(sparql_filename: str, url: str, repo: str) -> NoReturn:
     """
     Construct new triples
     """
     import pgraphdb as db
 
-    results = db.sparql_construct(sparql_file=sparql_filename, url=url, repo_name=repo)
+    results = db.sparql_construct(
+        sparql_file=sparql_filename, url=url, repo_name=repo
+    ).convert()
 
     print(results)
 
-    return None
+    sys.exit(0)
 
 
 @click.command(
@@ -515,14 +547,15 @@ def construct_cmd(sparql_filename, url, repo):
 @sparql_filename_pos
 @url_opt
 @repo_name_opt
-def update_cmd(sparql_filename, url, repo):
+def update_cmd(sparql_filename: str, url: str, repo: str) -> NoReturn:
     """
     Submit a SPARQL delete or insert query to octofludb
     """
     import pgraphdb as db
 
     db.update(sparql_file=sparql_filename, url=url, repo_name=repo)
-    return None
+
+    sys.exit(0)
 
 
 @click.command(
@@ -531,14 +564,16 @@ def update_cmd(sparql_filename, url, repo):
 @all_the_turtles
 @url_opt
 @repo_name_opt
-def upload_cmd(turtle_filenames, url, repo):
+def upload_cmd(turtle_filenames: List[str], url: str, repo: str) -> NoReturn:
     """
     Upload one or more turtle files to the database
     """
     upload(turtle_filenames, url, repo)
 
+    sys.exit(0)
 
-def upload(turtle_filenames, url, repo):
+
+def upload(turtle_filenames: List[str], url: str, repo: str) -> List[str]:
     import pgraphdb as db
     import octofludb.script as script
 
@@ -559,45 +594,43 @@ def upload(turtle_filenames, url, repo):
 )
 @click.argument("tag", type=str)
 @filename_arg
-def prep_tag_cmd(tag, filename):
+def prep_tag_cmd(tag: str, filename: str) -> NoReturn:
     """
     Associate list of IDs with a tag
     """
     prep_tag(tag, filename)
 
+    sys.exit(0)
 
-def prep_tag(tag, filename, outfile=sys.stdout):
+
+def prep_tag(tag: str, filename: str, outfile: TextIO = sys.stdout) -> None:
     from rdflib import Literal
     import datetime as datetime
     from octofludb.nomenclature import make_uri, make_tag_uri, P
     from octofludb.util import file_str
 
-    g = open_graph()
     with open(filename, "r") as fh:
         taguri = make_tag_uri(tag)
-        g = open_graph()
+        g : Set[Tuple[Node, Node, Node]] = set()
         g.add((taguri, P.name, Literal(tag)))
         g.add((taguri, P.time, Literal(datetime.datetime.now())))
         g.add((taguri, P.file, Literal(file_str(fh))))
         for identifier in (s.strip() for s in fh.readlines()):
             g.add((make_uri(identifier), P.tag, taguri))
-        g.commit()  # just in case we missed anything
-        log("Serializing to turtle format ... ", end="")
-        turtles = g.serialize(format="turtle")
-        log("done")
-        for l in turtles.splitlines():
-            try:
-                print(l.decode("utf-8"), file=outfile)
-            except:
-                print(l, file=outfile)
-    g.close()
+
+        turtles = open_graph().update(g).commit().serialize(format="turtle")
+
+        for line in turtles.splitlines():
+            print(line, file=outfile)
+
+    return None
 
 
 @click.command(
     name="ivr",
 )
-@filename_arg
-def prep_ivr_cmd(filename):
+@filehandle_r_arg
+def prep_ivr_cmd(filename: TextIO) -> NoReturn:
     """
     Translate an IVR table to RDF.
 
@@ -606,28 +639,32 @@ def prep_ivr_cmd(filename):
     """
     import octofludb.recipes as recipe
 
-    with_graph(functools.partial(recipe.mk_influenza_na, filename))
+    with_graph(recipe.mk_influenza_na(filename))
+
+    sys.exit(0)
 
 
 @click.command(
     name="ird",
 )
-@filename_arg
-def prep_ird_cmd(filename):
+@filehandle_r_arg
+def prep_ird_cmd(filename: TextIO) -> NoReturn:
     """
     Translate an IRD table to RDF.
     """
 
     import octofludb.recipes as recipe
 
-    with_graph(functools.partial(recipe.mk_ird, filename))
+    with_graph(recipe.mk_ird(filename))
+
+    sys.exit(0)
 
 
 @click.command(
     name="gis",
 )
-@filename_arg
-def prep_gis_cmd(filename):
+@filehandle_r_arg
+def prep_gis_cmd(filename: TextIO) -> NoReturn:
     """
     Translate a Gisaid metadata excel file to RDF.
 
@@ -635,34 +672,40 @@ def prep_gis_cmd(filename):
     """
     import octofludb.recipes as recipe
 
-    with_graph(functools.partial(recipe.mk_gis, filename))
+    with_graph(recipe.mk_gis(filename))
+
+    sys.exit(0)
 
 
-def _mk_gbids_cmd(g, gbids=[]):
+def _mk_gbids_cmd(gbids: List[str] = []) -> Set[Tuple[Node, Node, Node]]:
     import octofludb.entrez as entrez
     import octofludb.genbank as gb
     import octofludb.script as script
 
     error_msgs = []
 
+    all_triples = set()
+
     for gb_metas in entrez.get_gbs(gbids):
         for gb_meta in gb_metas:
-            error_msg = gb.add_gb_meta_triples(g, gb_meta)
+            (triples, error_msg) = gb.make_gb_meta_triples(gb_meta)
             if error_msg:
                 error_msgs.append(error_msg)
         # commit the current batch (say of 1000 entries)
-        g.commit()
+        all_triples.update(triples)
 
     if len(error_msgs) > 0:
         logpath = script.error_log_entry(error_msgs, "failed_genbank_parses.txt")
         log(f"{len(error_msgs)} genbank entries could not be parsed, see {logpath}")
+
+    return all_triples
 
 
 @click.command(
     name="gbids",
 )
 @filename_arg
-def prep_gbids_cmd(*args, **kwargs):
+def prep_gbids_cmd(filename: str) -> NoReturn:
     """
     Retrieve data for a list of genbank ids.
 
@@ -670,8 +713,10 @@ def prep_gbids_cmd(*args, **kwargs):
     """
     with open(filename, "r") as fh:
         gbids = [gbid.strip() for gbid in fh]
-    log(f"Retrieving and parsing genbank ids from '{args.filename}'")
-    with_graph(functools.partial(_mk_gbids_cmd, gbids=gbids))
+    log(f"Retrieving and parsing genbank ids from 'filename'")
+    with_graph(_mk_gbids_cmd(gbids=gbids))
+
+    sys.exit(0)
 
 
 @click.command(name="update_gb")
@@ -695,14 +740,16 @@ def prep_gbids_cmd(*args, **kwargs):
     default=1440,
     type=click.IntRange(min=1, max=9999),
 )
-def prep_update_gb_cmd(minyear, maxyear, nmonths):
+def prep_update_gb_cmd(minyear: int, maxyear: int, nmonths: int) -> NoReturn:
     """
     Retrieve any missing genbank records. Results are stored in files with the prefix '.gb_###.ttl'
     """
-    return prep_update_gb(minyear, maxyear, nmonths)
+    prep_update_gb(minyear, maxyear, nmonths)
+
+    sys.exit(0)
 
 
-def prep_update_gb(minyear, maxyear, nmonths):
+def prep_update_gb(minyear: int, maxyear: int, nmonths: int) -> List[str]:
     from octofludb.entrez import missing_acc_by_date
     import octofludb.colors as colors
 
@@ -718,7 +765,7 @@ def prep_update_gb(minyear, maxyear, nmonths):
             else:
                 log(colors.good(f"Updating {date} ..."))
                 with open(outfile, "w") as fh:
-                    with_graph(functools.partial(_mk_gbids_cmd, gbids=missing_acc), outfile=fh)
+                    with_graph(_mk_gbids_cmd(gbids=missing_acc), outfile=fh)
                 outfiles.append(outfile)
         else:
             log(colors.good(f"Up-to-date for {date}"))
@@ -730,8 +777,8 @@ def prep_update_gb(minyear, maxyear, nmonths):
     name="blast",
 )
 @tag_arg_opt
-@filename_arg
-def prep_blast_cmd(tag, filename):
+@filehandle_r_arg
+def prep_blast_cmd(tag: str, filename: TextIO) -> NoReturn:
     """
     Translate BLAST results into RDF.
 
@@ -740,23 +787,30 @@ def prep_blast_cmd(tag, filename):
     import octofludb.recipes as recipe
 
     log(f"Retrieving and parsing blast results from '{filename}'")
-    with_graph(functools.partial(recipe.mk_blast, filename, tag=tag))
+    with_graph(recipe.mk_blast(filename, tag=tag))
+
+    sys.exit(0)
 
 
-def process_tablelike(include, exclude, levels):
-    if not include:
-        inc = {}
+def process_tablelike(
+    include: Optional[str], exclude: Optional[str], levels: Optional[str]
+) -> Tuple[Set[str], Set[str], Set[str]]:
+    if include is None or include == "":
+        inc = set()
     else:
         inc = set(include.split(","))
-    if not exclude:
-        exc = {}
+
+    if exclude is None or exclude == "":
+        exc = set()
     else:
         exc = set(exclude.split(","))
-    if not levels:
-        levels = None
+
+    if levels is None or levels == "":
+        lev = set()
     else:
-        levels = {s.strip() for s in levels.split(",")}
-    return (inc, exc, levels)
+        lev = {s.strip() for s in levels.split(",")}
+
+    return (inc, exc, lev)
 
 
 include_opt = click.option(
@@ -786,39 +840,47 @@ def prep_table_cmd(*args, **kwargs):
 
 
 def prep_table(
-    filename,
-    tag=None,
-    include=None,
-    exclude=None,
-    levels=None,
-    na=None,
-    segment_key=None,
-    outfile=sys.stdout,
-):
+    filename: str,
+    tag: Optional[str] = None,
+    include: Optional[str] = None,
+    exclude: Optional[str] = None,
+    levels: Optional[str] = None,
+    na: Optional[str] = None,
+    segment_key: Optional[str] = None,
+    outfile: TextIO = sys.stdout,
+) -> None:
     """
     Translate a table to RDF
     """
     from octofludb.recipes import IrregularSegmentTable
     import octofludb.classes as classes
 
-    if segment_key:
-        constructor = IrregularSegmentTable
-    else:
-        constructor = classes.Table
+    (inc, exc, levelsProc) = process_tablelike(include, exclude, levels)
 
-    def _mk_table_cmd(g, fh):
-        (inc, exc, levelsProc) = process_tablelike(include, exclude, levels)
-        constructor(
-            filehandle=fh,
-            tag=tag,
-            include=inc,
-            exclude=exc,
-            log=True,
-            levels=levelsProc,
-            na_str=make_na(na),
-        ).connect(g)
+    def _mk_table_cmd(fh: TextIO) -> Set[Tuple[Node, Node, Node]]:
+        if segment_key is None:
+            return IrregularSegmentTable(
+                filehandle=fh,
+                tag=tag,
+                include=inc,
+                exclude=exc,
+                log=True,
+                levels=levelsProc,
+                na_str=make_na(na),
+            ).connect()
+        else:
+            return classes.Table(
+                filehandle=fh,
+                tag=tag,
+                include=inc,
+                exclude=exc,
+                log=True,
+                levels=levelsProc,
+                na_str=make_na(na),
+            ).connect()
 
-    with_graph(functools.partial(_mk_table_cmd, filename), outfile=outfile)
+    with open(filename, "r") as fi:
+        return with_graph(_mk_table_cmd(fi), outfile=outfile)
 
 
 @click.command(
@@ -830,30 +892,32 @@ def prep_table(
 @include_opt
 @exclude_opt
 @na_opt
-def prep_fasta_cmd(*args, **kwargs):
+def prep_fasta_cmd(*args, **kwargs) -> NoReturn:
     """
     Translate a fasta file to RDF.
 
     <filename> Path to a TAB-delimited or excel table
     """
 
-    return prep_fasta(*args, **kwargs)
+    prep_fasta(*args, **kwargs)
+
+    sys.exit(0)
 
 
 def prep_fasta(
-    filename,
-    tag=None,
-    delimiter=None,
-    include=None,
-    exclude=None,
-    na=None,
-    outfile=sys.stdout,
-):
+    filename: str,
+    tag: Optional[str] = None,
+    delimiter: Optional[str] = None,
+    include: Optional[str] = None,
+    exclude: Optional[str] = None,
+    na: Optional[str] = None,
+    outfile: TextIO = sys.stdout,
+) -> None:
     import octofludb.classes as classes
 
-    def _mk_fasta_cmd(g, fh):
+    def _mk_fasta_cmd(fh: TextIO) -> Set[Tuple[Node, Node, Node]]:
         (inc, exc, levels) = process_tablelike(include, exclude, None)
-        classes.Ragged(
+        return classes.Ragged(
             filehandle=fh,
             tag=tag,
             include=inc,
@@ -861,24 +925,31 @@ def prep_fasta(
             log=True,
             levels=levels,
             na_str=make_na(na),
-        ).connect(g)
+        ).connect()
 
     with open(filename, "r") as fasta_fh:
-        with_graph(functools.partial(_mk_fasta_cmd, fasta_fh), outfile=outfile)
+        with_graph(_mk_fasta_cmd(fasta_fh), outfile=outfile)
 
-    return outfile
+    return None
 
 
 @click.command(
     name="unpublished",
 )
-@filename_arg
+@filehandle_r_arg
 @tag_arg_opt
 @delimiter_opt
 @include_opt
 @exclude_opt
 @na_opt
-def prep_unpublished_cmd(filename, tag, delimiter, include, exclude, na):
+def prep_unpublished_cmd(
+    filename: TextIO,
+    tag: Optional[str],
+    delimiter: Optional[str],
+    include: Optional[str],
+    exclude: Optional[str],
+    na: Optional[str],
+) -> NoReturn:
     """
     Prepare an unpublished set up sequences.
 
@@ -908,9 +979,11 @@ def prep_unpublished_cmd(filename, tag, delimiter, include, exclude, na):
     """
     import octofludb.recipes as recipe
 
-    def _mk_unpublished_fasta_cmd(g, fh):
+    def _mk_unpublished_fasta_cmd(fh: TextIO) -> Set[Tuple[Node, Node, Node]]:
+
         (inc, exc, levels) = process_tablelike(include, exclude, None)
-        recipe.IrregularFasta(
+
+        return recipe.IrregularFasta(
             filehandle=fh,
             tag=tag,
             include=inc,
@@ -918,9 +991,11 @@ def prep_unpublished_cmd(filename, tag, delimiter, include, exclude, na):
             log=True,
             levels=levels,
             na_str=make_na(na),
-        ).connect(g)
+        ).connect()
 
-    with_graph(functools.partial(_mk_unpublished_fasta_cmd, filename))
+    with_graph(_mk_unpublished_fasta_cmd(filename))
+
+    sys.exit(0)
 
 
 @click.group(
@@ -947,7 +1022,7 @@ prep_grp.add_command(prep_ird_cmd)
 prep_grp.add_command(prep_ivr_cmd)
 
 
-def make_const(url, repo, outfile=sys.stdout):
+def make_const(url: str, repo: str, outfile: TextIO = sys.stdout) -> None:
     """
     Generate constellations for all swine strains.
 
@@ -964,24 +1039,33 @@ def make_const(url, repo, outfile=sys.stdout):
     import pgraphdb as db
 
     sparql_filename = os.path.join(os.path.dirname(__file__), "data", "segments.rq")
-    results = db.sparql_query(sparql_file=sparql_filename, url=url, repo_name=repo)
+    results = db.sparql_query(
+        sparql_file=sparql_filename, url=url, repo_name=repo
+    ).convert()
     formatting.write_constellations(results, outfile=outfile)
+    return None
 
 
-def make_subtypes(url, repo, outfile=sys.stdout):
+def make_subtypes(url: str, repo: str, outfile: TextIO = sys.stdout) -> NoReturn:
     strains, isolates = get_missing_subtypes(url, repo)
     print("strain_name\tsubtype", file=outfile)
     for identifier, subtype in strains + isolates:
         print(f"{identifier}\t{subtype}", file=outfile)
 
+    sys.exit(0)
 
-def get_missing_subtypes(url, repo):
+
+def get_missing_subtypes(
+    url: str, repo: str
+) -> Tuple[List[Tuple[str, str]], List[Tuple[str, str]]]:
     import octofludb.recipes as recipe
     import pgraphdb as db
 
     sparql_filename = os.path.join(os.path.dirname(__file__), "data", "subtypes.rq")
 
-    results = db.sparql_query(sparql_file=sparql_filename, url=url, repo_name=repo)
+    results = db.sparql_query(
+        sparql_file=sparql_filename, url=url, repo_name=repo
+    ).convert()
 
     return recipe.mk_subtypes(results)
 
@@ -991,7 +1075,7 @@ def get_missing_subtypes(url, repo):
 )
 @url_opt
 @repo_name_opt
-def report_masterlist_cmd(url, repo):
+def report_masterlist_cmd(url: str, repo: str) -> NoReturn:
     """
     Generate the surveillance masterlist
     """
@@ -1000,9 +1084,11 @@ def report_masterlist_cmd(url, repo):
 
     sparql_filename = os.path.join(os.path.dirname(__file__), "data", "masterlist.rq")
 
-    results = db.sparql_query(sparql_file=sparql_filename, url=url, repo_name=repo)
+    results = db.sparql_query(sparql_file=sparql_filename, url=url, repo_name=repo).convert()
 
     recipe.mk_masterlist(results)
+
+    sys.exit(0)
 
 
 # ===== fetch subcommands =====
@@ -1014,7 +1100,7 @@ def report_masterlist_cmd(url, repo):
 @filename_arg
 @url_opt
 @repo_name_opt
-def fetch_tag_cmd(filename, url, repo):
+def fetch_tag_cmd(filename: str, url: str, repo: str) -> NoReturn:
     """
     Upload list of tags
     """
@@ -1039,16 +1125,13 @@ def fetch_tag_cmd(filename, url, repo):
     (n, turtle_filename) = mkstemp(suffix=".ttl")
     with open(turtle_filename, "w") as th:
         for l in turtles.splitlines():
-            try:
-                print(l.decode("utf-8"), file=th)
-            except:
-                print(l, file=th)
+            print(l, file=th)
 
     # upload it to the database
     upload_cmd([turtle_filename], url, repo)
     g.close()
 
-    return None
+    sys.exit(0)
 
 
 @click.command(
@@ -1056,7 +1139,7 @@ def fetch_tag_cmd(filename, url, repo):
 )
 @url_opt
 @repo_name_opt
-def fetch_isolate_cmd(url, repo):
+def fetch_isolate_cmd(url: str, repo: str) -> NoReturn:
     """
     Fetch tagged isolate data
     """
@@ -1065,13 +1148,15 @@ def fetch_isolate_cmd(url, repo):
     )
     fmt_query_cmd(sparql_filename, header=True, fasta=False, url=url, repo=repo)
 
+    sys.exit(0)
+
 
 @click.command(
     name="strain",
 )
 @url_opt
 @repo_name_opt
-def fetch_strain_cmd(url, repo):
+def fetch_strain_cmd(url: str, repo: str) -> NoReturn:
     """
     Fetch tagged strain data
     """
@@ -1080,13 +1165,15 @@ def fetch_strain_cmd(url, repo):
     )
     fmt_query_cmd(sparql_filename, header=True, fasta=False, url=url, repo=repo)
 
+    sys.exit(0)
+
 
 @click.command(
     name="segment",
 )
 @url_opt
 @repo_name_opt
-def fetch_segment_cmd(url, repo):
+def fetch_segment_cmd(url: str, repo: str) -> NoReturn:
     """
     Fetch tagged segment data
     """
@@ -1095,13 +1182,15 @@ def fetch_segment_cmd(url, repo):
     )
     fmt_query_cmd(sparql_filename, header=True, fasta=False, url=url, repo=repo)
 
+    sys.exit(0)
+
 
 @click.command(
     name="sequence",
 )
 @url_opt
 @repo_name_opt
-def fetch_sequence_cmd(url, repo):
+def fetch_sequence_cmd(url: str, repo: str) -> NoReturn:
     """
     Fetch tagged sequence data
     """
@@ -1110,13 +1199,15 @@ def fetch_sequence_cmd(url, repo):
     )
     fmt_query_cmd(sparql_filename, header=False, fasta=True, url=url, repo=repo)
 
+    sys.exit(0)
+
 
 @click.command(
     name="clear",
 )
 @url_opt
 @repo_name_opt
-def fetch_clear_cmd(url, repo):
+def fetch_clear_cmd(url: str, repo: str) -> NoReturn:
     """
     Clear all uploaded tags
     """
@@ -1126,6 +1217,8 @@ def fetch_clear_cmd(url, repo):
         os.path.dirname(__file__), "data", "clear-query-tags.rq"
     )
     db.update(sparql_file=sparql_filename, url=url, repo_name=repo)
+
+    sys.exit(0)
 
 
 @click.group(
@@ -1163,7 +1256,13 @@ fetch_grp.add_command(fetch_clear_cmd)
 # ===== report subcommands =====
 
 
-def macro_query(filename, macros, *args, **kwargs):
+def macro_query(
+    filename: str, macros: List[Tuple[str, str]], *args, **kwargs
+) -> TextIO:
+    """
+    Expand macros in a SPARQL query file
+    """
+
     import re
     from tempfile import mkstemp
 
@@ -1178,9 +1277,11 @@ def macro_query(filename, macros, *args, **kwargs):
                     line = re.sub(macro, replacement, line)
                 print(line, file=query)
 
-    fmt_query_cmd(tmpfile, *args, **kwargs)
+    result = fmt_query_cmd(tmpfile, *args, **kwargs)
 
     os.remove(tmpfile)
+
+    return result
 
 
 @click.command(

@@ -1,20 +1,35 @@
-from typing import List
+from __future__ import annotations
+from typing import (
+    List,
+    NoReturn,
+    TypeVar,
+    Iterator,
+    TextIO,
+    Union,
+    Tuple,
+    Optional,
+    Any,
+)
+
 from rdflib import Literal
 import math
 import sys
 import re
 
+A = TypeVar("A")
+B = TypeVar("B")
 
-def log(msg, end="\n"):
+
+def log(msg: str, end: str = "\n") -> None:
     print(msg, file=sys.stderr, flush=True, end=end)
 
 
-def die(msg):
+def die(msg: str) -> NoReturn:
     print(msg, file=sys.stderr, flush=True)
     sys.exit(1)
 
 
-def file_str(f):
+def file_str(f: Union[str, TextIO]) -> str:
     if isinstance(f, str):
         return f
     else:
@@ -24,17 +39,7 @@ def file_str(f):
             return str(f)
 
 
-def zipGen(x, y):
-    if x is None:
-        x = []
-    if y is None:
-        y = []
-    x += [None] * (len(y) - len(x))
-    y += [None] * (len(x) - len(y))
-    return zip(x, y)
-
-
-def strOrNone(x):
+def strOrNone(x: Any) -> Optional[str]:
     try:
         if math.isnan(x):
             x = None
@@ -45,33 +50,20 @@ def strOrNone(x):
     return x
 
 
-def identity(x):
-    x
-
-
-def upper(x):
+def upper(x: str) -> str:
     return x.upper()
 
 
-def lower(x):
+def lower(x: str) -> str:
     return x.lower()
 
 
-def underscore(x):
+def underscore(x: str) -> str:
     return x.replace(" ", "_")
 
 
-def strip(x):
+def strip(x: str) -> str:
     return x.strip()
-
-
-def compose(*args):
-    def composition(x):
-        for f in reversed(args):
-            x = f(x)
-        return x
-
-    return composition
 
 
 def make_maybe_add(g, meta, sid):
