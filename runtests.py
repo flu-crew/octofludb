@@ -694,6 +694,11 @@ class TestSubtypeSelection(unittest.TestCase):
             None,
         )
 
+    def test_quarter_from_date(self):
+        self.assertEqual(recipes.quarter_from_date("2021"), "")
+        self.assertEqual(recipes.quarter_from_date("2021-01-01"), "2021Q1")
+        self.assertEqual(recipes.quarter_from_date("2021-12-01"), "2021Q4")
+
     def test_get_subtype_from_segments(self):
         self.assertEqual(
             recipes._get_subtype("whatever", ["H1"], ["N1"], [], []), "H1N1"

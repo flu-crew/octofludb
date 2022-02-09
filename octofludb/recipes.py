@@ -261,8 +261,16 @@ def append_add(entry: dict, field: str, values: List[str]) -> None:
 
 
 def quarter_from_date(date: str) -> str:
-    year, month = date.split("-")[0:2]
-    quarter = str(math.ceil(int(month) / 3))
+    """
+    Get the annual quarter from the data.
+
+    This is NOT the fiscal quarter. So 2021-12-01 is 2021Q4 rather than 2022Q1.
+    """
+    try:
+        year, month = date.split("-")[0:2]
+        quarter = str(math.ceil(int(month) / 3))
+    except ValueError:
+        return ""
     return f"{year}Q{quarter}"
 
 
