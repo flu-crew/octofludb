@@ -152,11 +152,11 @@ def mk_ird(filehandle: TextIO) -> Set[Tuple[Node, Node, Node]]:
     return g
 
 
-def mk_gis(filehandle: TextIO) -> Set[Tuple[Node, Node, Node]]:
+def mk_gis(filename: str) -> Set[Tuple[Node, Node, Node]]:
 
     g = set()  # initialize triple set
 
-    fh = pd.read_excel(filehandle, sheet_name=0)
+    fh = pd.read_excel(filename, sheet_name=0)
     d = {c: [x for x in fh[c]] for c in fh}
     epipat = re.compile(" *\|.*")
     for i in tqdm(range(len(d["Isolate_Id"]))):

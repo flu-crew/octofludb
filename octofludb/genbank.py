@@ -26,12 +26,15 @@ from octofludb.colors import bad
 import octofludb.domain_geography as geo
 
 
-def make_maybe_add(g : Set[Tuple[Node, Node, Node]], meta : Dict[str, Optional[str]], sid : Optional[Node]):
-    def maybe_add(p, key, formatter=lambda x : make_literal(x, infer=False)):
+def make_maybe_add(
+    g: Set[Tuple[Node, Node, Node]], meta: Dict[str, Optional[str]], sid: Optional[Node]
+):
+    def maybe_add(p, key, formatter=lambda x: make_literal(x, infer=False)):
         if key in meta and meta[key] != None:
             safeAdd(g, sid, p, formatter(meta[key]))
 
     return maybe_add
+
 
 def make_gb_meta_triples(
     gb_meta: dict, only_influenza_a: bool = True
@@ -95,7 +98,7 @@ def make_gb_meta_triples(
     if "GBSeq_sequence" in gb_meta:
         seq = gb_meta["GBSeq_sequence"].upper()
         safeAdd(g, gid, P.dnaseq, make_literal(seq, infer=False))
-        safeAdd(g, gid, P.chksum, make_literal(chksum(seq), infer=False)) 
+        safeAdd(g, gid, P.chksum, make_literal(chksum(seq), infer=False))
 
     strain = None
     host = None
@@ -139,7 +142,12 @@ def make_gb_meta_triples(
                     try:
                         segment_name = flu.p_segment.parse_strict(val)
                         # attach the segment_name to the top-level genbank record, not the feature
-                        safeAdd(g, gid, P.segment_name, make_literal(segment_name, infer=False))
+                        safeAdd(
+                            g,
+                            gid,
+                            P.segment_name,
+                            make_literal(segment_name, infer=False),
+                        )
                     except:
                         pass
                     # attach the original, unparsed gene name to the feature

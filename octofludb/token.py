@@ -92,7 +92,7 @@ class Token:
         return set()
 
     def relate(
-        self, tokens: List[Token], levels: Set[str] = set()
+        self, tokens: List[Token], levels: Optional[Set[str]] = set()
     ) -> Set[Tuple[Node, Node, Node]]:
         """
         Create links as desired between Tokens.

@@ -24,7 +24,8 @@ def with_graph(
     g = open_graph()
 
     # Add the new triples
-    g.update(triples)
+    for triple in triples:
+        g.add(triple)
 
     # Commit them to the database (memory, in this case)
     g.commit()
@@ -176,8 +177,7 @@ def upload_gisaid(config: dict, url: str, repo: str) -> List[str]:
                 skipped_meta += 1
             else:
                 with open(outfile, "w") as fo:
-                    with open(epiflu_metafile, "r") as fi:
-                        with_graph(recipe.mk_gis(fi), outfile=fo)
+                    with_graph(recipe.mk_gis(epiflu_metafile), outfile=fo)
                 uploaded_files += upload([outfile], url=url, repo=repo)
     else:
         log("No epiflu metafiles found")
@@ -662,8 +662,8 @@ def prep_ird_cmd(filename: TextIO) -> NoReturn:
 @click.command(
     name="gis",
 )
-@filehandle_r_arg
-def prep_gis_cmd(filename: TextIO) -> NoReturn:
+@filename_arg
+def prep_gis_cmd(filename: str) -> NoReturn:
     """
     Translate a Gisaid metadata excel file to RDF.
 
@@ -671,7 +671,7 @@ def prep_gis_cmd(filename: TextIO) -> NoReturn:
     """
     import octofludb.recipes as recipe
 
-    with_graph(recipe.mk_gis(filename))
+    with_graph(recipe.mk_gis(filename=filename))
 
     sys.exit(0)
 
@@ -793,7 +793,7 @@ def prep_blast_cmd(tag: str, filename: TextIO) -> NoReturn:
 
 def process_tablelike(
     include: Optional[str], exclude: Optional[str], levels: Optional[str]
-) -> Tuple[Set[str], Set[str], Set[str]]:
+) -> Tuple[Set[str], Set[str], Optional[Set[str]]]:
     if include is None or include == "":
         inc = set()
     else:
@@ -804,8 +804,11 @@ def process_tablelike(
     else:
         exc = set(exclude.split(","))
 
-    if levels is None or levels == "":
+    lev: Optional[Set[str]]
+    if levels == "":
         lev = set()
+    elif levels is None:
+        lev = None
     else:
         lev = {s.strip() for s in levels.split(",")}
 

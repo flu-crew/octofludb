@@ -202,13 +202,15 @@ class StrainToken(Token):
         return None
 
     def relate(
-        self, tokens: List[Token], levels: Set[str] = set()
+        self, tokens: List[Token], levels: Optional[Set[str]] = None
     ) -> Set[Tuple[Node, Node, Node]]:
         g: Set[Tuple[Node, Node, Node]] = set()
         if self.clean is not None and self.match:
             uri = self.as_uri()
             has_segment = self._has_segment(tokens)
-            use_segment = (not levels and has_segment) or (levels and "segment" in levels and has_segment)
+            use_segment = (levels is None and has_segment) or (
+                levels is not None and "segment" in levels and has_segment
+            )
             if self.typename is not None:
                 safeAdd(g, uri, make_property(self.typename), self.as_literal())
             for other in tokens:
@@ -275,7 +277,7 @@ class Strain(StrainToken):
 # --- strain attributes ---
 class StrainAttribute(Token):
     def relate(
-        self, tokens: List[Token], levels: Set[str] = set()
+        self, tokens: List[Token], levels: Optional[Set[str]] = set()
     ) -> Set[Tuple[Node, Node, Node]]:
         g: Set[Tuple[Node, Node, Node]] = set()
         for other in tokens:
@@ -330,9 +332,9 @@ class SegmentToken(Token):
         return make_uri(self.clean)
 
     def relate(
-        self, tokens: List[Token], levels: Set[str] = set()
+        self, tokens: List[Token], levels: Optional[Set[str]] = set()
     ) -> Set[Tuple[Node, Node, Node]]:
-        g : Set[Tuple[Node, Node, Node]] = set()
+        g: Set[Tuple[Node, Node, Node]] = set()
         if not self.match:
             return g
         uri = self.as_uri()
@@ -361,7 +363,7 @@ class Genbank(SegmentToken):
         return text.upper()
 
     def add_triples(self) -> Set[Tuple[Node, Node, Node]]:
-        g : Set[Tuple[Node, Node, Node]]= set()
+        g: Set[Tuple[Node, Node, Node]] = set()
         if self.clean:
             safeAdd(g, self.as_uri(), P.gb, self.as_literal())
         return g
@@ -378,7 +380,7 @@ class EpiSeqid(SegmentToken):
         return text.upper().replace("_", "")
 
     def add_triples(self) -> Set[Tuple[Node, Node, Node]]:
-        g : Set[Tuple[Node, Node, Node]] = set()
+        g: Set[Tuple[Node, Node, Node]] = set()
         if self.clean:
             safeAdd(g, self.as_uri(), P.epi_id, self.as_literal())
         return g
@@ -387,7 +389,7 @@ class EpiSeqid(SegmentToken):
 # --- segment attributes ---
 class SegmentAttribute(Token):
     def relate(
-        self, tokens: List[Token], levels: Set[str] = set()
+        self, tokens: List[Token], levels: Optional[Set[str]] = set()
     ) -> Set[Tuple[Node, Node, Node]]:
         g = set()
         for other in tokens:
@@ -461,16 +463,20 @@ class Dnaseq(SequenceToken):
         return g
 
     def relate(
-        self, tokens: List[Token], levels: Set[str] = set()
+        self, tokens: List[Token], levels: Optional[Set[str]] = set()
     ) -> Set[Tuple[Node, Node, Node]]:
-        g : Set[Tuple[Node, Node, Node]] = set()
+        g: Set[Tuple[Node, Node, Node]] = set()
         uri = self.as_uri()
         for other in tokens:
             if other.clean is None:
                 continue
             elif other.group == "strain":
                 safeAdd(g, other.as_uri(), P.has_segment, uri)
-            elif not self._has_segment(tokens) and not other.typename in STRAIN_FIELDS and uri is not None:
+            elif (
+                not self._has_segment(tokens)
+                and not other.typename in STRAIN_FIELDS
+                and uri is not None
+            ):
                 g.update(other.object_of(uri))
         return g
 
@@ -480,9 +486,9 @@ class Proseq(SequenceToken):
     parser = p_proseq
 
     def relate(
-        self, tokens: List[Token], levels: Set[str] = set()
+        self, tokens: List[Token], levels: Optional[Set[str]] = set()
     ) -> Set[Tuple[Node, Node, Node]]:
-        g : Set[Tuple[Node, Node, Node]] = set()
+        g: Set[Tuple[Node, Node, Node]] = set()
         uri = self.as_uri()
         safeAdd(g, uri, P.proseq, make_literal(self.clean, infer=False))
         has_segment = self._has_segment(tokens)

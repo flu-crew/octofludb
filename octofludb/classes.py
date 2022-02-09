@@ -47,7 +47,7 @@ class Interpreter:
         default_classifier: Type[Token] = Unknown,
         include: Set[str] = set(),
         exclude: Set[str] = set(),
-        levels: Set[str] = set(),
+        levels: Optional[Set[str]] = None,
         na_str: List[str] = [],
         log: bool = False,
     ):
@@ -166,7 +166,7 @@ class ParsedPhraseList(Interpreter):
         default_classifier: Type[Token] = Unknown,
         include: Set[str] = set(),
         exclude: Set[str] = set(),
-        levels: Set[str] = set(),
+        levels: Optional[Set[str]] = None,
         na_str: List[str] = [],
         log: bool = False,
     ):
@@ -193,7 +193,9 @@ class ParsedPhraseList(Interpreter):
 
 
 def tabularTyping(
-    data: Dict[str, List[str]], levels: Set[str] = set(), na_str: List[str] = []
+    data: Dict[str, List[str]],
+    levels: Optional[Set[str]] = None,
+    na_str: List[str] = [],
 ) -> List[Phrase]:
     cols = []
     if not data:
@@ -212,7 +214,7 @@ def tabularTyping(
 
 
 def headlessTabularTyping(
-    data: List[List[str]], levels: Set[str] = set(), na_str: List[str] = []
+    data: List[List[str]], levels: Optional[Set[str]] = None, na_str: List[str] = []
 ):
     cols = []
     if not data:
@@ -362,9 +364,9 @@ class Ragged(ParsedPhraseList):
 
 
 class Phrase:
-    def __init__(self, tokens: List[Token], levels: Set[str] = set()):
-        self.tokens : List[Token] = tokens
-        self.levels : Set[str] = levels
+    def __init__(self, tokens: List[Token], levels: Optional[Set[str]] = None):
+        self.tokens: List[Token] = tokens
+        self.levels: Optional[Set[str]] = levels
 
     def connect(self, taguri=None) -> Set[Tuple[Node, Node, Node]]:
         """
@@ -377,7 +379,11 @@ class Phrase:
         for token in self.tokens:
             if token.clean is None:
                 continue
-            if self.levels or (token.group in self.levels):
+
+            # If no restrictions have been placed on the levels
+            # or if the current token is one of the allowed levels
+            # then find relations
+            if self.levels is None or (token.group in self.levels):
                 g.update(token.relate(tokens=self.tokens, levels=self.levels))
             g.update(token.add_triples())
             if taguri and token.group:

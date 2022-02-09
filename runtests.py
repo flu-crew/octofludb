@@ -640,7 +640,7 @@ class TestHomoList(unittest.TestCase):
 class TestPhrase(unittest.TestCase):
     def test_phrase(self):
         self.assertEqual(
-            showTriple(["A/swine/bogus/A01234567/2021", "H1N1"], levels={"strain", "subtype"}),
+            showTriple(["A/swine/bogus/A01234567/2021", "H1N1"], levels=None),
             [
                 (
                     "https://flu-crew.org/id/a%2Fswine%2Fbogus%2Fa01234567%2F2021",
@@ -650,7 +650,7 @@ class TestPhrase(unittest.TestCase):
                 (
                     "https://flu-crew.org/id/a%2Fswine%2Fbogus%2Fa01234567%2F2021",
                     "https://flu-crew.org/term/strain_name",
-                    "A/swine/bogus/A01234567/2021"
+                    "A/swine/bogus/A01234567/2021",
                 ),
                 (
                     "https://flu-crew.org/id/a%2Fswine%2Fbogus%2Fa01234567%2F2021",
@@ -666,34 +666,95 @@ class TestFasta(unittest.TestCase):
         # returns nothing since there is not recognizable identifier in the header
         g = Ragged(">baz\nATGG\n>foo||z\nATGGG", na_str=[]).connect()
         s = sorted([(str(s), str(p), str(o)) for s, p, o in g])
-        self.assertEqual(s, [])
+        self.maxDiff = None
+        self.assertEqual(
+            s,
+            [
+                (
+                    "https://flu-crew.org/id/4badd1687f27faae29f9b1fe1ea37e78",
+                    "https://flu-crew.org/term/chksum",
+                    "4badd1687f27faae29f9b1fe1ea37e78",
+                ),
+                (
+                    "https://flu-crew.org/id/4badd1687f27faae29f9b1fe1ea37e78",
+                    "https://flu-crew.org/term/dnaseq",
+                    "ATGGG",
+                ),
+                (
+                    "https://flu-crew.org/id/4badd1687f27faae29f9b1fe1ea37e78",
+                    "https://flu-crew.org/term/unknown",
+                    "foo",
+                ),
+                (
+                    "https://flu-crew.org/id/4badd1687f27faae29f9b1fe1ea37e78",
+                    "https://flu-crew.org/term/unknown",
+                    "z",
+                ),
+                (
+                    "https://flu-crew.org/id/5b2033ab635505389b1acfa0d6eda05c",
+                    "https://flu-crew.org/term/chksum",
+                    "5b2033ab635505389b1acfa0d6eda05c",
+                ),
+                (
+                    "https://flu-crew.org/id/5b2033ab635505389b1acfa0d6eda05c",
+                    "https://flu-crew.org/term/dnaseq",
+                    "ATGG",
+                ),
+                (
+                    "https://flu-crew.org/id/5b2033ab635505389b1acfa0d6eda05c",
+                    "https://flu-crew.org/term/unknown",
+                    "baz",
+                ),
+            ],
+        )
 
     def test_genbank(self):
         # returns nothing since there is not recognizable identifier in the header
-        self.maxDiff=None
-        g = Ragged(">MC123456\nATGGATGG\n>MC123457||z\nATGGGATGGG", levels={"dnaseq"}, na_str=[]).connect()
+        self.maxDiff = None
+        g = Ragged(
+            ">MC123456\nATGGATGG\n>MC123457||z\nATGGGATGGG", levels=None, na_str=[]
+        ).connect()
         s = sorted([(str(s), str(p), str(o)) for s, p, o in g])
-        self.assertEqual(s,
-           [('https://flu-crew.org/id/mc123456',
-             'https://flu-crew.org/term/chksum',
-             'c0a0ebddc678651ab0bcbbb4276af291'),
-            ('https://flu-crew.org/id/mc123456',
-             'https://flu-crew.org/term/dnaseq',
-             'ATGGATGG'),
-            ('https://flu-crew.org/id/mc123456',
-             'https://flu-crew.org/term/genbank_id',
-             'MC123456'),
-            ('https://flu-crew.org/id/mc123457',
-             'https://flu-crew.org/term/chksum',
-             '460a05ce52afb5bf34785e743d485aff'),
-            ('https://flu-crew.org/id/mc123457',
-             'https://flu-crew.org/term/dnaseq',
-             'ATGGGATGGG'),
-            ('https://flu-crew.org/id/mc123457',
-             'https://flu-crew.org/term/genbank_id',
-             'MC123457'),
-            ('https://flu-crew.org/id/mc123457', 'https://flu-crew.org/term/unknown', 'z')]
-          )
+        self.assertEqual(
+            s,
+            [
+                (
+                    "https://flu-crew.org/id/mc123456",
+                    "https://flu-crew.org/term/chksum",
+                    "c0a0ebddc678651ab0bcbbb4276af291",
+                ),
+                (
+                    "https://flu-crew.org/id/mc123456",
+                    "https://flu-crew.org/term/dnaseq",
+                    "ATGGATGG",
+                ),
+                (
+                    "https://flu-crew.org/id/mc123456",
+                    "https://flu-crew.org/term/genbank_id",
+                    "MC123456",
+                ),
+                (
+                    "https://flu-crew.org/id/mc123457",
+                    "https://flu-crew.org/term/chksum",
+                    "460a05ce52afb5bf34785e743d485aff",
+                ),
+                (
+                    "https://flu-crew.org/id/mc123457",
+                    "https://flu-crew.org/term/dnaseq",
+                    "ATGGGATGGG",
+                ),
+                (
+                    "https://flu-crew.org/id/mc123457",
+                    "https://flu-crew.org/term/genbank_id",
+                    "MC123457",
+                ),
+                (
+                    "https://flu-crew.org/id/mc123457",
+                    "https://flu-crew.org/term/unknown",
+                    "z",
+                ),
+            ],
+        )
 
     def test_fasta_carriage(self):
         g1 = Ragged(">baz\nATGG\n>foo||z\nATGGG", na_str=[]).connect()
