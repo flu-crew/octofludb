@@ -56,7 +56,7 @@ def uidgen(base="_", pad=3, start=0):
         yield ni.term(padDigit(base + str(i), pad))
 
 
-def make_uri(x, namespace=ni):
+def make_uri(x, namespace=ni) -> Optional[Node]:
     if not x:
         return None
     if isinstance(x, rdflib.term.URIRef):
@@ -86,11 +86,11 @@ def make_country_uri(countryStr):
     return uri
 
 
-def make_country_uri_from_code(code):
+def make_country_uri_from_code(code: str) -> Node:
     return ncountry.term(code)
 
 
-def make_date(dateStr):
+def make_date(dateStr) -> Optional[Node]:
     try:
         # Parse this to a date if it is of the pandas date type
         # This will remove any time annotation

@@ -8,7 +8,7 @@ import os
 import functools
 from rdflib import Graph
 from rdflib.term import Node
-from octofludb.util import log, die
+from octofludb.util import log, die, safeAdd
 from octofludb.version import __version__
 
 
@@ -604,19 +604,18 @@ def prep_tag_cmd(tag: str, filename: str) -> NoReturn:
 
 
 def prep_tag(tag: str, filename: str, outfile: TextIO = sys.stdout) -> None:
-    from rdflib import Literal
     import datetime as datetime
-    from octofludb.nomenclature import make_uri, make_tag_uri, P
+    from octofludb.nomenclature import make_uri, make_tag_uri, make_literal, P
     from octofludb.util import file_str
 
     with open(filename, "r") as fh:
         taguri = make_tag_uri(tag)
-        g : Set[Tuple[Node, Node, Node]] = set()
-        g.add((taguri, P.name, Literal(tag)))
-        g.add((taguri, P.time, Literal(datetime.datetime.now())))
-        g.add((taguri, P.file, Literal(file_str(fh))))
+        g: Set[Tuple[Node, Node, Node]] = set()
+        safeAdd(g, taguri, P.name, make_literal(tag, infer=False))
+        safeAdd(g, taguri, P.time, make_literal(datetime.datetime.now()))
+        safeAdd(g, taguri, P.file, make_literal(file_str(fh), infer=False))
         for identifier in (s.strip() for s in fh.readlines()):
-            g.add((make_uri(identifier), P.tag, taguri))
+            safeAdd(g, make_uri(identifier), P.tag, taguri)
 
         turtles = open_graph().update(g).commit().serialize(format="turtle")
 
@@ -860,7 +859,7 @@ def prep_table(
     def _mk_table_cmd(fh: TextIO) -> Set[Tuple[Node, Node, Node]]:
         if segment_key is None:
             return IrregularSegmentTable(
-                filehandle=fh,
+                text=fh,
                 tag=tag,
                 include=inc,
                 exclude=exc,
@@ -870,7 +869,7 @@ def prep_table(
             ).connect()
         else:
             return classes.Table(
-                filehandle=fh,
+                text=fh,
                 tag=tag,
                 include=inc,
                 exclude=exc,
@@ -918,7 +917,7 @@ def prep_fasta(
     def _mk_fasta_cmd(fh: TextIO) -> Set[Tuple[Node, Node, Node]]:
         (inc, exc, levels) = process_tablelike(include, exclude, None)
         return classes.Ragged(
-            filehandle=fh,
+            text=fh,
             tag=tag,
             include=inc,
             exclude=exc,
@@ -984,7 +983,7 @@ def prep_unpublished_cmd(
         (inc, exc, levels) = process_tablelike(include, exclude, None)
 
         return recipe.IrregularFasta(
-            filehandle=fh,
+            text=fh,
             tag=tag,
             include=inc,
             exclude=exc,
@@ -1084,7 +1083,9 @@ def report_masterlist_cmd(url: str, repo: str) -> NoReturn:
 
     sparql_filename = os.path.join(os.path.dirname(__file__), "data", "masterlist.rq")
 
-    results = db.sparql_query(sparql_file=sparql_filename, url=url, repo_name=repo).convert()
+    results = db.sparql_query(
+        sparql_file=sparql_filename, url=url, repo_name=repo
+    ).convert()
 
     recipe.mk_masterlist(results)
 

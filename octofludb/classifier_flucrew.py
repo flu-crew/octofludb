@@ -1,9 +1,9 @@
 from __future__ import annotations
-from typing import Set, Dict, List, Type, Tuple
+from typing import Set, Dict, List, Type, Tuple, Optional
 
 import parsec as p
 from octofludb.hash import chksum
-from octofludb.util import log
+from octofludb.util import log, safeAdd
 from octofludb.domain_flu import SEGMENT
 from rdflib import Literal
 from rdflib.term import Node
@@ -159,7 +159,7 @@ class Date(Token):
     def munge(self, text):
         return str(text)
 
-    def as_literal(self):
+    def as_literal(self) -> Optional[Node]:
         return make_date(self.dirty)
 
 
@@ -201,24 +201,26 @@ class StrainToken(Token):
                 return True
         return None
 
-    def relate(self, tokens, g, levels=None):
-        if self.clean is None or not self.match:
-            return
-        uri = self.as_uri()
-        has_segment = self._has_segment(tokens)
-        use_segment = (levels is None and has_segment) or (
-            levels is not None and "segment" in levels and has_segment
-        )
-        g.add((uri, make_property(self.typename), self.as_literal()))
-        for other in tokens:
-            if not other.match or other.clean == self.clean or other.clean is None:
-                continue
-            if other.group == "segment":
-                g.add((uri, P.has_segment, other.as_uri()))
-            elif other.choose_field() in STRAIN_FIELDS:
-                g.update(other.object_of(uri))
-            elif not use_segment:
-                g.update(other.object_of(uri))
+    def relate(
+        self, tokens: List[Token], levels: Set[str] = set()
+    ) -> Set[Tuple[Node, Node, Node]]:
+        g: Set[Tuple[Node, Node, Node]] = set()
+        if self.clean is not None and self.match:
+            uri = self.as_uri()
+            has_segment = self._has_segment(tokens)
+            use_segment = (not levels and has_segment) or (levels and "segment" in levels and has_segment)
+            if self.typename is not None:
+                safeAdd(g, uri, make_property(self.typename), self.as_literal())
+            for other in tokens:
+                if not other.match or other.clean == self.clean or other.clean is None:
+                    continue
+                if other.group == "segment":
+                    safeAdd(g, uri, P.has_segment, other.as_uri())
+                elif other.choose_field() in STRAIN_FIELDS:
+                    g.update(other.object_of(uri))
+                elif not use_segment:
+                    g.update(other.object_of(uri))
+        return g
 
 
 class Isolate(StrainToken):
@@ -237,9 +239,9 @@ class Barcode(StrainToken):
         return text.upper()
 
     def add_triples(self) -> Set[Tuple[Node, Node, Node]]:
-        g = set()
+        g: Set[Tuple[Node, Node, Node]] = set()
         if self.clean:
-            g.add((self.as_uri(), P.barcode, self.as_literal()))
+            safeAdd(g, self.as_uri(), P.barcode, self.as_literal())
         return g
 
 
@@ -251,17 +253,17 @@ class Strain(StrainToken):
         return text.replace(" ", "_")
 
     def add_triples(self) -> Set[Tuple[Node, Node, Node]]:
-        g = set()
+        g: Set[Tuple[Node, Node, Node]] = set()
         if self.clean:
             uri = self.as_uri()
-            g.add((uri, P.strain_name, self.as_literal()))
+            safeAdd(g, uri, P.strain_name, self.as_literal())
             for el in self.clean.split("/"):
                 barcode_match = re.fullmatch(BARCODE_PAT, el)
                 state_str = StateUSA.parser(el)
 
                 # some strain names contain a barcode, which is also a unique id
                 if barcode_match is not None:
-                    g.add((uri, P.strain_name, self.as_literal()))
+                    safeAdd(g, uri, P.strain_name, self.as_literal())
                     g.add((uri, P.barcode, make_literal(barcode_match[0])))
                 elif state_str is not None:
                     state = StateUSA(state_str)
@@ -272,10 +274,16 @@ class Strain(StrainToken):
 
 # --- strain attributes ---
 class StrainAttribute(Token):
-    def relate(self, tokens, g, levels=None):
+    def relate(
+        self, tokens: List[Token], levels: Set[str] = set()
+    ) -> Set[Tuple[Node, Node, Node]]:
+        g: Set[Tuple[Node, Node, Node]] = set()
         for other in tokens:
             if other.group == "strain" and other.typename != self.typename:
-                g.update(self.object_of(other.as_uri()))
+                other_uri = other.as_uri()
+                if other_uri is not None:
+                    g.update(self.object_of(other_uri))
+        return g
 
 
 class Subtype(StrainAttribute):
@@ -318,12 +326,15 @@ class SegmentToken(Token):
     group = "segment"
     class_predicate = P.has_segment
 
-    def as_uri(self):
+    def as_uri(self) -> Optional[Node]:
         return make_uri(self.clean)
 
-    def relate(self, tokens, g, levels=None):
+    def relate(
+        self, tokens: List[Token], levels: Set[str] = set()
+    ) -> Set[Tuple[Node, Node, Node]]:
+        g : Set[Tuple[Node, Node, Node]] = set()
         if not self.match:
-            return
+            return g
         uri = self.as_uri()
         for other in tokens:
             if other.clean is None:
@@ -333,11 +344,13 @@ class SegmentToken(Token):
                 and other.group == "segment"
                 and other.typename != self.typename
             ):
-                g.add((uri, P.sameAs, other.as_uri()))
+                safeAdd(g, uri, P.sameAs, other.as_uri())
             elif (
                 not other.choose_field() in STRAIN_FIELDS and other.typename is not None
             ):
-                g.update(other.object_of(uri))
+                if uri is not None:
+                    g.update(other.object_of(uri))
+        return g
 
 
 class Genbank(SegmentToken):
@@ -348,10 +361,9 @@ class Genbank(SegmentToken):
         return text.upper()
 
     def add_triples(self) -> Set[Tuple[Node, Node, Node]]:
-        g = set()
+        g : Set[Tuple[Node, Node, Node]]= set()
         if self.clean:
-            g.add((self.as_uri(), P.gb, self.as_literal()))
-
+            safeAdd(g, self.as_uri(), P.gb, self.as_literal())
         return g
 
 
@@ -359,26 +371,31 @@ class EpiSeqid(SegmentToken):
     typename = "epi_id"
     parser = p_epi_id
 
-    def as_uri(self):
+    def as_uri(self) -> Optional[Node]:
         return make_uri(self.clean)
 
     def munge(self, text):
         return text.upper().replace("_", "")
 
     def add_triples(self) -> Set[Tuple[Node, Node, Node]]:
-        g = set()
+        g : Set[Tuple[Node, Node, Node]] = set()
         if self.clean:
-            g.add((self.as_uri(), P.epi_id, self.as_literal()))
-
+            safeAdd(g, self.as_uri(), P.epi_id, self.as_literal())
         return g
 
 
 # --- segment attributes ---
 class SegmentAttribute(Token):
-    def relate(self, tokens, g, levels=None):
+    def relate(
+        self, tokens: List[Token], levels: Set[str] = set()
+    ) -> Set[Tuple[Node, Node, Node]]:
+        g = set()
         for other in tokens:
             if other.group == "segment":
-                g.update(self.object_of(other.as_uri()))
+                other_uri = other.as_uri()
+                if other_uri is not None:
+                    g.update(self.object_of(other_uri))
+        return g
 
 
 class SegmentName(SegmentAttribute):
@@ -443,35 +460,44 @@ class Dnaseq(SequenceToken):
             g.add((uri, P.dnaseq, Literal(self.clean)))
         return g
 
-    def relate(self, tokens, g, levels=None):
+    def relate(
+        self, tokens: List[Token], levels: Set[str] = set()
+    ) -> Set[Tuple[Node, Node, Node]]:
+        g : Set[Tuple[Node, Node, Node]] = set()
         uri = self.as_uri()
         for other in tokens:
             if other.clean is None:
                 continue
             elif other.group == "strain":
-                g.add((other.as_uri(), P.has_segment, uri))
-            elif not self._has_segment(tokens) and not other.typename in STRAIN_FIELDS:
+                safeAdd(g, other.as_uri(), P.has_segment, uri)
+            elif not self._has_segment(tokens) and not other.typename in STRAIN_FIELDS and uri is not None:
                 g.update(other.object_of(uri))
+        return g
 
 
 class Proseq(SequenceToken):
     typename = "proseq"
     parser = p_proseq
 
-    def relate(self, tokens, g, levels=None):
+    def relate(
+        self, tokens: List[Token], levels: Set[str] = set()
+    ) -> Set[Tuple[Node, Node, Node]]:
+        g : Set[Tuple[Node, Node, Node]] = set()
         uri = self.as_uri()
-        g.add((uri, P.proseq, Literal(self.clean)))
+        safeAdd(g, uri, P.proseq, make_literal(self.clean, infer=False))
         has_segment = self._has_segment(tokens)
         for other in tokens:
             if other.clean is None:
                 continue
             if other.group == "segment":
-                g.add((other.as_uri(), P.has_feature, uri))
+                safeAdd(g, other.as_uri(), P.has_feature, uri)
             elif other.group == "strain":
                 if has_segment:
                     log("WARNING: I don't know how to connect a protein to a strain id")
             elif not other.choose_field() in STRAIN_FIELDS and not has_segment:
-                g.update(other.object_of(uri))
+                if uri is not None:
+                    g.update(other.object_of(uri=uri))
+        return g
 
 
 class H1Clade(Token):

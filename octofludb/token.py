@@ -90,22 +90,14 @@ class Token:
         Add knowledge to the graph
         """
         return set()
-        #  # FIXME: the following code unifies fields of the same type, but it can go too far
-        #  if (
-        #      self.field
-        #      and self.field != self.typename
-        #      and self.class_predicate
-        #      and self.match
-        #  ):
-        #      subproperty_triple = define_subproperty(self.as_predicate(), self.class_predicate)
-        #      if subproperty_triple:
-        #          g.add(subproperty_triple)
 
-    def relate(self, fields, g, levels=None):
+    def relate(
+        self, tokens: List[Token], levels: Set[str] = set()
+    ) -> Set[Tuple[Node, Node, Node]]:
         """
         Create links as desired between Tokens.
         """
-        pass
+        return set()
 
     def __str__(self):
         return self.clean
@@ -167,8 +159,12 @@ class Integer(Token):
     typename = "integer"
     parser = p.regex("[1-9]\\d*") ^ p.string("0")
 
-    def as_literal(self):
-        return rdflib.Literal(self.clean, datatype=XSD.integer)
+    # This should never be none so long as the parser succeeded
+    def as_literal(self) -> Optional[Node]:
+        if self.match:
+            return rdflib.Literal(self.clean, datatype=XSD.integer)
+        else:
+            return None
 
 
 class Double(Token):
@@ -180,8 +176,12 @@ class Double(Token):
         ^ p.string("0")
     )
 
-    def as_literal(self):
-        return rdflib.Literal(self.clean, XSD.double)
+    # This should never be none so long as the parser succeeded
+    def as_literal(self) -> Optional[Node]:
+        if self.match:
+            return rdflib.Literal(self.clean, XSD.double)
+        else:
+            return None
 
 
 class Boolean(Token):
@@ -194,8 +194,11 @@ class Boolean(Token):
         else:
             return "false"
 
-    def as_literal(self):
-        return rdflib.Literal(self.clean, XSD.boolean)
+    def as_literal(self) -> Optional[Node]:
+        if self.clean in ["true", "false"]:
+            return rdflib.Literal(self.clean, XSD.boolean)
+        else:
+            return None
 
 
 class Ignore(Token):

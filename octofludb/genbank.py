@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Set, Tuple
+from typing import Set, Tuple, Dict, Optional, Callable
 
 from octofludb.nomenclature import (
     uidgen,
@@ -10,10 +10,10 @@ from octofludb.nomenclature import (
     make_date,
     make_country_uri,
     make_usa_state_uri,
+    make_literal,
 )
-from octofludb.util import rmNone, make_maybe_add
+from octofludb.util import rmNone, safeAdd
 from octofludb.hash import chksum
-from rdflib import Literal
 from rdflib.term import Node
 from rdflib.namespace import XSD
 import re
@@ -25,6 +25,13 @@ from octofludb.util import log
 from octofludb.colors import bad
 import octofludb.domain_geography as geo
 
+
+def make_maybe_add(g : Set[Tuple[Node, Node, Node]], meta : Dict[str, Optional[str]], sid : Optional[Node]):
+    def maybe_add(p, key, formatter=lambda x : make_literal(x, infer=False)):
+        if key in meta and meta[key] != None:
+            safeAdd(g, sid, p, formatter(meta[key]))
+
+    return maybe_add
 
 def make_gb_meta_triples(
     gb_meta: dict, only_influenza_a: bool = True
@@ -62,12 +69,12 @@ def make_gb_meta_triples(
             return (g, f"{accession}\tNot influenza")
 
     gid = make_uri(accession)
-    g.add((gid, P.gb, Literal(accession)))
+    safeAdd(g, gid, P.gb, make_literal(accession, infer=False))
 
     maybe_add = make_maybe_add(g, gb_meta, gid)
 
     def make_integer(x):
-        return Literal(x, datatype=XSD.integer)
+        return make_literal(x, datatype=XSD.integer, infer=False)
 
     maybe_add(P.gb_locus, "GBSeq_locus")
     maybe_add(P.gb_length, "GBSeq_length", formatter=make_integer)
@@ -87,8 +94,8 @@ def make_gb_meta_triples(
     # usually an entry has sequence, but there are weird exceptions
     if "GBSeq_sequence" in gb_meta:
         seq = gb_meta["GBSeq_sequence"].upper()
-        g.add((gid, P.dnaseq, Literal(seq)))
-        g.add((gid, P.chksum, Literal(chksum(seq))))
+        safeAdd(g, gid, P.dnaseq, make_literal(seq, infer=False))
+        safeAdd(g, gid, P.chksum, make_literal(chksum(seq), infer=False)) 
 
     strain = None
     host = None
@@ -98,8 +105,8 @@ def make_gb_meta_triples(
     igen = uidgen(base=accession + "_feat_")
     for feat in gb_meta["GBSeq_feature-table"]:
         fid = next(igen)
-        g.add((gid, P.has_feature, fid))
-        g.add((fid, P.name, Literal(feat["GBFeature_key"])))
+        safeAdd(g, gid, P.has_feature, fid)
+        safeAdd(g, fid, P.name, make_literal(feat["GBFeature_key"], infer=False))
 
         maybe_add = make_maybe_add(g, feat, fid)
         maybe_add(P.gb_location, "GBFeature_location")
@@ -113,8 +120,8 @@ def make_gb_meta_triples(
                 val = qual["GBQualifier_value"]
 
                 if key == "translation":
-                    g.add((fid, P.proseq, Literal(val)))
-                    g.add((fid, P.chksum, Literal(chksum(val))))
+                    g.add((fid, P.proseq, make_literal(val, infer=False)))
+                    g.add((fid, P.chksum, make_literal(chksum(val), infer=False)))
                 elif key == "strain":
                     try:
                         strain = identifier.p_strain.parse(val)
@@ -132,41 +139,41 @@ def make_gb_meta_triples(
                     try:
                         segment_name = flu.p_segment.parse_strict(val)
                         # attach the segment_name to the top-level genbank record, not the feature
-                        g.add((gid, P.segment_name, Literal(segment_name)))
+                        safeAdd(g, gid, P.segment_name, make_literal(segment_name, infer=False))
                     except:
                         pass
                     # attach the original, unparsed gene name to the feature
-                    g.add((fid, make_property(key), Literal(val)))
+                    safeAdd(g, fid, make_property(key), make_literal(val, infer=True))
                 else:
-                    g.add((fid, make_property(key), Literal(val)))
+                    safeAdd(g, fid, make_property(key), make_literal(val, infer=True))
 
     # link strain information
     if strain:
         sid = make_uri(strain)
-        g.add((sid, P.has_segment, gid))
-        g.add((sid, P.strain_name, Literal(strain)))
+        safeAdd(g, sid, P.has_segment, gid)
+        safeAdd(g, sid, P.strain_name, make_literal(strain, infer=False))
         if host:
-            g.add((sid, P.host, Literal(animal.clean_host(host))))
+            safeAdd(g, sid, P.host, make_literal(animal.clean_host(host), infer=False))
         if date:
-            g.add((sid, P.date, date))
+            safeAdd(g, sid, P.date, date)
         if country:
             code = geo.country_to_code(country)
             country_uri = make_country_uri(country)
-            g.add((sid, P.country, country_uri))
+            safeAdd(g, sid, P.country, country_uri)
             if code is None:
                 # if this is an unrecognized country (e.g., Kosovo) then state
-                g.add((country_uri, P.name, Literal(country)))
+                g.add((country_uri, P.name, make_literal(country, infer=False)))
             if code == "USA":
                 fields = strain.split("/")
                 for field in fields[1:]:
                     # If this looks like a US state, add it
                     code = geo.state_to_code(field)
                     if code:
-                        g.add((sid, P.state, make_usa_state_uri(code)))
+                        safeAdd(g, sid, P.state, make_usa_state_uri(code))
                     # If this looks like an A0 number, add it
                     try:
                         A0 = identifier.p_A0.parse_strict(field)
-                        g.add((sid, P.barcode, Literal(A0)))
+                        safeAdd(g, sid, P.barcode, make_literal(A0, infer=False))
                     except:
                         pass
     else:

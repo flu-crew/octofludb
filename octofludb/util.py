@@ -9,9 +9,11 @@ from typing import (
     Tuple,
     Optional,
     Any,
+    Set,
 )
 
 from rdflib import Literal
+from rdflib.term import Node
 import math
 import sys
 import re
@@ -66,17 +68,6 @@ def strip(x: str) -> str:
     return x.strip()
 
 
-def make_maybe_add(g, meta, sid):
-    def maybe_add(p, key, formatter=Literal):
-        if key in meta and meta[key] != None:
-            try:
-                g.add((sid, p, formatter(meta[key])))
-            except:
-                pass
-
-    return maybe_add
-
-
 def rmNone(xs):
     """Remove all 'None' elements from a list"""
     return list(filter(lambda x: x != None, xs))
@@ -122,3 +113,13 @@ def addDefault(d: dict, key: str, default: str):
     if d[key] == None:
         d[key] = default
     return d
+
+
+def safeAdd(
+    g: Set[Tuple[Node, Node, Node]],
+    s: Optional[Node],
+    p: Optional[Node],
+    o: Optional[Node],
+) -> None:
+    if s is not None and p is not None and o is not None:
+        g.add((s, p, o))

@@ -2,7 +2,6 @@ from __future__ import annotations
 from typing import Optional, List, Set, Tuple, TextIO
 
 import sys
-from rdflib import Literal
 from rdflib.term import Node
 import pandas as pd  # type: ignore
 import octofludb.classes as classes
@@ -11,8 +10,8 @@ import octofludb.classifier_flucrew as flu
 import octofludb.token as tok
 import octofludb.domain_identifier as identifier
 import parsec
-from octofludb.nomenclature import P, O, make_uri, make_tag_uri
-from octofludb.util import log, file_str
+from octofludb.nomenclature import P, O, make_uri, make_tag_uri, make_literal
+from octofludb.util import log, file_str, safeAdd
 import re
 import math
 from tqdm import tqdm  # type: ignore
@@ -52,23 +51,23 @@ def mk_blast(
 
         if tag:
             taguri = make_tag_uri(tag)
-            g.add((taguri, P.name, Literal(tag)))
-            g.add((taguri, P.time, Literal(timestr)))
-            g.add((taguri, P.file, Literal(file_str(filehandle))))
-            g.add((huid, P.tag, taguri))
+            g.add((taguri, P.name, make_literal(tag, infer=False)))
+            g.add((taguri, P.time, make_literal(timestr, infer=False)))
+            g.add((taguri, P.file, make_literal(file_str(filehandle), infer=False)))
+            safeAdd(g, huid, P.tag, taguri)
 
-        g.add((huid, P.qseqid, make_uri(qseqid)))
-        g.add((huid, P.sseqid, make_uri(sseqid)))
-        g.add((huid, P.pident, Literal(float(pident))))
-        g.add((huid, P.length, Literal(int(length))))
-        g.add((huid, P.mismatch, Literal(int(mismatch))))
-        g.add((huid, P.gapopen, Literal(int(gapopen))))
-        g.add((huid, P.qstart, Literal(int(qstart))))
-        g.add((huid, P.qend, Literal(int(qend))))
-        g.add((huid, P.sstart, Literal(int(sstart))))
-        g.add((huid, P.send, Literal(int(send))))
-        g.add((huid, P.evalue, Literal(float(evalue))))
-        g.add((huid, P.bitscore, Literal(float(bitscore))))
+        safeAdd(g, huid, P.qseqid, make_uri(qseqid))
+        safeAdd(g, huid, P.sseqid, make_uri(sseqid))
+        safeAdd(g, huid, P.pident, make_literal(float(pident), infer=False))
+        safeAdd(g, huid, P.length, make_literal(int(length), infer=False))
+        safeAdd(g, huid, P.mismatch, make_literal(int(mismatch), infer=False))
+        safeAdd(g, huid, P.gapopen, make_literal(int(gapopen), infer=False))
+        safeAdd(g, huid, P.qstart, make_literal(int(qstart), infer=False))
+        safeAdd(g, huid, P.qend, make_literal(int(qend), infer=False))
+        safeAdd(g, huid, P.sstart, make_literal(int(sstart), infer=False))
+        safeAdd(g, huid, P.send, make_literal(int(send), infer=False))
+        safeAdd(g, huid, P.evalue, make_literal(float(evalue), infer=False))
+        safeAdd(g, huid, P.bitscore, make_literal(float(bitscore), infer=False))
 
     return g
 
@@ -429,7 +428,7 @@ MASTERLIST_HEADER: List[str] = [
 
 
 def mk_masterlist(results: dict) -> None:
-    entries : dict = dict()
+    entries: dict = dict()
 
     for row in results["results"]["bindings"]:
         barcode = row["barcode"]["value"]

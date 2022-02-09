@@ -1,11 +1,5 @@
 from __future__ import annotations
-from typing import (
-    List,
-    Tuple,
-    TextIO,
-    Optional,
-    Dict
-)
+from typing import List, Tuple, TextIO, Optional, Dict
 
 from octofludb.util import log
 from octofludb.colors import bad
@@ -13,7 +7,7 @@ from octofludb.colors import bad
 import sys
 
 
-def write_as_fasta(results : dict, outfile : TextIO =sys.stdout) -> None:
+def write_as_fasta(results: dict, outfile: TextIO = sys.stdout) -> None:
     """
     Write a SPARQL query result as a FASTA file
     """
@@ -32,7 +26,9 @@ def write_as_fasta(results : dict, outfile : TextIO =sys.stdout) -> None:
         print(sequence, file=outfile)
 
 
-def write_as_table(results : dict, header : bool =True, outfile : TextIO =sys.stdout) -> None:
+def write_as_table(
+    results: dict, header: bool = True, outfile: TextIO = sys.stdout
+) -> None:
     """
     Write a SPARQL query result as a TAB-delimited table with an optional header
     """
@@ -50,7 +46,7 @@ def write_as_table(results : dict, header : bool =True, outfile : TextIO =sys.st
         print("\t".join(fields), file=outfile)
 
 
-def write_constellations(results : dict, outfile : TextIO =sys.stdout) -> None:
+def write_constellations(results: dict, outfile: TextIO = sys.stdout) -> None:
     """
     Prepare constellations
     """
@@ -64,14 +60,14 @@ def write_constellations(results : dict, outfile : TextIO =sys.stdout) -> None:
         print(f"{strain}\t{const}", file=outfile)
 
 
-def _parse_constellation_query(results : dict) -> List[Tuple[str, str, str]]:
+def _parse_constellation_query(results: dict) -> List[Tuple[str, str, str]]:
     return [
         (row["strain"]["value"], row["segment"]["value"], row["clade"]["value"])
         for row in results["results"]["bindings"]
     ]
 
 
-def _make_constellations(rows : List[Tuple[str, str, str]]) -> List[Tuple[str, str]]:
+def _make_constellations(rows: List[Tuple[str, str, str]]) -> List[Tuple[str, str]]:
 
     segment_lookup = dict(PB2=0, PB1=1, PA=2, NP=3, M=4, MP=4, NS=5)
 
@@ -79,7 +75,7 @@ def _make_constellations(rows : List[Tuple[str, str, str]]) -> List[Tuple[str, s
         pdm="P", LAIV="V", TRIG="T", humanSeasonal="H", classicalSwine="C"
     )
 
-    const : Dict[str, List[str]] = dict()
+    const: Dict[str, List[str]] = dict()
     for (strain, segment, clade) in rows:
 
         if not strain in const:
@@ -101,11 +97,12 @@ def _make_constellations(rows : List[Tuple[str, str, str]]) -> List[Tuple[str, s
             )
             char = "X"
 
-
         if const[strain][index] == "-":
             const[strain][index] = char
         elif const[strain][index] != char:
-            const[strain][index] = "M" # conflicting internal gene clades, this means the strain is probably mixed
+            const[strain][
+                index
+            ] = "M"  # conflicting internal gene clades, this means the strain is probably mixed
 
     output_rows = []
     for (k, c) in const.items():

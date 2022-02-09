@@ -18,6 +18,13 @@ from tqdm import tqdm  # type: ignore
 from collections import OrderedDict
 
 
+def get_filename(fh: Union[str, TextIO]) -> Optional[str]:
+    if isinstance(fh, str):
+        return None
+    else:
+        return fh.name
+
+
 def updateClassifiers(
     classifiers: OrderedDict[str, Type[Token]], include: Set[str], exclude: Set[str]
 ) -> List[Type[Token]]:
@@ -43,14 +50,12 @@ class Interpreter:
         levels: Set[str] = set(),
         na_str: List[str] = [],
         log: bool = False,
-        filehandle: Optional[TextIO] = None,
     ):
         self.tag = tag
         self.levels = levels
         self.na_str = na_str
         self.classifiers = updateClassifiers(classifiers, include, exclude)
         self.default_classifier = default_classifier
-        self.filehandle = filehandle
         if log:
             self.log()
         self.field = field
@@ -100,7 +105,7 @@ class Datum(Interpreter):
 
 
 def addTag(
-    tag, filehandle: Optional[TextIO]
+    tag: Optional[str], filename: Optional[str]
 ) -> Tuple[Optional[Node], Set[Tuple[Node, Node, Node]]]:
     """
     Add tag info to the triple set and return the tag URI
@@ -113,8 +118,8 @@ def addTag(
 
         g.add((taguri, P.name, make_literal(tag)))
         g.add((taguri, P.time, make_literal(datetime.datetime.now())))
-        if filehandle is not None:
-            g.add((taguri, P.file, make_literal(filehandle.name)))
+        if filename is not None and filename != "":
+            g.add((taguri, P.file, make_literal(filename)))
     else:
         taguri = None
         g = set()
@@ -126,7 +131,7 @@ class HomoList(Interpreter):
     Interpret a list of items assumed to be of the same type
     """
 
-    def cast(self, data):
+    def cast(self, data: List[str]) -> List[Token]:
         for classifier in self.classifiers:
             if classifier.goodness(data, na_str=self.na_str) > 0.8:
                 c = classifier
@@ -136,7 +141,8 @@ class HomoList(Interpreter):
         return [c(x, field=self.field, na_str=self.na_str) for x in data]
 
     def connect(self) -> Set[Tuple[Node, Node, Node]]:
-        triples = addTag(tag=self.tag, filehandle=None)[1]
+
+        triples = addTag(tag=self.tag, filename=None)[1]
 
         for token in self.data:
             if token.clean is None:
@@ -153,7 +159,7 @@ class HomoList(Interpreter):
 class ParsedPhraseList(Interpreter):
     def __init__(
         self,
-        filehandle: Optional[TextIO],
+        text: Union[str, TextIO],
         field: Optional[str] = None,
         tag: Optional[str] = None,
         classifiers: OrderedDict[str, Type[Token]] = allClassifiers,
@@ -170,22 +176,25 @@ class ParsedPhraseList(Interpreter):
         self.na_str = na_str
         if log:
             self.log()
-        self.filehandle = filehandle
+        self.text = text
         self.default_classifier = default_classifier
-        self.data = self.cast(self.parse(filehandle))
+        self.data = self.cast(self.parse(text))
 
-    def parse(self, filehandle):
+    def parse(self, text):
         raise NotImplementedError
 
     def connect(self) -> Set[Tuple[Node, Node, Node]]:
         log("Making triples")
-        taguri, triples = addTag(tag=self.tag, filehandle=self.filehandle)
+
+        taguri, triples = addTag(tag=self.tag, filename=get_filename(self.text))
         for (i, phrase) in enumerate(tqdm(self.data)):
             triples.update(phrase.connect(taguri=taguri))
         return triples
 
 
-def tabularTyping(data, levels=set(), na_str=[]):
+def tabularTyping(
+    data: Dict[str, List[str]], levels: Set[str] = set(), na_str: List[str] = []
+) -> List[Phrase]:
     cols = []
     if not data:
         return []
@@ -202,7 +211,9 @@ def tabularTyping(data, levels=set(), na_str=[]):
     return phrases
 
 
-def headlessTabularTyping(data, levels=set(), na_str=[]):
+def headlessTabularTyping(
+    data: List[List[str]], levels: Set[str] = set(), na_str: List[str] = []
+):
     cols = []
     if not data:
         return []
@@ -224,35 +235,44 @@ class Table(ParsedPhraseList):
     have a header.
     """
 
-    def cast(self, data):
+    def cast(self, data: Dict[str, List[str]]) -> List[Phrase]:
         return tabularTyping(data, levels=self.levels, na_str=self.na_str)
 
-    def parse(self, filehandle):
+    def parse(self, text: Union[str, TextIO]):
         """
         Make a dictionary with column name as key and list of strings as value.
         Currently only Excel is supported.
         """
-        try:
-            data = self._parse_excel(filehandle)
-        except:
-            data = self._parse_table(filehandle)
+        if isinstance(text, TextIO):
+            try:
+                data = self._parse_excel(text)
+            except:
+                data = self._parse_table(text)
+        else:
+            data = self._parse_table(text)
         return data
 
-    def _parse_excel(self, filehandle):
+    def _parse_excel(self, text: TextIO):
         try:
-            log(f"Reading {file_str(filehandle)} as excel file ...")
-            d = pd.read_excel(filehandle.name)
+            log(f"Reading {text.name} as excel file ...")
+            d = pd.read_excel(text.name)
             self.header = list(d.columns)
             # create a dictionary of List(str) with column names as keys
             return {c: [strOrNone(x) for x in d[c]] for c in d}
         except xlrd.biffh.XLRDError as e:
-            log(f"Could not parse '{file_str(filehandle)}' as an excel file")
+            log(f"Could not parse '{text.name}' as an excel file")
             raise e
         return d
 
-    def _parse_table(self, filehandle, delimiter="\t"):
-        log(f"Reading {file_str(filehandle)} as tab-delimited file ...")
-        rows = [r.split(delimiter) for r in filehandle.readlines()]
+    def _parse_table(self, text: Union[str, TextIO], delimiter: str = "\t"):
+        if isinstance(text, str):
+            log(f"Reading raw string as tab-delimited file ...")
+            lines = [s.rstrip() for s in text.split("\n")]
+        else:
+            log(f"Reading '{text.name}' as tab-delimited file ...")
+            lines = text.readlines()
+
+        rows = [r.split(delimiter) for r in lines]
         if len(rows) < 2:
             # if the input table is empty or has only a header
             return dict()
@@ -273,7 +293,7 @@ class Ragged(ParsedPhraseList):
     from comparing phrases.
     """
 
-    def cast(self, data):
+    def cast(self, data: List[List[str]]) -> List[Phrase]:
         # If all entries have the same number of entries, I treat them as a
         # table. Then I can use column-based type inference.
         if len({len(xs) for xs in data}) == 1:
@@ -291,13 +311,13 @@ class Ragged(ParsedPhraseList):
                 for row in data
             ]
 
-    def parse(self, filehandle):
+    def parse(self, text: Union[str, TextIO]) -> List[List[str]]:
         """
         Return a list of lists of strings. Currently only FASTA is supported.
         """
-        return self._parse_fasta(filehandle, sep="|")
+        return self._parse_fasta(text, sep="|")
 
-    def _parse_fasta(self, filehandle, sep="|"):
+    def _parse_fasta(self, text: Union[str, TextIO], sep: str = "|") -> List[List[str]]:
         """
         Parse a fasta file. The header is split into fields on 'sep'. The
         sequence is added as a final field.
@@ -311,12 +331,16 @@ class Ragged(ParsedPhraseList):
         )
         p_entry = p_header + p_seq
         p_fasta = parsec.many1(p_entry)
-        log(f"Reading {file_str(filehandle)} as a fasta file:")
-        try:
-            entries = p_fasta.parse(filehandle.read())
-        except AttributeError:
-            # in case I want to pass in a list of strings, e.g., in tests
-            entries = p_fasta.parse(filehandle)
+
+        if isinstance(text, str):
+            log(f"Reading raw string as a fasta data:")
+            fasta_str = text
+        else:
+            log(f"Reading '{text.name}' as a fasta file:")
+            fasta_str = text.read()
+
+        entries = p_fasta.parse(fasta_str)
+
         row = [h.split(sep) + [q] for (h, q) in entries]
         return row
 
@@ -338,9 +362,9 @@ class Ragged(ParsedPhraseList):
 
 
 class Phrase:
-    def __init__(self, tokens, levels=set()):
-        self.tokens = tokens
-        self.levels = levels
+    def __init__(self, tokens: List[Token], levels: Set[str] = set()):
+        self.tokens : List[Token] = tokens
+        self.levels : Set[str] = levels
 
     def connect(self, taguri=None) -> Set[Tuple[Node, Node, Node]]:
         """
@@ -354,7 +378,7 @@ class Phrase:
             if token.clean is None:
                 continue
             if self.levels or (token.group in self.levels):
-                g.update(token.relate(self.tokens, levels=self.levels))
+                g.update(token.relate(tokens=self.tokens, levels=self.levels))
             g.update(token.add_triples())
             if taguri and token.group:
                 turi = token.as_uri()

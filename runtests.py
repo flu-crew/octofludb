@@ -5,17 +5,42 @@ import octofludb.recipes as recipes
 import octofludb.formatting as formatter
 import octofludb.token as tok
 import octofludb.script as script
+import octofludb.util as util
 from octofludb.nomenclature import (
     make_uri,
     make_usa_state_uri,
     make_country_uri,
     make_property,
+    make_literal,
 )
 from octofludb.classes import HomoList, Phrase, Datum, Ragged
 from octofludb.graph import showTriple
 import unittest
 import rdflib
 import urllib.parse as url
+
+
+class TestUtil(unittest.TestCase):
+    def test_safeAdd(self):
+        g = set()
+        util.safeAdd(g, None, None, None)
+
+        self.assertEqual(g, set())
+
+        h = set()
+        util.safeAdd(
+            h, make_uri("subject"), make_property("predicate"), make_literal("object")
+        )
+        self.assertEqual(
+            [(str(s), str(p), str(o)) for s, p, o in list(h)],
+            [
+                (
+                    "https://flu-crew.org/id/subject",
+                    "https://flu-crew.org/term/predicate",
+                    "object",
+                )
+            ],
+        )
 
 
 class TestMakeUri(unittest.TestCase):
@@ -615,15 +640,20 @@ class TestHomoList(unittest.TestCase):
 class TestPhrase(unittest.TestCase):
     def test_phrase(self):
         self.assertEqual(
-            showTriple(["A01234567", "H1N1"]),
+            showTriple(["A/swine/bogus/A01234567/2021", "H1N1"], levels={"strain", "subtype"}),
             [
                 (
-                    "https://flu-crew.org/id/a01234567",
+                    "https://flu-crew.org/id/a%2Fswine%2Fbogus%2Fa01234567%2F2021",
                     "https://flu-crew.org/term/barcode",
                     "A01234567",
                 ),
                 (
-                    "https://flu-crew.org/id/a01234567",
+                    "https://flu-crew.org/id/a%2Fswine%2Fbogus%2Fa01234567%2F2021",
+                    "https://flu-crew.org/term/strain_name",
+                    "A/swine/bogus/A01234567/2021"
+                ),
+                (
+                    "https://flu-crew.org/id/a%2Fswine%2Fbogus%2Fa01234567%2F2021",
                     "https://flu-crew.org/term/subtype",
                     "H1N1",
                 ),
@@ -633,48 +663,37 @@ class TestPhrase(unittest.TestCase):
 
 class TestFasta(unittest.TestCase):
     def test_fasta(self):
+        # returns nothing since there is not recognizable identifier in the header
         g = Ragged(">baz\nATGG\n>foo||z\nATGGG", na_str=[]).connect()
         s = sorted([(str(s), str(p), str(o)) for s, p, o in g])
-        self.assertEqual(
-            s,
-            [
-                (
-                    "https://flu-crew.org/id/4badd1687f27faae29f9b1fe1ea37e78",
-                    "https://flu-crew.org/term/chksum",
-                    "4badd1687f27faae29f9b1fe1ea37e78",
-                ),
-                (
-                    "https://flu-crew.org/id/4badd1687f27faae29f9b1fe1ea37e78",
-                    "https://flu-crew.org/term/dnaseq",
-                    "ATGGG",
-                ),
-                (
-                    "https://flu-crew.org/id/4badd1687f27faae29f9b1fe1ea37e78",
-                    "https://flu-crew.org/term/unknown",
-                    "foo",
-                ),
-                (
-                    "https://flu-crew.org/id/4badd1687f27faae29f9b1fe1ea37e78",
-                    "https://flu-crew.org/term/unknown",
-                    "z",
-                ),
-                (
-                    "https://flu-crew.org/id/5b2033ab635505389b1acfa0d6eda05c",
-                    "https://flu-crew.org/term/chksum",
-                    "5b2033ab635505389b1acfa0d6eda05c",
-                ),
-                (
-                    "https://flu-crew.org/id/5b2033ab635505389b1acfa0d6eda05c",
-                    "https://flu-crew.org/term/dnaseq",
-                    "ATGG",
-                ),
-                (
-                    "https://flu-crew.org/id/5b2033ab635505389b1acfa0d6eda05c",
-                    "https://flu-crew.org/term/unknown",
-                    "baz",
-                ),
-            ],
-        )
+        self.assertEqual(s, [])
+
+    def test_genbank(self):
+        # returns nothing since there is not recognizable identifier in the header
+        self.maxDiff=None
+        g = Ragged(">MC123456\nATGGATGG\n>MC123457||z\nATGGGATGGG", levels={"dnaseq"}, na_str=[]).connect()
+        s = sorted([(str(s), str(p), str(o)) for s, p, o in g])
+        self.assertEqual(s,
+           [('https://flu-crew.org/id/mc123456',
+             'https://flu-crew.org/term/chksum',
+             'c0a0ebddc678651ab0bcbbb4276af291'),
+            ('https://flu-crew.org/id/mc123456',
+             'https://flu-crew.org/term/dnaseq',
+             'ATGGATGG'),
+            ('https://flu-crew.org/id/mc123456',
+             'https://flu-crew.org/term/genbank_id',
+             'MC123456'),
+            ('https://flu-crew.org/id/mc123457',
+             'https://flu-crew.org/term/chksum',
+             '460a05ce52afb5bf34785e743d485aff'),
+            ('https://flu-crew.org/id/mc123457',
+             'https://flu-crew.org/term/dnaseq',
+             'ATGGGATGGG'),
+            ('https://flu-crew.org/id/mc123457',
+             'https://flu-crew.org/term/genbank_id',
+             'MC123457'),
+            ('https://flu-crew.org/id/mc123457', 'https://flu-crew.org/term/unknown', 'z')]
+          )
 
     def test_fasta_carriage(self):
         g1 = Ragged(">baz\nATGG\n>foo||z\nATGGG", na_str=[]).connect()
