@@ -156,7 +156,7 @@ def mk_gis(filename: str) -> Set[Tuple[Node, Node, Node]]:
 
     g = set()  # initialize triple set
 
-    fh = pd.read_excel(filename, sheet_name=0)
+    fh = pd.read_excel(filename, sheet_name=0, keep_default_na = False)
     d = {c: [x for x in fh[c]] for c in fh}
     epipat = re.compile(" *\|.*")
     for i in tqdm(range(len(d["Isolate_Id"]))):
@@ -169,12 +169,12 @@ def mk_gis(filename: str) -> Set[Tuple[Node, Node, Node]]:
             strain_tok = flu.Unknown(strain_clean, field="strain_name")
             # and keep the full strain name, even if ugly
             full_strain_name_tok = flu.Unknown(
-                d["Isolate_Name"][i], field="gisaid_strain_name"
+                d["Isolate_Name"][i], field="gisaid_strain_name", na_str=[""]
             )
 
             host_tok = flu.Host(d["Host"][i], field="host")
             subtype_tok = flu.Subtype(d["Subtype"][i], field="gisaid_subtype")
-            lineage_tok = tok.Unknown(d["Lineage"][i], field="lineage", na_str=[""])
+            lineage_tok = tok.String(d["Lineage"][i], field="lineage", na_str=[""])
             try:
                 country_tok = flu.Country(d["Location"][i].split(" / ")[1])
             except:

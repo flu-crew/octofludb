@@ -154,6 +154,24 @@ class Unknown(Token):
         else:
             return item
 
+class String(Token):
+    typename = "string"
+    parser = lambda x: x
+
+    # This should never be none so long as the parser succeeded
+    def as_literal(self) -> Optional[Node]:
+        if self.match:
+            # this differs from Unknown in that no inference will be attempted
+            return rdflib.Literal(self.dirty)
+        else:
+            return None
+
+    @classmethod
+    def testOne(cls, item: Optional[str], na_str: List[str] = []) -> Optional[str]:
+        if item in na_str:
+            return None
+        else:
+            return item
 
 class Integer(Token):
     typename = "integer"
