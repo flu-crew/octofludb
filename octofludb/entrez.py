@@ -16,8 +16,7 @@ from octofludb.util import log
 import octofludb.colors as colors
 import pgraphdb as db
 
-Entrez.email = "zebulun.arendsee@usda.gov"
-
+Entrez.email = "tavis.anderson@usda.gov"
 
 def get_all_acc_in_db(
     url: str = "http://localhost:7200", repo: str = "octofludb"
