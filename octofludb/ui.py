@@ -1369,7 +1369,7 @@ report_grp.add_command(report_masterlist_cmd)
 )
 @url_opt
 @repo_name_opt
-def delete_constellations_cmd(url, repo):
+def delete_constellations_cmd(url : str, repo : str) -> NoReturn:
     """
     Delete all constellation data
     """
@@ -1379,13 +1379,15 @@ def delete_constellations_cmd(url, repo):
     delete_script = script.get_data_file("delete-constellations.rq")
     db.update(sparql_file=delete_script, url=url, repo_name=repo)
 
+    sys.exit(0)
+
 
 @click.command(
     name="subtypes",
 )
 @url_opt
 @repo_name_opt
-def delete_subtypes_cmd(url, repo):
+def delete_subtypes_cmd(url : str, repo : str) -> NoReturn:
     """
     Delete all subtype data
     """
@@ -1395,13 +1397,15 @@ def delete_subtypes_cmd(url, repo):
     delete_script = script.get_data_file("delete-subtypes.rq")
     db.update(sparql_file=delete_script, url=url, repo_name=repo)
 
+    sys.exit(0)
+
 
 @click.command(
     name="us-clades",
 )
 @url_opt
 @repo_name_opt
-def delete_us_clades_cmd(url, repo):
+def delete_us_clades_cmd(url : str, repo : str) -> NoReturn:
     """
     Delete all clade data
     """
@@ -1411,13 +1415,15 @@ def delete_us_clades_cmd(url, repo):
     delete_script = script.get_data_file("delete-us_clades.rq")
     db.update(sparql_file=delete_script, url=url, repo_name=repo)
 
+    sys.exit(0)
+
 
 @click.command(
     name="gl-clades",
 )
 @url_opt
 @repo_name_opt
-def delete_gl_clades_cmd(url, repo):
+def delete_gl_clades_cmd(url : str, repo : str) -> NoReturn:
     """
     Delete all global H1 clade data
     """
@@ -1427,13 +1433,15 @@ def delete_gl_clades_cmd(url, repo):
     delete_script = script.get_data_file("delete-gl_clades.rq")
     db.update(sparql_file=delete_script, url=url, repo_name=repo)
 
+    sys.exit(0)
+
 
 @click.command(
     name="motifs",
 )
 @url_opt
 @repo_name_opt
-def delete_motifs_cmd(url, repo):
+def delete_motifs_cmd(url : str, repo : str) -> NoReturn:
     """
     Delete all antigenic motifs
     """
@@ -1442,6 +1450,8 @@ def delete_motifs_cmd(url, repo):
 
     delete_script = script.get_data_file("delete-motifs.rq")
     db.update(sparql_file=delete_script, url=url, repo_name=repo)
+
+    sys.exit(0)
 
 
 @click.group(
