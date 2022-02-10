@@ -487,10 +487,12 @@ def classify_cmd(filename: str, reference: Optional[str] = None) -> NoReturn:
     """
     classify_and_write(filename, reference=None, outfile=sys.stdout)
 
+    sys.exit(0)
+
 
 def classify_and_write(
     filename: str, reference: Optional[str] = None, outfile: TextIO = sys.stdout
-) -> NoReturn:
+) -> None:
     rows = classify(filename, reference=reference)
     print("seqid\tsegment_subtype\tclade\tgl_clade", file=outfile)
 
@@ -499,8 +501,6 @@ def classify_and_write(
     # nothing.
     for row in rows:
         print("\t".join(row), file=outfile)
-
-    sys.exit(0)
 
 
 def classify(filename: str, reference: Optional[str] = None) -> List[List[str]]:
