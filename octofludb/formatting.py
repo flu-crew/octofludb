@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import List, Tuple, TextIO, Optional, Dict
+from typing import List, Tuple, TextIO, Dict
 
 from octofludb.util import log
 from octofludb.colors import bad
@@ -78,12 +78,12 @@ def _make_constellations(rows: List[Tuple[str, str, str]]) -> List[Tuple[str, st
     const: Dict[str, List[str]] = dict()
     for (strain, segment, clade) in rows:
 
-        if not strain in const:
+        if strain not in const:
             const[strain] = list("------")
 
         try:
             index = segment_lookup[segment]
-        except KeyError as e:
+        except KeyError:
             log(
                 f"{bad('WARNING:')} segment/segment_subtype mismatch, {str((strain, segment, clade))}"
             )

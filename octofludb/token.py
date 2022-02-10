@@ -2,13 +2,10 @@ from __future__ import annotations
 from typing import Optional, Callable, Union, List, Tuple, Set
 
 import parsec as p
-from octofludb.nomenclature import make_property, make_literal, define_subproperty
+from octofludb.nomenclature import make_property
 import rdflib
 from rdflib.term import Node
-import sys
 import re
-import math
-from octofludb.util import rmNone, log
 from rdflib.namespace import XSD
 
 
@@ -124,7 +121,7 @@ class Token:
     @classmethod
     def goodness(cls, items, na_str=[]):
         column_matches = [
-            (cls.testOne(item=x, na_str=na_str) != None)
+            (cls.testOne(item=x, na_str=na_str) is not None)
             for x in items
             if not (x in na_str or x is None)
         ]
@@ -154,6 +151,7 @@ class Unknown(Token):
         else:
             return item
 
+
 class String(Token):
     typename = "string"
     parser = lambda x: x
@@ -172,6 +170,7 @@ class String(Token):
             return None
         else:
             return item
+
 
 class Integer(Token):
     typename = "integer"

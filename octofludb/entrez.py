@@ -1,12 +1,6 @@
 from __future__ import annotations
 from typing import (
-    Callable,
-    TextIO,
-    Union,
-    NoReturn,
-    Optional,
     List,
-    Set,
     Tuple,
     Generator,
 )
@@ -16,8 +10,6 @@ import time
 import os
 import requests
 import datetime
-from typing import List
-from urllib.error import HTTPError
 from Bio import Entrez  # type: ignore
 from tqdm import tqdm  # type: ignore
 from octofludb.util import log
@@ -33,7 +25,9 @@ def get_all_acc_in_db(
 
     sparql_filename = os.path.join(os.path.dirname(__file__), "data", "all-acc.rq")
 
-    acc = db.sparql_query(sparql_file=sparql_filename, url=url, repo_name=repo).convert()
+    acc = db.sparql_query(
+        sparql_file=sparql_filename, url=url, repo_name=repo
+    ).convert()
 
     return [x["acc"]["value"] for x in acc["results"]["bindings"]]
 
@@ -112,7 +106,7 @@ def missing_acc_by_date(
             mth_acc = get_acc_by_date(
                 mindate=f"{str(year)}/{str(month)}", maxdate=f"{str(year)}/{str(month)}"
             )
-            new_acc = [acc for acc in mth_acc if not acc in old_acc]
+            new_acc = [acc for acc in mth_acc if acc not in old_acc]
             nmonths -= 1
             yield (f"{str(year)}/{str(month)}", new_acc)
 
@@ -123,7 +117,7 @@ def missing_acc_by_date(
         if year > max_year:
             continue
         year_acc = get_acc_by_date(mindate=str(year), maxdate=str(year))
-        new_acc = [acc for acc in year_acc if not acc in old_acc]
+        new_acc = [acc for acc in year_acc if acc not in old_acc]
         #  nmonths -= 12
         yield (str(year), new_acc)
 

@@ -5,12 +5,11 @@ import sys
 from rdflib.term import Node
 import pandas as pd  # type: ignore
 import octofludb.classes as classes
-from octofludb.colors import bad
 import octofludb.classifier_flucrew as flu
 import octofludb.token as tok
 import octofludb.domain_identifier as identifier
 import parsec
-from octofludb.nomenclature import P, O, make_uri, make_tag_uri, make_literal
+from octofludb.nomenclature import P, make_uri, make_tag_uri, make_literal
 from octofludb.util import log, file_str, safeAdd
 import re
 import math
@@ -139,7 +138,7 @@ def mk_ird(filehandle: TextIO) -> Set[Tuple[Node, Node, Node]]:
                         tok.Unknown(els[10], field="flu_season", na_str=na_str),
                         flu.Strain(els[11], field="strain_name", na_str=na_str),
                         # curation report - hard pass
-                        ### I don't need your annotations, I can do my own, thank you very much
+                        # -- I don't need your annotations, I can do my own, thank you very much
                         #  flu.US_Clade(els[13], field="us_clade", na_str=na_str),
                         #  flu.GlobalClade(els[14], field="gl_clade", na_str=na_str),
                     ]
@@ -156,7 +155,7 @@ def mk_gis(filename: str) -> Set[Tuple[Node, Node, Node]]:
 
     g = set()  # initialize triple set
 
-    fh = pd.read_excel(filename, sheet_name=0, keep_default_na = False)
+    fh = pd.read_excel(filename, sheet_name=0, keep_default_na=False)
     d = {c: [x for x in fh[c]] for c in fh}
     epipat = re.compile(" *\|.*")
     for i in tqdm(range(len(d["Isolate_Id"]))):
@@ -251,7 +250,7 @@ def append_add(entry: dict, field: str, values: List[str]) -> None:
     if len(values) > 0:
         if field in entry:
             for value in values:
-                if not value in entry[field]:
+                if value not in entry[field]:
                     entry[field].append(value)
         else:
             entry[field] = values
@@ -355,9 +354,7 @@ def mk_subtypes(
         else:
             entry = entries[strain]
 
-        isolates = entry["isolates"].update(
-            [i for i in row["isolates"]["value"].split("+") if i]
-        )
+        entry["isolates"].update([i for i in row["isolates"]["value"].split("+") if i])
 
         append_add(entry, "genbank_subtypes", default_access(row, "genbank_subtypes"))
         append_add(entry, "gisaid_subtypes", default_access(row, "gisaid_subtypes"))
@@ -440,7 +437,6 @@ def mk_masterlist(results: dict) -> None:
             for field in MASTERLIST_HEADER:
                 entry[field] = []
 
-        gb = row["genbank_id"]["value"]
         segment = row["segment"]["value"]
 
         genbank_id = default_access(row, "genbank_id")[0]

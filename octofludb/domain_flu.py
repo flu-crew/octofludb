@@ -3,7 +3,7 @@ import re
 from octofludb.domain_date import p_year
 from octofludb.domain_identifier import p_A0
 from octofludb.parser import wordset
-from octofludb.util import rmNone, concat
+from octofludb.util import rmNone
 
 # the 8 segments of the flu genome (order matters)
 SEGMENT = ["PB2", "PB1", "PA", "HA", "NP", "NA", "M", "NS"]

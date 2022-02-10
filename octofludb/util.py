@@ -3,7 +3,6 @@ from typing import (
     List,
     NoReturn,
     TypeVar,
-    Iterator,
     TextIO,
     Union,
     Tuple,
@@ -12,7 +11,6 @@ from typing import (
     Set,
 )
 
-from rdflib import Literal
 from rdflib.term import Node
 import math
 import sys
@@ -70,7 +68,7 @@ def strip(x: str) -> str:
 
 def rmNone(xs):
     """Remove all 'None' elements from a list"""
-    return list(filter(lambda x: x != None, xs))
+    return list(filter(lambda x: x is not None, xs))
 
 
 def firstOne(xs):
@@ -88,13 +86,13 @@ def padDigit(x: str, n=2) -> str:
 
 
 def replace(d, key, a, b):
-    if d[key] != None:
+    if d[key] is not None:
         d[key] = d[key].replace(a, b)
     return d
 
 
 def fixRegexMap(d: dict, field: str, rexpr: str, m: dict, flags=0):
-    if d[field] != None:
+    if d[field] is not None:
         key = rmNone([re.fullmatch(rexpr, k, flags) for k in m.keys()])
         if len(key) > 0:
             d[field] = m[key[0].string]
@@ -110,7 +108,7 @@ def fixLookup(d: dict, field: str, m: dict, f=lambda x: x):
 
 
 def addDefault(d: dict, key: str, default: str):
-    if d[key] == None:
+    if d[key] is None:
         d[key] = default
     return d
 

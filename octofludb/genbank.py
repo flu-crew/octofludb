@@ -1,26 +1,24 @@
 from __future__ import annotations
-from typing import Set, Tuple, Dict, Optional, Callable
+from typing import Set, Tuple, Dict, Optional
 
 from octofludb.nomenclature import (
     uidgen,
     P,
-    O,
     make_property,
     make_uri,
     make_date,
     make_country_uri,
     make_usa_state_uri,
     make_literal,
+    make_integer,
 )
-from octofludb.util import rmNone, safeAdd
+from octofludb.util import safeAdd
 from octofludb.hash import chksum
 from rdflib.term import Node
-from rdflib.namespace import XSD
 import re
 import octofludb.domain_identifier as identifier
 import octofludb.domain_flu as flu
 import octofludb.domain_animal as animal
-import sys
 from octofludb.util import log
 from octofludb.colors import bad
 import octofludb.domain_geography as geo
@@ -30,7 +28,7 @@ def make_maybe_add(
     g: Set[Tuple[Node, Node, Node]], meta: Dict[str, Optional[str]], sid: Optional[Node]
 ):
     def maybe_add(p, key, formatter=lambda x: make_literal(x, infer=False)):
-        if key in meta and meta[key] != None:
+        if key in meta and meta[key] is not None:
             safeAdd(g, sid, p, formatter(meta[key]))
 
     return maybe_add
@@ -65,7 +63,7 @@ def make_gb_meta_triples(
 
     if only_influenza_a:
         # ignore this entry if the organism is not specified
-        if not "GBSeq_organism" in gb_meta:
+        if "GBSeq_organism" not in gb_meta:
             return (g, f"{accession}\tNo organsim specified")
         # ignore this entry if the organism is not an Influenza virus
         if not bool(re.match("Influenza [ABCD] virus", gb_meta["GBSeq_organism"])):
@@ -75,9 +73,6 @@ def make_gb_meta_triples(
     safeAdd(g, gid, P.gb, make_literal(accession, infer=False))
 
     maybe_add = make_maybe_add(g, gb_meta, gid)
-
-    def make_integer(x):
-        return make_literal(x, datatype=XSD.integer, infer=False)
 
     maybe_add(P.gb_locus, "GBSeq_locus")
     maybe_add(P.gb_length, "GBSeq_length", formatter=make_integer)

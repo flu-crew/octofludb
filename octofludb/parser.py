@@ -1,7 +1,5 @@
 import parsec as p
 import re
-import rdflib
-from typing import List
 from collections import defaultdict
 
 

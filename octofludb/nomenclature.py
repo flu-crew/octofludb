@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Callable, TextIO, Union, NoReturn, Optional, List, Set, Tuple
+from typing import Optional, Tuple
 
 import itertools
 import rdflib
@@ -8,7 +8,7 @@ import sys
 import re
 import octofludb.domain_geography as geo
 import octofludb.domain_date as date
-from rdflib.namespace import RDF, RDFS, OWL, XSD
+from rdflib.namespace import RDFS, OWL, XSD
 from rdflib.term import Node
 from octofludb.util import padDigit
 
@@ -116,6 +116,10 @@ def make_literal(x, infer=True) -> Node:
         return rdflib.Literal(str(date.p_date.parse(x)), datatype=XSD.date)
     except:
         return rdflib.Literal(x)
+
+
+def make_integer(x):
+    return rdflib.Literal(x, datatype=XSD.integer)
 
 
 class O:

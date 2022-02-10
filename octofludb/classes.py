@@ -1,18 +1,15 @@
 from __future__ import annotations
 from typing import Set, Dict, List, Optional, Any, Type, TextIO, Tuple, Union
 
-import sys
 import parsec
 from octofludb.classifier_flucrew import allClassifiers
 from octofludb.token import Token, Unknown, Missing
-from octofludb.util import strOrNone, log, concat, file_str
+from octofludb.util import strOrNone, log, concat
 from octofludb.nomenclature import make_tag_uri, make_literal, P
-import dateutil.parser as dateparser
 import xlrd  # type: ignore
 import pandas as pd  # type: ignore
 import octofludb.colors as colors
 import datetime as datetime
-from rdflib import Literal
 from rdflib.term import Node
 from tqdm import tqdm  # type: ignore
 from collections import OrderedDict
@@ -268,7 +265,7 @@ class Table(ParsedPhraseList):
 
     def _parse_table(self, text: Union[str, TextIO], delimiter: str = "\t"):
         if isinstance(text, str):
-            log(f"Reading raw string as tab-delimited file ...")
+            log("Reading raw string as tab-delimited file ...")
             lines = [s.rstrip() for s in text.split("\n")]
         else:
             log(f"Reading '{text.name}' as tab-delimited file ...")
@@ -335,7 +332,7 @@ class Ragged(ParsedPhraseList):
         p_fasta = parsec.many1(p_entry)
 
         if isinstance(text, str):
-            log(f"Reading raw string as a fasta data:")
+            log("Reading raw string as a fasta data:")
             fasta_str = text
         else:
             log(f"Reading '{text.name}' as a fasta file:")

@@ -4,14 +4,12 @@ from typing import Optional, List, Iterable, TypeVar
 import hashlib
 import subprocess
 import yaml
-import pgraphdb
 import smof  # type: ignore
 import glob
 import os
 import sys
 import shutil
 import math
-from octofludb.classes import Table
 from octofludb.util import log, die
 import octofludb.colors as colors
 
@@ -282,7 +280,9 @@ def findMotifs(
 
     # write fasta file
     fasta_filename = f"{subtype}.fna"
-    results = db.sparql_query(sparql_file=sparql_filename, url=url, repo_name=repo_name).convert()
+    results = db.sparql_query(
+        sparql_file=sparql_filename, url=url, repo_name=repo_name
+    ).convert()
     with open(fasta_filename, "w") as f:
         formatting.write_as_fasta(results, outfile=f)
 

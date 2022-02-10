@@ -1,14 +1,13 @@
 from __future__ import annotations
-from typing import Callable, TextIO, Union, NoReturn, Optional, List, Set, Tuple
+from typing import TextIO, NoReturn, Optional, List, Set, Tuple
 
 import click
 import collections
 import sys
 import os
-import functools
 from rdflib import Graph
 from rdflib.term import Node
-from octofludb.util import log, die, safeAdd
+from octofludb.util import log, safeAdd
 from octofludb.version import __version__
 
 
@@ -33,8 +32,8 @@ def with_graph(
     log("Serializing to turtle format ... ", end="")
     turtles = g.serialize(format="turtle")
     log("done")
-    for l in turtles.splitlines():
-        print(l, file=outfile)
+    for line in turtles.splitlines():
+        print(line, file=outfile)
     g.close()
 
     return None
@@ -129,7 +128,6 @@ def init_cmd(url: str, repo: str) -> NoReturn:
     """
     import pgraphdb as db
     import requests
-    import shutil
     import octofludb.script as script
 
     config_file = os.path.join(
@@ -258,8 +256,6 @@ def upload_classifications(url: str, repo: str) -> List[str]:
 
 
 def upload_subtypes(url: str, repo: str) -> List[str]:
-    import octofludb.script as script
-    import pgraphdb as db
 
     # infer subtypes
     subtypes_table = "subtypes.txt"
@@ -387,9 +383,7 @@ def pull_cmd(
     This will pull all genbank data that has been released in the last 30
     years (which should be all of it).
     """
-    import octofludb.recipes as recipe
     import octofludb.script as script
-    import pgraphdb as db
 
     cwd = os.getcwd()
 
@@ -497,8 +491,6 @@ def classify_cmd(filename: str, reference: Optional[str] = None) -> NoReturn:
 def classify_and_write(
     filename: str, reference: Optional[str] = None, outfile: TextIO = sys.stdout
 ) -> NoReturn:
-    import octofludb.colors as colors
-
     rows = classify(filename, reference=reference)
     print("seqid\tsegment_subtype\tclade\tgl_clade", file=outfile)
 
@@ -712,7 +704,7 @@ def prep_gbids_cmd(filename: str) -> NoReturn:
     """
     with open(filename, "r") as fh:
         gbids = [gbid.strip() for gbid in fh]
-    log(f"Retrieving and parsing genbank ids from 'filename'")
+    log("Retrieving and parsing genbank ids from 'filename'")
     with_graph(_mk_gbids_cmd(gbids=gbids))
 
     sys.exit(0)
@@ -1128,8 +1120,8 @@ def fetch_tag_cmd(filename: str, url: str, repo: str) -> NoReturn:
     log("done")
     (n, turtle_filename) = mkstemp(suffix=".ttl")
     with open(turtle_filename, "w") as th:
-        for l in turtles.splitlines():
-            print(l, file=th)
+        for line in turtles.splitlines():
+            print(line, file=th)
 
     # upload it to the database
     upload_cmd([turtle_filename], url, repo)
@@ -1349,7 +1341,7 @@ def report_offlu_cmd(url, repo):
     """
     Synthesize public and private data needed for offlu reports
     """
-    raise NotImplemented
+    raise NotImplementedError
 
 
 @click.group(

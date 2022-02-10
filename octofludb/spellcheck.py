@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Iterable, List, Callable, Set, Optional
+from typing import Iterable, Callable, Set, Optional
 
 from octofludb.util import underscore, lower, strip
 

@@ -1,7 +1,6 @@
 from __future__ import annotations
-from typing import Set, Dict, List, Type, Tuple, Optional
+from typing import Set, List, Type, Tuple, Optional
 
-import parsec as p
 from octofludb.hash import chksum
 from octofludb.util import log, safeAdd
 from octofludb.domain_flu import SEGMENT
@@ -28,7 +27,6 @@ from octofludb.domain_flu import (
     p_segment_subtype,
     p_segment_number,
     p_subtype,
-    p_strain_obj,
     p_constellation,
     p_h1_clade,
     p_h3_clade,
@@ -38,11 +36,6 @@ from octofludb.domain_flu import (
 )
 
 from octofludb.domain_date import (
-    p_year,
-    p_longyear,
-    p_month,
-    p_day,
-    p_date,
     p_any_date_str,
 )
 from octofludb.domain_geography import (
@@ -54,7 +47,6 @@ from octofludb.domain_animal import p_host
 from octofludb.domain_sequence import p_dnaseq, p_proseq
 
 from octofludb.token import Token, Unknown
-from octofludb.util import rmNone
 from octofludb.nomenclature import (
     make_uri,
     make_date,
@@ -62,6 +54,7 @@ from octofludb.nomenclature import (
     make_usa_state_uri,
     make_literal,
     make_country_uri,
+    make_country_uri_from_code,
     P,
 )
 
@@ -474,7 +467,7 @@ class Dnaseq(SequenceToken):
                 safeAdd(g, other.as_uri(), P.has_segment, uri)
             elif (
                 not self._has_segment(tokens)
-                and not other.typename in STRAIN_FIELDS
+                and other.typename not in STRAIN_FIELDS
                 and uri is not None
             ):
                 g.update(other.object_of(uri))
