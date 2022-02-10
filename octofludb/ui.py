@@ -682,8 +682,8 @@ def _mk_gbids_cmd(gbids: List[str] = []) -> Set[Tuple[Node, Node, Node]]:
             (triples, error_msg) = gb.make_gb_meta_triples(gb_meta)
             if error_msg:
                 error_msgs.append(error_msg)
-        # commit the current batch (say of 1000 entries)
-        all_triples.update(triples)
+            # commit the current batch (say of 1000 entries)
+            all_triples.update(triples)
 
     if len(error_msgs) > 0:
         logpath = script.error_log_entry(error_msgs, "failed_genbank_parses.txt")
