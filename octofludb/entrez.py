@@ -33,7 +33,7 @@ def get_all_acc_in_db(
 
     sparql_filename = os.path.join(os.path.dirname(__file__), "data", "all-acc.rq")
 
-    acc = db.sparql_query(sparql_file=sparql_filename, url=url, repo_name=repo)
+    acc = db.sparql_query(sparql_file=sparql_filename, url=url, repo_name=repo).convert()
 
     return [x["acc"]["value"] for x in acc["results"]["bindings"]]
 
