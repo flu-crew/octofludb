@@ -243,7 +243,9 @@ def runOctoFLU(path: str, reference: Optional[str] = None) -> List[List[str]]:
 
                     # run octoFLU using the given reference
                     try:
-                        log(f"Running command: './octoFLU.sh {chunk_relpath}' from '{os.getcwd()}'")
+                        log(
+                            f"Running command: './octoFLU.sh {chunk_relpath}' from '{os.getcwd()}'"
+                        )
                         subprocess.run(["./octoFLU.sh", chunk_relpath], check=True)
                     except subprocess.CalledProcessError as e:
                         log(colors.bad(f"`./octoFLU.sh {chunk_relpath}` failed"))

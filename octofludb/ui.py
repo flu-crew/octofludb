@@ -1369,7 +1369,7 @@ report_grp.add_command(report_masterlist_cmd)
 )
 @url_opt
 @repo_name_opt
-def delete_constellations_cmd(url : str, repo : str) -> NoReturn:
+def delete_constellations_cmd(url: str, repo: str) -> NoReturn:
     """
     Delete all constellation data
     """
@@ -1387,7 +1387,7 @@ def delete_constellations_cmd(url : str, repo : str) -> NoReturn:
 )
 @url_opt
 @repo_name_opt
-def delete_subtypes_cmd(url : str, repo : str) -> NoReturn:
+def delete_subtypes_cmd(url: str, repo: str) -> NoReturn:
     """
     Delete all subtype data
     """
@@ -1405,7 +1405,7 @@ def delete_subtypes_cmd(url : str, repo : str) -> NoReturn:
 )
 @url_opt
 @repo_name_opt
-def delete_us_clades_cmd(url : str, repo : str) -> NoReturn:
+def delete_us_clades_cmd(url: str, repo: str) -> NoReturn:
     """
     Delete all clade data
     """
@@ -1423,7 +1423,7 @@ def delete_us_clades_cmd(url : str, repo : str) -> NoReturn:
 )
 @url_opt
 @repo_name_opt
-def delete_gl_clades_cmd(url : str, repo : str) -> NoReturn:
+def delete_gl_clades_cmd(url: str, repo: str) -> NoReturn:
     """
     Delete all global H1 clade data
     """
@@ -1441,7 +1441,7 @@ def delete_gl_clades_cmd(url : str, repo : str) -> NoReturn:
 )
 @url_opt
 @repo_name_opt
-def delete_motifs_cmd(url : str, repo : str) -> NoReturn:
+def delete_motifs_cmd(url: str, repo: str) -> NoReturn:
     """
     Delete all antigenic motifs
     """

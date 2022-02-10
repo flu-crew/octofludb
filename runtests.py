@@ -13,7 +13,7 @@ from octofludb.nomenclature import (
     make_property,
     make_literal,
 )
-from octofludb.classes import HomoList, Phrase, Datum, Ragged
+from octofludb.classes import HomoList, Ragged
 from octofludb.graph import showTriple
 import unittest
 import rdflib

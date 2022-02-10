@@ -18,6 +18,7 @@ import pgraphdb as db
 
 Entrez.email = "tavis.anderson@usda.gov"
 
+
 def get_all_acc_in_db(
     url: str = "http://localhost:7200", repo: str = "octofludb"
 ) -> List[str]:
