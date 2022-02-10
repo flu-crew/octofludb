@@ -1,20 +1,10 @@
 PREFIX f: <https://flu-crew.org/term/>
 
 delete {
-    ?s f:h3_motif ?h3_motif .
-    ?s f:_motif ?h3_motif .
-    ?s f:cb_motif ?cb_motif .
-    ?s f:sa_motif ?sa_motif .
-    ?s f:sb_motif ?sb_motif .
-    ?s f:ca1_motif ?ca1_motif .
-    ?s f:ca2_motif ?ca2_motif .
+    ?s ?p ?motif .
 }
 where {
-    ?s f:h3_motif ?h3_motif .
-    ?s f:_motif ?h3_motif .
-    ?s f:cb_motif ?cb_motif .
-    ?s f:sa_motif ?sa_motif .
-    ?s f:sb_motif ?sb_motif .
-    ?s f:ca1_motif ?ca1_motif .
-    ?s f:ca2_motif ?ca2_motif .
+    ?s f:seqid ?seqid .
+    ?s f:motif ?motif .
+    ?s ?p ?motif .
 }
