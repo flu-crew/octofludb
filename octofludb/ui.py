@@ -267,8 +267,7 @@ def upload_subtypes(url: str, repo: str) -> List[str]:
     with open(subtypes_table, "r") as subtypesin:
         with open(genbank_subtypes, "w") as gh:
             with open(epiflu_subtypes, "w") as eh:
-                for (i, row) in enumerate(subtypesin.readlines()):
-                    row = row.strip()
+                for (i, row) in enumerate(subtypesin.read().splitlines()):
                     if i == 0:
                         print("strain_name\tsubtype", file=gh)
                         print("isolate_id\tsubtype", file=eh)
