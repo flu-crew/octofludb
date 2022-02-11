@@ -561,7 +561,7 @@ class IrregularSegmentTable(classes.Table):
     Load a table; where the kth field is treated as a segment identifier.
     """
 
-    def cast(self, data : Dict[str, List[Optional[str]]]):
+    def cast(self, data: Dict[str, List[Optional[str]]]):
         try:
             segment_ids = data[self.header[0]]
             del data[self.header[0]]

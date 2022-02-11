@@ -235,7 +235,7 @@ class Table(ParsedPhraseList):
     """
 
     def __init__(self, *args, **kwargs):
-        self.header : List[str] = []
+        self.header: List[str] = []
         super().__init__(*args, **kwargs)
 
     def cast(self, data: Dict[str, List[Optional[str]]]) -> List[Phrase]:
@@ -267,7 +267,9 @@ class Table(ParsedPhraseList):
             raise e
         return d
 
-    def _parse_table(self, text: Union[str, TextIO], delimiter: str = "\t") -> Dict[str, List[Optional[str]]]:
+    def _parse_table(
+        self, text: Union[str, TextIO], delimiter: str = "\t"
+    ) -> Dict[str, List[Optional[str]]]:
         if isinstance(text, str):
             log("Reading raw string as tab-delimited file ...")
             lines = [s.rstrip() for s in text.split("\n")]
@@ -277,7 +279,7 @@ class Table(ParsedPhraseList):
 
         rows = [r.split(delimiter) for r in lines]
         if len(rows) == 0:
-            die("Empty input table, it should at least have a header") 
+            die("Empty input table, it should at least have a header")
         else:
             self.header = [c.strip() for c in rows[0]]
             indices = range(len(self.header))

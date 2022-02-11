@@ -262,12 +262,14 @@ def upload_subtypes(url: str, repo: str) -> List[str]:
     with open(subtypes_table, "w") as subtypesout:
         make_subtypes(url=url, repo=repo, outfile=subtypesout)
 
+    # The subtype table needs to be split into genbank and epiflu tables to
+    # ensure proper inference of strain name versus isolate id types.
     genbank_subtypes = "subtypes-genbank.txt"
     epiflu_subtypes = "subtypes-epiflu.txt"
     with open(subtypes_table, "r") as subtypesin:
         with open(genbank_subtypes, "w") as gh:
+            print("strain_name\tsubtype", file=gh)
             with open(epiflu_subtypes, "w") as eh:
-                print("strain_name\tsubtype", file=gh)
                 print("isolate_id\tsubtype", file=eh)
                 # the subtypes.txt file has a header which needs to be skipped
                 for row in subtypesin.read().splitlines()[1:]:
@@ -275,13 +277,15 @@ def upload_subtypes(url: str, repo: str) -> List[str]:
                         print(row, file=eh)
                     else:
                         print(row, file=gh)
+                eh.flush()
+            gh.flush()
 
     gturtles = "subtypes-genbank.ttl"
     eturtles = "subtypes-epiflu.ttl"
     with open(gturtles, "w") as gturtleout:
-        prep_table(genbank_subtypes, outfile=gturtleout)
+        prep_table(filename=genbank_subtypes, outfile=gturtleout, segment_key="strain_name")
     with open(eturtles, "w") as eturtleout:
-        prep_table(epiflu_subtypes, outfile=eturtleout)
+        prep_table(filename=epiflu_subtypes, outfile=eturtleout, segment_key="isolate_id")
 
     return upload([gturtles, eturtles], url=url, repo=repo)
 
