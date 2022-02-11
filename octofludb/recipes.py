@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Optional, List, Set, Tuple, TextIO
+from typing import Optional, List, Set, Tuple, TextIO, Dict
 
 import sys
 from rdflib.term import Node
@@ -10,7 +10,7 @@ import octofludb.token as tok
 import octofludb.domain_identifier as identifier
 import parsec
 from octofludb.nomenclature import P, make_uri, make_tag_uri, make_literal
-from octofludb.util import log, file_str, safeAdd
+from octofludb.util import log, file_str, safeAdd, die
 import re
 import math
 from tqdm import tqdm  # type: ignore
@@ -561,9 +561,12 @@ class IrregularSegmentTable(classes.Table):
     Load a table; where the kth field is treated as a segment identifier.
     """
 
-    def cast(self, data):
-        segment_ids = data[self.header[0]]
-        del data[self.header[0]]
+    def cast(self, data : Dict[str, List[Optional[str]]]):
+        try:
+            segment_ids = data[self.header[0]]
+            del data[self.header[0]]
+        except IndexError:
+            die("Tables must have header lines and at least 1 column")
         phrases = super().cast(data)
         for i in range(len(segment_ids)):
             phrases[i].tokens.append(IrregularSegment(segment_ids[i]))

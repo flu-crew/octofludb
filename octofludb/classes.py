@@ -4,7 +4,7 @@ from typing import Set, Dict, List, Optional, Any, Type, TextIO, Tuple, Union
 import parsec
 from octofludb.classifier_flucrew import allClassifiers
 from octofludb.token import Token, Unknown, Missing
-from octofludb.util import strOrNone, log, concat
+from octofludb.util import strOrNone, log, concat, die
 from octofludb.nomenclature import make_tag_uri, make_literal, P
 import xlrd  # type: ignore
 import pandas as pd  # type: ignore
@@ -190,7 +190,7 @@ class ParsedPhraseList(Interpreter):
 
 
 def tabularTyping(
-    data: Dict[str, List[str]],
+    data: Dict[str, List[Optional[str]]],
     levels: Optional[Set[str]] = None,
     na_str: List[str] = [],
 ) -> List[Phrase]:
@@ -234,10 +234,14 @@ class Table(ParsedPhraseList):
     have a header.
     """
 
-    def cast(self, data: Dict[str, List[str]]) -> List[Phrase]:
+    def __init__(self, *args, **kwargs):
+        self.header : List[str] = []
+        super().__init__(*args, **kwargs)
+
+    def cast(self, data: Dict[str, List[Optional[str]]]) -> List[Phrase]:
         return tabularTyping(data, levels=self.levels, na_str=self.na_str)
 
-    def parse(self, text: Union[str, TextIO]):
+    def parse(self, text: Union[str, TextIO]) -> Dict[str, List[Optional[str]]]:
         """
         Make a dictionary with column name as key and list of strings as value.
         Currently only Excel is supported.
@@ -251,7 +255,7 @@ class Table(ParsedPhraseList):
             data = self._parse_table(text)
         return data
 
-    def _parse_excel(self, text: TextIO):
+    def _parse_excel(self, text: TextIO) -> Dict[str, List[Optional[str]]]:
         try:
             log(f"Reading {text.name} as excel file ...")
             d = pd.read_excel(text.name)
@@ -263,7 +267,7 @@ class Table(ParsedPhraseList):
             raise e
         return d
 
-    def _parse_table(self, text: Union[str, TextIO], delimiter: str = "\t"):
+    def _parse_table(self, text: Union[str, TextIO], delimiter: str = "\t") -> Dict[str, List[Optional[str]]]:
         if isinstance(text, str):
             log("Reading raw string as tab-delimited file ...")
             lines = [s.rstrip() for s in text.split("\n")]
@@ -272,9 +276,8 @@ class Table(ParsedPhraseList):
             lines = text.readlines()
 
         rows = [r.split(delimiter) for r in lines]
-        if len(rows) < 2:
-            # if the input table is empty or has only a header
-            return dict()
+        if len(rows) == 0:
+            die("Empty input table, it should at least have a header") 
         else:
             self.header = [c.strip() for c in rows[0]]
             indices = range(len(self.header))

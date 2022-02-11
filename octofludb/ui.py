@@ -267,15 +267,14 @@ def upload_subtypes(url: str, repo: str) -> List[str]:
     with open(subtypes_table, "r") as subtypesin:
         with open(genbank_subtypes, "w") as gh:
             with open(epiflu_subtypes, "w") as eh:
-                for (i, row) in enumerate(subtypesin.read().splitlines()):
-                    if i == 0:
-                        print("strain_name\tsubtype", file=gh)
-                        print("isolate_id\tsubtype", file=eh)
+                print("strain_name\tsubtype", file=gh)
+                print("isolate_id\tsubtype", file=eh)
+                # the subtypes.txt file has a header which needs to be skipped
+                for row in subtypesin.read().splitlines()[1:]:
+                    if "EPI_ISL" in row:
+                        print(row, file=eh)
                     else:
-                        if "EPI_ISL" in row:
-                            print(row, file=eh)
-                        else:
-                            print(row, file=gh)
+                        print(row, file=gh)
 
     gturtles = "subtypes-genbank.ttl"
     eturtles = "subtypes-epiflu.ttl"
