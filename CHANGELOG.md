@@ -1,8 +1,10 @@
-v0.13.3 [2022-01-xx]
-====================
+v1.0.0 [2022-02-11]
+===================
 
- [ ] Refactor with mypy
- [ ] Make octoFLU fail loadly, rather than silently moving on when, for example, dependencies are missing
+ My final release
+
+ * Refactor with mypy
+ * Many bug fixes
 
 v0.13.2 [2021-12-23]
 ====================
