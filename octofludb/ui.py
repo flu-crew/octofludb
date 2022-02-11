@@ -1040,13 +1040,11 @@ def make_const(url: str, repo: str, outfile: TextIO = sys.stdout) -> None:
     return None
 
 
-def make_subtypes(url: str, repo: str, outfile: TextIO = sys.stdout) -> NoReturn:
+def make_subtypes(url: str, repo: str, outfile: TextIO = sys.stdout) -> None:
     strains, isolates = get_missing_subtypes(url, repo)
     print("strain_name\tsubtype", file=outfile)
     for identifier, subtype in strains + isolates:
         print(f"{identifier}\t{subtype}", file=outfile)
-
-    sys.exit(0)
 
 
 def get_missing_subtypes(
