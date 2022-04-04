@@ -87,8 +87,11 @@ following:
    and the USA is in North America) and the relationships between country names
    (United Arab Emirates) and ISO country codes (ARE).
 
- * Retrieve and process all Influenza A Virus data from GenBank. This step will
-   take a long time. Most of a day. There are two ways to speed this up. First,
+ * Retrieve and process Influenza A Virus data from GenBank from the current month. 
+   To build the database from nothing call `octofludb pull --nmonths=360`.
+   This will pull all GenBank data that has been released in the last 30
+   years (which should be all of it). A comprehensive pull will take a long time. 
+   Most of a day. There are two ways to speed this up. First,
    if you are building a new repo, and `octofludb`'s GenBank processing code
    hasn't changed, you can go to your `~/.octofludb/build` directory and run
    `octofludb upload .gb*ttl`. This will upload all the past GenBank turtle
