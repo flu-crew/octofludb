@@ -956,16 +956,18 @@ class TestConstellations(unittest.TestCase):
 
     def test_constellations_well_mixed(self):
         data = [
-            # A PPPPPT
-            ("A", "PB2", "pdm"),
+            # A VPPVPT
+            ("A", "PB2", "LAIV"), 
+            ("A", "PB2", "TX98"), # both V
             ("A", "PB1", "pdm"),
             ("A", "PA", "pdm"),
-            ("A", "NP", "pdm"),
+            ("A", "NP", "LAIV"),
+            ("A", "NP", "TX98"), # both V
             ("A", "M", "pdm"),
             ("A", "NS", "TRIG"),
             ("A", "NS", "TRIG"),  # duplicates are fine
         ]
-        out = [("A", "PPPPPT")]
+        out = [("A", "VPPVPT")]
         self.assertEqual(formatter._make_constellations(data), out)
 
     def test_constellations_irregular(self):
@@ -981,6 +983,19 @@ class TestConstellations(unittest.TestCase):
             ("A", "NS", "TRIG"),
         ]
         out = [("A", "PX-P-T")]
+        self.assertEqual(formatter._make_constellations(data), out)
+        
+    def test_constellations_flexible(self):
+        data = [
+            # A AAAAPX
+            ("A", "PB2", "avian"),
+            ("A", "PB1", "Avian"),
+            ("A", "PA", "PA-avian-spillover"),
+            ("A", "NP", "NP-avian"),
+            ("A", "M", "PDM"),
+            ("A", "NS", "Human"),
+        ]
+        out = [("A", "AAAAPX")]
         self.assertEqual(formatter._make_constellations(data), out)
 
 

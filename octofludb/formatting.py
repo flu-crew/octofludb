@@ -72,7 +72,7 @@ def _make_constellations(rows: List[Tuple[str, str, str]]) -> List[Tuple[str, st
     segment_lookup = dict(PB2=0, PB1=1, PA=2, NP=3, M=4, MP=4, NS=5)
 
     clade_lookup = dict(
-        pdm="P", LAIV="V", TRIG="T", humanSeasonal="H", classicalSwine="C"
+        pdm="P", LAIV="V", TX98="V", TRIG="T", humanSeasonal="H", classicalSwine="C", avian="A"
     )
 
     const: Dict[str, List[str]] = dict()
@@ -92,17 +92,21 @@ def _make_constellations(rows: List[Tuple[str, str, str]]) -> List[Tuple[str, st
         if clade in clade_lookup:
             char = clade_lookup[clade]
         else:
-            log(
-                f"{bad('WARNING:')} expected internal gene clade to be one of  'pdm', 'LAIV', 'TRIG', 'classicalSwine', or 'humanSeasonal'. Found clade {clade}, assigning constellation character 'X'"
-            )
-            char = "X"
+            # add flexible matching
+            for c_lookup, c_letter in clade_lookup.items():
+                if c_lookup.lower() in clade.lower():
+                    char = c_letter
+                    break
+            else:
+                log(
+                    f"{bad('WARNING:')} expected internal gene clade to be one of  'pdm', 'LAIV', 'TX98', 'TRIG', 'classicalSwine', 'humanSeasonal', or 'avian'. Found clade {clade}, assigning constellation character 'X'"
+                )
+                char = "X"
 
         if const[strain][index] == "-":
             const[strain][index] = char
         elif const[strain][index] != char:
-            const[strain][
-                index
-            ] = "M"  # conflicting internal gene clades, this means the strain is probably mixed
+            const[strain][index] = "M"  # conflicting internal gene clades, this means the strain is probably mixed
 
     output_rows = []
     for (k, c) in const.items():
