@@ -957,12 +957,12 @@ class TestConstellations(unittest.TestCase):
     def test_constellations_well_mixed(self):
         data = [
             # A VPPVPT
-            ("A", "PB2", "LAIV"),
-            ("A", "PB2", "TX98"),  # both V
+            ("A", "PB2", "LAIV"), 
+            ("A", "PB2", "TX98"), # both V
             ("A", "PB1", "pdm"),
             ("A", "PA", "pdm"),
             ("A", "NP", "LAIV"),
-            ("A", "NP", "TX98"),  # both V
+            ("A", "NP", "TX98"), # both V
             ("A", "M", "pdm"),
             ("A", "NS", "TRIG"),
             ("A", "NS", "TRIG"),  # duplicates are fine
@@ -984,7 +984,7 @@ class TestConstellations(unittest.TestCase):
         ]
         out = [("A", "PX-P-T")]
         self.assertEqual(formatter._make_constellations(data), out)
-
+        
     def test_constellations_flexible(self):
         data = [
             # A AAAAPX
