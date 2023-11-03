@@ -1,3 +1,8 @@
+v1.0.2 [2023-11-03]
+===================
+
+ * Made constellation determination more robust with partial, case-insensitive matching
+
 v1.0.1 [2022-02-16]
 ===================
 
