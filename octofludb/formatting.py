@@ -95,6 +95,9 @@ def _make_constellations(rows: List[Tuple[str, str, str]]) -> List[Tuple[str, st
             # add flexible matching
             for c_lookup, c_letter in clade_lookup.items():
                 if c_lookup.lower() in clade.lower():
+                    log(
+                        f"{bad('WARNING:')} closest match found is partial and/or case-insensitive, {str((strain, clade, c_lookup))}"
+                    )
                     char = c_letter
                     break
             else:
