@@ -315,7 +315,7 @@ def upload_motifs(url: str, repo: str) -> List[str]:
     # find h3 motifs
     h3_motif_table = script.findMotifs(
         os.path.join(os.path.dirname(__file__), "data", "get-h3-swine.rq"),
-        ["h3_motif=145,155,156,158,189"],
+        ["h3_motif=145,155,156,158,159,189"],
         "H3",
         url=url,
         repo_name=repo,

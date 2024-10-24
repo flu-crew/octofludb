@@ -1,3 +1,10 @@
+v1.0.2 [2023-11-03]
+===================
+
+ * Make constellation determination more robust with partial, case-insensitive matching
+ * Correct H3 motif by adding missing site (159)
+ * Fix fetch-unclassified-swine.rq to include GISAID strains
+
 v1.0.1 [2022-02-16]
 ===================
 

@@ -72,7 +72,7 @@ def _make_constellations(rows: List[Tuple[str, str, str]]) -> List[Tuple[str, st
     segment_lookup = dict(PB2=0, PB1=1, PA=2, NP=3, M=4, MP=4, NS=5)
 
     clade_lookup = dict(
-        pdm="P", LAIV="V", TX98="V", TRIG="T", humanSeasonal="H", classicalSwine="C", avian="A"
+        pdm="P", LAIV="V", TRIG="T", humanSeasonal="H", classicalSwine="C", avian="A"
     )
 
     const: Dict[str, List[str]] = dict()
@@ -91,6 +91,11 @@ def _make_constellations(rows: List[Tuple[str, str, str]]) -> List[Tuple[str, st
 
         if clade in clade_lookup:
             char = clade_lookup[clade]
+        elif "-like" in clade.lower():
+            log(
+                f"{bad('WARNING:')} internal gene clade includes '-like' label ({clade}), assigning constellation character 'X'"
+            )
+            char = "X"
         else:
             # add flexible matching
             for c_lookup, c_letter in clade_lookup.items():
@@ -102,7 +107,7 @@ def _make_constellations(rows: List[Tuple[str, str, str]]) -> List[Tuple[str, st
                     break
             else:
                 log(
-                    f"{bad('WARNING:')} expected internal gene clade to be one of  'pdm', 'LAIV', 'TX98', 'TRIG', 'classicalSwine', 'humanSeasonal', or 'avian'. Found clade {clade}, assigning constellation character 'X'"
+                    f"{bad('WARNING:')} expected internal gene clade to be one of  'pdm', 'LAIV', 'TRIG', 'classicalSwine', 'humanSeasonal', or 'avian'. Found clade {clade}, assigning constellation character 'X'"
                 )
                 char = "X"
 
