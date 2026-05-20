@@ -3,6 +3,7 @@ from octofludb.util import padDigit, rmNone
 from octofludb.parser import wordset
 from rdflib.namespace import XSD
 from rdflib import Literal
+from typing import Optional
 
 
 def expandYear(x: str) -> str:
@@ -16,10 +17,11 @@ def expandYear(x: str) -> str:
 
 
 class Date:
-    def __init__(self, year: str, month: str = None, day: str = None):
+    def __init__(self, year: str, month: Optional[str] = None, day: Optional[str] = None):
         self.year = year
+        # month and day are set to None even though types are strings. This should probably be fixed but will require cascading changes in the code
         self.month = month
-        self.day = day
+        self.day = day  
 
     def as_uri(self):
         # 2015

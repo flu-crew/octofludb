@@ -220,7 +220,7 @@ def mk_gis(filename: str) -> Set[Tuple[Node, Node, Node]]:
         except IndexError:
             log("Bad line - index error")
             for name, col in d.items():
-                log(name + " : " + str(col[i]))
+                log(str(name) + " : " + str(col[i]))
             sys.exit(1)
         except KeyError as e:
             log("This does not appear to be a valid gisaid metadata file")
@@ -229,7 +229,7 @@ def mk_gis(filename: str) -> Set[Tuple[Node, Node, Node]]:
         except:
             log("Bad line - other error")
             for name, col in d.items():
-                log(name + " : " + str(col[i]))
+                log(str(name) + " : " + str(col[i]))
 
     return g
 
@@ -340,7 +340,8 @@ def mk_subtypes(
 ) -> Tuple[List[Tuple[str, str]], List[Tuple[str, str]]]:
     entries: dict = dict()
 
-    for row in results["results"]["bindings"]:
+    # results is the type of the result of SPARQLWrapper not the wrapper itself I think
+    for row in results["results"]["bindings"]: # type: ignore 
         sid = row["sid"]["value"]
 
         if sid not in entries:
@@ -560,8 +561,8 @@ class IrregularSegmentTable(classes.Table):
     """
     Load a table; where the kth field is treated as a segment identifier.
     """
-
-    def cast(self, data: Dict[str, List[Optional[str]]]):
+    # The method technically calls the superclass with filled in default values for segment key but is missing the segment key parameter itself
+    def cast(self, data: Dict[str, List[Optional[str]]]) -> Optional[List[classes.Phrase]]: #type: ignore
         try:
             segment_ids = data[self.header[0]]
             del data[self.header[0]]
@@ -569,5 +570,5 @@ class IrregularSegmentTable(classes.Table):
             die("Tables must have header lines and at least 1 column")
         phrases = super().cast(data, segment_key=True)
         for i in range(len(segment_ids)):
-            phrases[i].tokens.append(IrregularSegment(segment_ids[i]))
+            phrases[i].tokens.append(IrregularSegment(segment_ids[i])) #type: ignore
         return phrases

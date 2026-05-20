@@ -246,7 +246,7 @@ class Table(ParsedPhraseList):
         self.header: List[str] = []
         super().__init__(*args, **kwargs)
 
-    def cast(self, data: Dict[str, List[Optional[str]]], segment_key=False) -> List[Phrase]:
+    def cast(self, data: Dict[str, List[Optional[str]]], segment_key=False) -> Optional[List[Phrase]]: # converted to optional to handle crashes
         """
         Control header case to interact with STRAIN_FIELDS filter.
         - True: sets header to uppercase and disables STRAIN_FIELDS filter
@@ -275,7 +275,7 @@ class Table(ParsedPhraseList):
             d = pd.read_excel(text.name)
             self.header = list(d.columns)
             # create a dictionary of List(str) with column names as keys
-            return {c: [strOrNone(x) for x in d[c]] for c in d}
+            return {str(c): [strOrNone(x) for x in d[c]] for c in d}
         except xlrd.biffh.XLRDError as e:
             log(f"Could not parse '{text.name}' as an excel file")
             raise e

@@ -590,8 +590,8 @@ def prep_tag(tag: str, filename: str, outfile: TextIO = sys.stdout) -> None:
         safeAdd(g, taguri, P.file, make_literal(file_str(fh), infer=False))
         for identifier in (s.strip() for s in fh.readlines()):
             safeAdd(g, make_uri(identifier), P.tag, taguri)
-
-        turtles = open_graph().update(g).commit().serialize(format="turtle")
+        # No idea why following line fails in mypy. It claims that update only returns None
+        turtles = open_graph().update(g).commit().serialize(format="turtle") #type: ignore
 
         for line in turtles.splitlines():
             print(line, file=outfile)

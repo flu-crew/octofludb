@@ -15,8 +15,12 @@ from tqdm import tqdm  # type: ignore
 from octofludb.util import log
 import octofludb.colors as colors
 import pgraphdb as db
+import json
 
-Entrez.email = "tavis.anderson@usda.gov"
+# Quickfix to read input from a config file
+with open("config.json","r") as configfile:
+    config = json.load(configfile)
+    Entrez.email = config['email'] # type: ignore
 
 
 def get_all_acc_in_db(

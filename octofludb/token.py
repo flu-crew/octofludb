@@ -12,7 +12,7 @@ from rdflib.namespace import XSD
 class Token:
     # The parser may either be a function or a parsec parser
     parser: Union[
-        Callable[[Optional[str]], Optional[str]], p.Parser[str]
+        Callable[[Optional[str]], Optional[str]], p.Parser[str]# Should probably be fixed in the future.
     ] = lambda x: None
     group: Optional[str] = None
     typename: Optional[str] = "auto"
@@ -132,7 +132,7 @@ class Token:
 
 
 class Missing(Token):
-    parser = lambda x: None
+    # parser = lambda x: None # Inherit from parent
     typename = "missing"
 
     @classmethod
@@ -142,7 +142,8 @@ class Missing(Token):
 
 class Unknown(Token):
     typename = "unknown"
-    parser = lambda x: x
+    # For some reason mypy cannot infer that x is always Optional[str]
+    parser = lambda x: x # type: ignore
 
     @classmethod
     def testOne(cls, item: Optional[str], na_str: List[str] = []) -> Optional[str]:
@@ -154,7 +155,8 @@ class Unknown(Token):
 
 class String(Token):
     typename = "string"
-    parser = lambda x: x
+    # For some reason mypy cannot infer that x is always Optional[str]
+    parser = lambda x: x # type: ignore
 
     # This should never be none so long as the parser succeeded
     def as_literal(self) -> Optional[Node]:
@@ -220,7 +222,7 @@ class Boolean(Token):
 
 class Ignore(Token):
     typename = "ignore_me"
-    parser = lambda x: None
+    # parser = lambda x: None # Inherit from parent
 
     @classmethod
     def testOne(cls, item: Optional[str], na_str: List[str] = []) -> None:

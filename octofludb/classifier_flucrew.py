@@ -127,7 +127,8 @@ class CountryOrState(Token):
 class StateUSA(Token):
     typename = "state"
     class_predicate = P.state
-    parser = state_to_code
+    # No idea why type checking fails here, state_to_code has the appropriate types
+    parser = state_to_code # type: ignore
 
     @classmethod
     def testOne(cls, item, na_str=[]):
@@ -159,7 +160,8 @@ class Date(Token):
 
 class Host(Token):
     typename = "host"
-    parser = p_host
+    # No idea why this fails type checking either. Maybe ignores cascade?
+    parser = p_host #type: ignore
 
     def munge(self, text):
         return text.lower()

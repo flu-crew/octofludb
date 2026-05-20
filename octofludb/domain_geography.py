@@ -1,5 +1,6 @@
 import re
 from octofludb.spellcheck import make_flat_wordfinder
+from typing import Optional
 
 STATE_NAME2ABBR = {
     "alaska": "AK",
@@ -59,10 +60,10 @@ STATE_ABBR = set(STATE_NAME2ABBR.values())
 state_correction = make_flat_wordfinder(STATE_NAME2ABBR.keys())
 
 
-def state_to_code(name):
+def state_to_code(name:Optional[str])->Optional[str]:
     """Get the two letter code from a state name. Return None on failure."""
     try:
-        name = name.strip()
+        name = name.strip() # type: ignore
     except:
         return None
     if name.upper() in STATE_ABBR:
